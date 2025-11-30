@@ -1,0 +1,1000 @@
+lect 47:
+========
+
+best practice → always include a default constructor for entities and binding classes.
+
+
+============
+Webservices
+============
+
+-> It is a distributed technology which is used to develop distributed application.
+
+-> If one application is communicating with another application then those apps are called as distributed applications.
+
+-> Distributed applications should have interoperability.
+
+-> Interoperability means language independent & platform independent.
+
+				java app <--------> python app
+
+				java app <--------> dot net app
+
+				java app <---------> php app
+
+				java app <---------> Angular app
+
+				java app <---------> React app
+
+
+Note: Distributed applications are used for code reusability
+
+	  (Business to business communication)
+
+
+=> Distributed applications can be developed in 2 ways
+
+			1) SOAP Webservices (Outdated)
+
+			2) RESTFul Services (trending)
+
+===================================================
+What is REST API ?  
+===================================================
+
+ REST - Representational State Transfer
+
+ REST = transferring the representation of resource state between client and server.
+
+=> REST API means an application which provides business logic to other applications through internet.	
+
+=> Distributed App = rest api / restful service / restful webservice / microservice
+
+======================
+REST API Architecture
+=======================
+
+1) Provider / Resource
+
+2) Consumer / Client
+
+=> Provider means the application which is providing business services to other applications.
+
+=> Consumer means the application which is accessing business services from other applications.
+
+				Ex: MakeMyTrip & IRCTC
+
+Note: We will use JSON to exchange data between provider & consumer.
+
+=====
+Task
+=====
+
+1) What is HTTP
+2) HTTP methods & Purpose of those methods
+3) Http Status Codes
+
+lect 48;
+========
+=================
+What is HTTP
+=================
+
+=> HTTP stands for Hyper Text Transfer Protocol
+
+=> HTTP acts as mediator between Client & Server
+
+=> HTTP is stateless protocol :=>it means that each request from a client to a server is treated as an independent transaction,
+ and the server does not retain any memory of previous requests.
+
+=> We need to know about 
+
+		1) Http Request
+
+		2) Http Response
+
+		3) Http Methods
+
+		4) Http Status Codes
+
+
+========================
+HTTP Request Structure
+========================
+
+=> It contains below parts
+
+		a) Request Line (Http Method Type + URL)
+		b) Request Headers (Metadata) (Key-Value)
+		c) Request Body (Payload - text/xml/json)
+
+=============================
+HTTP Response Structure
+=============================
+
+=> It contains below parts
+
+		a) Response Line (Status Code + Status MSG)
+		b) Response headers (Metadata - K & V)
+		c) Response body (Payload - text/xml/json)
+
+
+Some Postman headers 
+=====================
+
+Content-Type 
+------------
+-This header tells the server the format of the request body.
+
+-It’s important when you send data in POST/PUT/PATCH requests.
+
+Accept :
+--------
+This header tells the server what format you expect in the response.
+
+Client says: “I can handle only this type of response.”
+
+
+==============
+HTTP Methods
+==============
+
+GET  ---> It is used to get the data (no request body)
+
+POST ---> Send data (create record)
+
+PUT  ---> Update record (complete update)
+
+PATCH ---> Partial Update
+
+DELETE ---> Delete Record
+
+===================
+HTTP Status Codes
+===================
+
+1xx (100-199) : Informational
+
+2xx (200-299) : Success
+
+3xx (300-399) : Redirection
+
+4xx (400-499) : Client Error
+
+5xx (500-599) : Server Error
+
+
+404 - Resource Not Found
+
+500 - Internal Server Error
+  
+200 - OK
+
+==============
+H2 database
+==============
+
+
+to set h2 database do below configuration below:
+-----------------------------------------------
+
+spring.datasource.username=tejas
+spring.datasource.password=abc
+spring.datasource.url=jdbc:h2:mem:tejas
+
+spring.jpa.show-sql=true
+
+server.port=8081
+
+to access h2 database type below url 
+------------------------------------
+
+http://localhost:8081/h2-console
+
+pswd : abc
+
+
+
+=======================================
+Developing REST APIs using Spring Boot
+=======================================
+
+=> We will use 'spring-boot-starter-web' dependency
+
+=> As part of REST API development we need to learn both
+
+		1) Provider Development
+		2) Consumer Development
+
+=> We will use below annotations as part of Provider development
+
+@RestController (@Controller + @ResponseBody)
+
+@GetMapping
+@PostMapping		
+@PutMapping
+@PatchMapping
+@DeleteMapping
+
+@RequestParam
+@PathVariable 
+
+@RequestBody
+
+=> We have below 3 options to develop Consumer
+
+			1) RestTemplate --- sync
+			2) WebClient (webflux) --- sync & async
+			3) FeignClient (spring cloud)
+
+
+Note : We will use POSTMAN to test provider functionality.
+
+Note: We will use Swagger to generate provider documentation.
+
+
+lect 49
+========
+
+=================
+HTTP GET Request
+=================
+
+=> GET request is used to get data from Server/Provider.
+
+=> GET request will not contain request body.
+
+=> If we want to send data in GET request then we need to use
+
+		1) Query Parameters
+		2) Path Parameters
+
+	Ex-1 : http://localhost:8081/welcome?name=raju
+
+	Ex-2: : http://localhost:8081/greet/john		
+
+=> Query Parameters we can read using @RequestParam annotation
+
+=> Path Parameters we can read using @PathVariable annotation.
+
+=========================================================================
+✅ Final Thought:
+@RestController is distributed because it lets external clients talk to your Spring Boot application over
+ the network — making it a key player in distributed architectures like microservices.
+
+@RestController                                                            <---it has distributed component 
+public class DemoRestController {
+
+	@GetMapping("/welcome")
+	public String getWelcomeMsg(@RequestParam("name") String name) {
+		String msg = name + ", Welcome to REST API";
+		return msg;
+	}
+										(best practices below)
+	@GetMapping(value = "/msg", produces = "text/plain")   		 <--- we are producing plain text and we are informing by using produces, and if there more than one parameter in mapping we need to write key as value for msg
+	public ResponseEntity<String> getMsg() {               		 <--- we are creating status code and setting data using return  type as responseEntity   
+		String msg = "Welcome to Ashok IT";
+		return new ResponseEntity<>(msg, HttpStatus.OK); 	 <--- here if we hit this URL it return msg with "200" response code.
+	}
+
+	@GetMapping("/greet/{name}")
+	public String getGreetMsg(@PathVariable("name") String name) {
+		String msg = name + ", Good Morning..!!";
+		return msg;
+	}
+
+
+}
+-----
+
+@GetMapping(... produces = "text/plain")
+→ Tells the browser that you're returning plain text, not JSON or HTML.
+
+ResponseEntity<String>
+→ You’re returning a plain string as the response body, with full HTTP control.
+
+new ResponseEntity<>(msg, HttpStatus.OK)
+→ Sends:
+		Response body: "Welcome to Ashok IT"
+
+		HTTP status code: 200 OK
+
+=============================================================================
+@RestController
+public class CustomerRestController {
+
+	@GetMapping(value = "/customers", produces = "application/json")
+	public ResponseEntity<List<Customer>> getCustomers() { 
+		Customer c1 = new Customer(1, "John", "john@gmail.com");
+		Customer c2 = new Customer(2, "Smith", "smith@gmail.com");
+		Customer c3 = new Customer(3, "David", "david@gmail.com");
+		List<Customer> list = Arrays.asList(c1, c2, c3);
+		return new ResponseEntity<>(list, HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/customer", produces = "application/json")  
+	public ResponseEntity<Customer> getCustomer() {    
+		Customer c = new Customer(1, "John", "john@gmail.com");
+		return new ResponseEntity<>(c, HttpStatus.OK);
+	}
+}
+
+Note :
+======
+
+Consumes = strict → request Content-Type must match.
+
+Produces = loose → response type is flexible, Spring won’t force JSON unless you return an object that can be serialized.
+
+
+Summary Chart
+What You Return			What Spring Sends	Content-Type
+String				Plain Text		text/plain
+ResponseEntity<String>		Plain Text		text/plain
+ResponseEntity<POJO>		JSON			application/json
+ResponseEntity<List<POJO>>	JSON array		application/json
+=============================================================
+
+lect50   
+======
+
+==================
+HTTP Post Request
+==================
+
+=> POST method is used for creating new resource/record
+
+=> if data is secure then we can send through path variable or query param.
+	:They are not safe for transmitting sensitive data like passwords, tokens, or personal info.
+
+	:URLs can be logged in browser history, server logs, proxies, etc.
+
+=> if data is secure then  POST method contains request body
+
+
+	@PostMapping(
+			value = "/customer", 
+			consumes = "application/json",// it is taking input in json format
+			produces = "text/plain"	// it is sending data in text formmat
+	)
+	public ResponseEntity<String> createCustomer(@RequestBody Customer c) {	//Without @RequestBody, Spring won't convert JSON to Java objects properly.
+		System.out.println(c);
+		// TODO: insert into db
+		return new ResponseEntity<>("Customer Saved", HttpStatus.CREATED);//"201" record is created 
+	}
+
+=>	@RequestBody --> same like @RequestParam and @PathVariable it reads data from user 
+		     --> to read data from http  req body(payload) 
+		     
+
+
+
+==================
+HTTP PUT Request
+==================
+
+=> PUT method is used for updating resource/record  (HTTP PATCH : to update any single field)
+ 
+=> PUT method contains request body
+
+==================
+HTTP DELETE Request
+==================
+
+=> DELETE method is used for deleting resource/record
+
+=> DELETE method contains request body
+
+
+produces : Represents rest api method response body data format
+
+consumes : Represents rest api method request body data format
+
+*both are optional ,but for document creation it is recommended.
+
+@RequestParam : To read query params from url
+
+@PathVariable : To read path params from URL
+
+@RequestBody : To read data from http req body (payload)
+
+==================
+What is Swagger ?
+==================
+
+=> Swagger is used to generate documentation for REST API
+
+=> Using Swagger we can test rest api.
+
+=> Add below dependency in pom.xml file
+
+<dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    <version>2.5.0</version>
+</dependency>
+
+Q. Why we write version  in swagger dependency as other dependencies version is handled by spring?
+
+--> springdoc-openapi is a third-party library, not officially part of Spring Boot.
+
+	Therefore, Spring Boot doesn’t manage its version.
+
+	You must specify the version manually to ensure compatibility and avoid runtime issues.
+
+
+
+=> After running the application use below url to access swaager-documentation
+
+		URL : http://localhost:8081/swagger-ui/index.html
+
+========================================================================
+Assignment -1 : Develop Spring Boot REST API to perform Crud operations with Database table using Spring Data jpa and test it using Swagger documentation.
+
+@@ Referenece Video : https://www.youtube.com/watch?v=_rOUDhCE-x4
+=========================================================================
+
+lect 52:
+========
+
+Assignment - 2 : Develop Ticket Booking Rest api (IRCTC api) with below operations. Use H2 DB for saving data.
+
+	operation-1 : book-ticket
+	operation-2 : get-ticket using ticket-id
+	operation-3 : get-all-tickets
+
+input : passenger-data
+			 - name
+			 - dob
+			 - gender
+			 - doj
+			 - from
+			 - to
+			 - trainNum
+
+output : ticket-data
+			 - ticketId
+			 - ticketStatus
+			 - trainNum
+			 - from
+			 - to
+			 - doj
+			 - name
+
+----------------------------------------------------------------------------	
+		
+##	BeanUtils.copyProperties(passenger, t); // use to copy from one object to other
+	//make sure you have same fields in both classes which we are going to copy
+		 
+date : 15/02/25
+lect53:  
+======
+
+===================
+What is xml ?
+===================
+
+-> XML stands for extensible markup language
+
+-> xml is free and open source
+
+-> xml governed by w3c org
+
+-> xml represents data in the form of elements
+
+-> XML is interoperable (language independent)
+
+-> XML is used to represent the data
+
+----------
+syntax:
+----------
+
+<person>
+	<id>101</id>
+	<name>Ashok</name>
+</person>
+
+-> We have 2 types of elements in xml
+	
+		1) simple element (contains data directley)
+
+		2) compound element (contains child elements)
+
+============================================
+Dealing with xml data in java applications	
+============================================
+
+=> Up to java 8v we have JAX-B api in jdk to deal with xml files in java.
+
+=> Using JAX-B api we can convert java object to xml and vice versa.
+
+				     jax-b
+			java obj <---------> xml data	
+
+Note: From java 9 onwards jax-b api is not part of JDK software.		
+
+=> If we want to deal with xml data in java applications, we need to add dependency	
+
+
+
+Marshalling : Converting java object to xml data
+
+Un-Marshalling : Converting xml data to java object
+
+=> To deal with xml data in spring boot rest api we need to add below dependency in pom.xml file  (we can get json AUTOMATICALY . And get xml by adding dependancy)
+
+<dependency>
+	<groupId>com.fasterxml.jackson.dataformat</groupId>
+	<artifactId>jackson-dataformat-xml</artifactId>
+</dependency>
+
+=> Below is the rest controller method which supports both xml and json response
+
+
+@RestController
+public class ProductRestController {
+
+	@GetMapping(
+			value = "/product",
+			produces  =  {"application/xml" , "application/json"}   <----- for swagger :we can able to see  two types of data format in swagger documentation
+	)									for postman: if we dont tick on accept it will give data in first type,as here we mention application/xml 
+
+	public ResponseEntity<Product> getProduct() {
+		Product p = new Product(101, "Monitor", 1000.00);
+		return new ResponseEntity<>(p, HttpStatus.OK);
+	}
+}
+
+Note: The above method returning Object that means it is loosely coupled with xml and json formats.
+
+=> Consumer can decide in which format they want response.
+
+=> Consumer should send Accept header  in the request to decide response format.
+
+			Accept = appliction/json   <--- value in postman  for swagger check for media type 
+
+			Accept = application/xml   <--- value
+
+Note: Based on the Accept header value given by consumer response will be sent from the provider.
+
+Note: while sending post request don't select accept box. just add content-type : "application/type" box.
+
+===================================================
+what is Content-Type header ?(check postman header)
+===================================================
+
+=> It is used to represent in which format consumer sending request body data to provider.
+
+
+	@PostMapping(
+			value="/product",
+			consumes = {"application/xml", "application/json"},
+			produces = "text/plain"                             -----> string format -->  "product added"
+	)
+	public ResponseEntity<String> addProduct(@RequestBody Product p){
+		System.out.println(p);
+		//logic
+		return new ResponseEntity<String>("product added", HttpStatus.CREATED);
+	}
+
+-------------------------------------------------------------
+
+=> Http Headers
+
+		Accept : In which format client expecting response body
+		Content-Type : In which format client giving request body
+
+=> Media Types
+
+		consumes : In which format provider expecting input
+		produces : In which format provider can give output
+
+=============================================================
+
+date 16/03/25:
+==============
+
+lect 54:
+========
+
+1) What is Distributed Application & Why ?
+
+2) What is Interoperability
+
+3) JSON & Jackson
+
+4) XML & JAX-B (outdated)
+
+5) HTTP Protocol (mediator)
+
+6) HTTP Methods (GET, POST, PUT, PATCH, DELETE)
+
+7) HTTP Status Codes
+
+8) HTTP Request Structure
+
+			- Request Line (Method + URL)
+			- Request Headers (Accept, Content-Type)
+			- Request Body (payload - txt/json/xml)
+
+9) HTTP Response Structure
+
+			- Response Line (Status Code + MSG)
+			- Response Headers (meta data)
+			- Response Body (payload - txt/json/xml)
+
+10) REST API Architecture
+
+			- Provider
+			- Consumer
+
+11) @RestController
+
+12) ResponseEntity
+
+13) @RequestParam (Query Params)
+
+14) @PathVariable (Path params)
+
+15) @RequestBody
+
+16) Consumes & Produces  (Media Types)
+
+17) Accept & Content-Type headers
+
+18) POSTMAN
+
+19) Swagger
+
+20) IRCTC API
+
+21) CRUD Operations using REST API with Data JPA
+
+
+Q. diff pojo ,binding entity class?
+
+=========
+Consumer
+==========
+
+=> The application which is accessing other applications is called as Consumer application.
+
+=> Using Spring Boot we can develop Consumer in 3 ways
+
+		1) RestTemplate (outdated)
+
+		2) WebClient
+
+		3) FeignClient
+
+=> RestTemplate supports only Synchronous communication
+
+=> WebClient supports both sync & async communication (spring 5.x)
+
+=> Feign Client is used for inter service communication in Microservices
+		
+===================================
+What is Synchronous Communication ?
+===================================
+
+=> After sending request to provider if consumer is waiting for the response then it is called as Synchronous communication.
+
+===================================
+What is Asynchronous Communication ?
+===================================
+
+=> After sending request to provider if consumer is not waiting for the response then it is called as asynchronous communication.
+
+
+lect 55:
+========
+application 38
+
+consumer application
+
+-> go to rapidapi.com for free api
+-> we can build consumer with the help of this.
+-> RestTemplate will take care of converting json/xml to java object 
+
+Short Note: JSON → Java Field Mapping
+
+1)Direct Matching (No Annotation Needed)
+
+-When: JSON keys exactly match Java field names.
+
+-Why: Jackson automatically maps JSON → Java object using matching names.
+
+-Example:
+
+	json : {"id": "101", "name": "Laptop"}
+	
+	java:
+
+	private String id;
+	private String name;
+
+
+2) Different Key Names (@JsonProperty)
+
+-When: JSON keys differ from Java field names. And we have idea of producer class which properties/keys it have.
+
+-Why: Jackson won’t know how to map; @JsonProperty("jsonKey") tells it the correct key.
+
+
+-Example:
+json:
+----
+{"product_id": "101", "product_name": "Laptop"}
+
+java
+----
+@JsonProperty("product_id")
+private String id;
+
+@JsonProperty("product_name")
+private String name;
+
+
+3) Type Mismatch
+
+-When: JSON type differs from Java type.
+
+-Why: Can cause parsing errors; either match types or parse manually.
+
+-Unknown/Dynamic JSON Keys
+
+-When: You don’t know the keys in advance.
+
+-Why: Use Map<String, Object> or custom deserializer instead of fixed class.
+
+-Key takeaway:
+
+-Always make your Java fields match JSON keys (directly or via @JsonProperty).
+
+-This ensures RestTemplate + Jackson can automatically convert JSON/XML → Java object without errors.
+
+lect 56:
+========
+-> Application 39
+-> Application development by webClient -> Spring Reactive Web dependency
+->        	Mono<String>bodyToMono = webClient.get() // send GET req
+						  .uri(apiUrl) // provider url
+						  .retrieve() // get response body
+	         				  .bodyToMono(String.class); // map response       //in controlller return type should be Momo<String>
+--------------------------------------------------------------
+
+@Service
+public class ProductService {
+	
+	
+	public Mono<Product> getProductNew(){
+		
+		String apiUrl = "https://api.restful-api.dev/objects/1";
+		
+		WebClient webclient = WebClient.create();
+		
+		return webclient.get()
+				.uri(apiUrl)
+				.retrieve()
+	     			.bodyToMono(Product.class); //in controlller return type should be Momo<class>//
+		
+	}
+
+	What it does:
+
+		It gets the raw JSON response from the API as a plain string.
+
+		No mapping is done to any Java object.
+
+	Use case:
+
+		When you want to log, debug, or process the response manually.
+
+		Suitable when you don't have or need a specific Java class to map to.
+
+	public Mono<String> getProduct() {
+
+		String apiUrl = "https://api.restful-api.dev/objects/1";
+
+		// getting webclient impl class obj
+		WebClient webClient = WebClient.create();
+		
+		
+       		 Mono<String> bodyToMono = webClient.get() // send GET req
+						    .uri(apiUrl) // provider url
+			  			    .retrieve() // get response body
+			  			    .bodyToMono(String.class); // map response       //in controlller return type should be Momo<String>
+		
+		return bodyToMono;
+	}
+		
+		What it does:
+
+			It deserializes the JSON response into a Product Java object using Jackson (or another JSON parser configured in Spring).
+
+			The Product class must match the structure of the JSON response.
+
+		Use case:
+
+			When you want to work with structured data in your application.
+
+			Enables type-safe access like product.getName() or product.getData().getPrice().
+
+}
+
+
+| Feature            | **RestTemplate**             | **WebClient**                                    | **Feign Client**                                 |
+| ------------------ | ---------------------------- | ------------------------------------------------ | ------------------------------------------------ |
+| **Blocking/Async** | Blocking (synchronous)       | Non-blocking (asynchronous, reactive)            | Blocking (by default), can use reactive          |
+| **Complexity**     | Easiest, but old             | More complex (reactive mindset)                  | Simplest (declarative interface)                 |
+| **Scalability**    | Poor under load              | High scalability (handles many concurrent calls) | Depends (mostly blocking unless configured)      |
+| **Streaming**      | ❌ Not supported            | ✅ Supported (Flux, SSE, WebSockets)             | ❌ Not supported natively                       |
+| **Microservices**  | Works, but boilerplate code  | Works great, flexible                            | ✅ Best (integrates with Spring Cloud, Eureka)  |
+| **Use Case**       | Legacy/simple apps           | Reactive, high-performance apps                  | Microservices with many inter-service calls      |
+| **Status**         | Deprecated (no new features) | Recommended for new apps                         | Recommended for Spring Cloud-based microservices |
+
+
+
+
+
+Assignment:
+===========
+
+application 40:
+---------------
+
+==> develop MakeMyTrip application to book tickets by using IRCTC Api which we developed already. Use two different port for both api
+
+Screen - 1: book-ticket page
+screen - 2: get tickets 
+
+Note : makemytrip must have same classes which store and pass data to producer app.
+
+lect 57:
+=========
+Errors finding 
+
+ 
+lect 58:
+=======
+
+41 application for exception handling
+
+Note:
+-----
+
+-> In web mvc we are sending error page as exception occurs.
+-> here in rest api  we are sending error data in json format.
+-> Instead of @ControllerAdvise we use @RestControllerAdvice annotation here.
+
+
+
+@ControllerAdvice - class level (c to b)
+@ExceptionHandler - can handle exception occur in same class ,write on method 
+@RestControllerAdvice - write above class ,any exception occur any controller we can  handle here .It has method having  @ExceptionHandler 
+annotation to handle that occurred exception 
+
+
+================================================
+Can we develop rest API  without @RestController
+================================================
+
+Spring Data Rest = @RestRepositories   
+
+lect 59: spring Rest 
+========
+
+=> In spring boot ,we can develop  Rest APi in two ways
+
+1) Spring web MVC ----> @RestController -> crud operation with business logic
+
+2) Spring data REST  --> @RestRepository --> only for crud operation  --> add rest repository dependency 
+
+-->spring-boot-starter-web gives you the tools to build a web/REST app.
+
+-->You still need to create your own @RestController to define custom API endpoints — unless you're using something like Spring Data REST, which generates them for you.
+
+@RepositoryRestResource(path = "books") // repository + restController  : repository act as rest controller
+public interface BookRepository extends JpaRepository<Book, Integer>{
+
+}
+
+✅ Available operations:
+
+| HTTP Method | URL Path      | Operation        | Description                     |
+| ----------- | ------------- | ---------------- | ------------------------------- |
+| GET         | `/books`      | `findAll()`      | Fetch all books                 |
+| GET         | `/books/{id}` | `findById(id)`   | Fetch book by ID                |
+| POST        | `/books`      | `save()`         | Create a new book (body: JSON)  |
+| PUT         | `/books/{id}` | `save()` with ID | Update entire book (body: JSON) |
+| PATCH       | `/books/{id}` | Partial update   | Update part of book fields      |
+| DELETE      | `/books/{id}` | `deleteById(id)` | Delete a book                   |
+
+
+
+
+HATEOS : Hypermedia as a response
+
+📌 HATEOAS (Hypermedia As The Engine Of Application State)
+
+A REST principle where responses include links (hypermedia) to guide the client on next possible actions.
+
+Makes APIs self-descriptive and discoverable.
+
+Example:
+
+{
+  "title": "Spring Boot Guide",
+  "_links": {
+    "self": { "href": "http://localhost:8080/books/1" },
+    "books": { "href": "http://localhost:8080/books" }
+  }
+}
+Benefits:
+
+	No need to hardcode URLs on client side.
+
+	Helps clients navigate APIs dynamically.
+
+Spring Data REST adds HATEOAS support by default.
+
+Great for flexibility; may be overkill for simple apps.
+
+
+------------------------------------------------------------------------
+//only for producer not consumer development
+
+
+@  (path = "books") // repository + restController
+public interface BookRepository extends JpaRepository<Book, Integer>{
+
+}
+
+Q. How to restrict put and delete request in rest repository?                     <-- interview que
+
+==> 
+✅ 1. Use @RepositoryRestResource + RepositoryRestConfiguration
+You can customize the HTTP methods exposed by the repository using Spring's configuration.
+
+🔧 Example: Restrict PUT and DELETE
+
+@Configuration
+public class RestRepositoryConfig implements RepositoryRestConfigurer {
+
+    @Override
+    public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
+        config.getExposureConfiguration()
+            .forDomainType(Book.class)
+            .withItemExposure((metadata, httpMethods) -> httpMethods.disable(HttpMethod.PUT, HttpMethod.DELETE))
+            .withCollectionExposure((metadata, httpMethods) -> httpMethods.disable(HttpMethod.PUT, HttpMethod.DELETE));
+    }
+}
+✅ 2. Make the repository read-only
+If you want only GET operations (read-only), you can extend Repository or ReadOnlyRepository:
+
+
+@RepositoryRestResource(path = "books")
+public interface BookRepository extends JpaRepository<Book, Integer> {
+    
+    @Override
+    @RestResource(exported = false) // disables POST, PUT, DELETE
+    <S extends Book> S save(S entity);
+
+    @Override
+    @RestResource(exported = false)
+    void deleteById(Integer id);
+}
+📝 Summary:
+
+Method			Way to Disable
+
+PUT / DELETE		Use RepositoryRestConfigurer
+Any method		Use @RestResource(exported = false)
+All write methods	Use a read-only interface
+------------------------------------------------------------------------
+
+
+lect60:
+=======
+revise for interview preparation

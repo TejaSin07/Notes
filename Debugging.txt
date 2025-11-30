@@ -1,0 +1,44 @@
+Debugging 
+==========
+
+Main Navigation Keys:
+---------------------
+
+1) F5 (Step Into) → goes inside the method you’re calling (even JDK/Spring internals).
+
+2) F6 (Step Over) → executes the current line but doesn’t go inside it.
+
+3) F7 (Step Return / Step Out) → finishes the current method and brings you back to the caller.
+
+4) F8 (Resume) → continues execution until the next breakpoint.
+
+- Accidentally stepped into framework? → F7 (Step Return).
+
+- Don’t want to step in? → F6 (Step Over).
+
+- Lost deep inside? → F8 to skip to next breakpoint.
+
+- Want to manually return? → Use Debug View stack frames and click your method.
+
+- Once you’re at the return line and  already know what’s coming back.
+
+  There’s no need to press F6. Just F8 to continue → execution will naturally return to your controller, and if you have a breakpoint there, it will stop.
+
+
+
+Note :
+1) If you don’t see Variables View:
+
+  - Go to menu → Window → Show View → Variables.
+ 
+  - Same for Expressions View.
+
+2) If you want to examine multiple places in one request:
+
+  - Set breakpoints at A, B, C.
+
+  - Then use F8 to jump through them in order.
+
+  - If you only care about one spot (say A), remove others, otherwise you’ll keep stopping everywhere.
+  
+  - you can see all breakpoint in breakpoint view**

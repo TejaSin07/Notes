@@ -1,0 +1,1044 @@
+Topics to cover :  1) jsp or front end like angular react
+
+Git Repo URL : https://github.com/ashokitschool/SBMS-39.git
+
+
+
+Feature				Servlets			Spring WebMVC
+Architecture	Low-level request handling			High-level MVC framework
+Ease of Use	Manual parsing of parameters, response handling	Annotations simplify request mapping
+REST Support	Needs manual JSON conversion			Built-in REST API support
+Scalability	Hard to manage large apps			Best for scalable applications
+Dependency	Java EE (Jakarta EE)				Spring Framework
+Integration	No built-in support for DB, security, etc.	Easily integrates with Spring ecosystem
+
+stay still last in lect to understand que   
+
+lect 34;
+-------
+=================
+Spring Web MVC
+=================
+
+-> Spring Web MVC is one module in spring framework.
+
+-> Using Spring Web MVC, we can develop below types of applications
+
+		1) Web Application ( C 2 B )
+
+		2) Distributed Application ( B 2 B )
+
+-> We need to use 'springboot-starter-web' dependency to work with Spring Web MVC module.
+
+-> 'web-starter' will provide embedded container by default. We no need to setup server manually.
+
+				- Apache (Default)
+				- Jetty
+				- Netty 		
+ 
+-> Spring Web MVC supports multiple presentation technologies.
+			Ex: JSP, Thymeleaf...
+
+-> Spring Web MVC supports Form Binding.Form data will be mapped to java object.
+
+Note: When we develop java web app using servlets we need capture form data like below.
+
+	 	String phno = request.getParameter("phno");
+	 	Long ph = Long.parseLong(phno);
+
+Note: We no need to write this logic in web mvc. It will take care of capturing form data and convert 
+into corresponding data type and store into java object.	 	
+
+============================
+Spring Web MVC Architecture
+============================
+
+=> In spring web mvc, below components will be involved...
+
+1) DispatcherServlet : front controller/framework servlet(take request and send request)
+
+2) HandlerMapper : To identify request handler i.e (controller)
+
+3) Controller : Request Handler (spring bean) - we have to develop
+
+4) ModelAndView : Model represents "data" & view represents "UI page".    <---
+
+5) ViewResolver : To identify where view pages available in app
+
+6) View : To render i.e displaying model data on view page.
+
+Note:  DispatcherServlet , HandlerMapper, ViewResolver are predefine classes i.e they are not need to setup. (we not able to see them  )
+
+
+🔁 Spring MVC Request Flow
+
+1️⃣ Client sends request (e.g., /getCustomers)
+↓
+
+2️⃣ DispatcherServlet (Front Controller)
+
+Entry point of every Spring MVC request.
+
+It receives the request first.
+
+It delegates to other components to handle it.
+
+↓
+
+3️⃣ HandlerMapping
+
+DispatcherServlet asks HandlerMapping:
+“Which controller method should handle this URL?”
+
+It returns the Controller (Handler) info + method to be invoked.
+
+↓
+
+4️⃣ Controller (Request Handler)
+
+Your code runs here.
+
+It processes the request, interacts with the service layer or DB.
+
+It prepares Model data and returns ModelAndView object.
+
+Model → data to show
+
+View name → name of JSP/HTML/Thymeleaf page
+
+↓
+
+5️⃣ ViewResolver
+
+DispatcherServlet sends the view name to the ViewResolver.
+
+ViewResolver maps that logical view name to an actual file (like /WEB-INF/views/customers.jsp).
+
+↓
+
+6️⃣ View (JSP/Thymeleaf/etc.)
+
+The view gets the model data.
+
+It renders the UI (HTML page) to show the data to the user.
+
+↓
+
+7️⃣ Response sent back to client
+ 				
+=========================================
+Building First Web App using Spring Boot
+==========================================
+
+1) Create Boot app with below dependencies
+
+			a) web-starter
+			b) thymeleaf-starter
+			c) devtools
+
+2) Create Controller class with required methods and map methods to HTTP methods with unique url patterns.
+
+3) Create View Page (HTML + Thymeleaf) (under templates folder)		
+
+4) Run the application and test it.	
+
+
+----------------- Controller -------------------------------
+
+@Controller
+public class MsgController {
+
+	@GetMapping("/greet")
+	public ModelAndView getMsg2() {
+
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("msg2", "Good Morning...!!");    <-- both param are string 
+		mav.setViewName("index");
+
+		return mav;
+	}
+
+	@GetMapping("/welcome")
+	public ModelAndView getMsg1() {
+
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("msg1", "Welcome  Ashok IT");
+		mav.setViewName("index");
+		return mav;
+	}
+}
+
+------------------------index.html------------------------------
+<html>
+	<body>
+		<p th:text="${msg1}"></p>  also we can add like  "${msg1} + ' to our company'"
+		<p th:text="${msg2}"></p>
+	</body>
+</html>
+----------------------------------------------------------------
+
+MultiAction controller: same as above ,controller that handles more than one request.
+
+===========================
+Spring Web MVC Assignments
+===========================
+
+1) Develop Spring Boot web app to retrieve products data from db table and display in UI page as a table.
+
+lect35:
+=======
+
+=========================
+Form Based Applications
+=========================
+
+=> In every web app many forms will be available
+
+		- login form
+		- register form
+		- search form
+
+=> We need to capture form data and we need to perform operation on that data...
+
+
+Note: Web MVC supports form binding.		
+
+=============================================================
+Develop Boot web app to save and retrieve products data 
+==============================================================
+
+1) Product.java (form binding + entity)
+
+		Integer pid; (PK, Auto_Increment)
+		String pname;
+		Double price;
+		Integer qty;
+
+2) ProductRepo.java (JpaRepository)		
+
+3) ProductService.java 
+
+		- public boolean saveProduct(Product p);
+
+		- public List<Product> getProducts( );
+
+4) ProductController.java
+
+		public ModelAndView loadForm( ); - GET
+
+		public ModelAndView saveProduct(Product p) - POST	
+
+		public ModelAndView getAllProducts( )  - GET
+
+5) View Pages
+	
+		index.html - form to enter data
+		data.html  - table to display data
+24 app: C:\Users\tejas\Desktop\springboot repo\workspace-spring-tool-suite-4-4.27.0.RELEASE\24-WebMVC-FormApp
+
+lect 37:
+=========
+25v application imp to practise		
+	
+Q. Difference Between POJO, Entity, and Bean in Java
+
+Feature			POJO (Plain Old Java Object)		Entity (JPA Entity)			Bean (Spring Bean/JavaBean)
+
+Definition		A simple Java object that 		A POJO that is mapped to a database	A special POJO that follows JavaBean 	   	
+			holds data.				table using JPA annotations.	    	conventions and is managed by the Spring framework.
+
+Framework Dependency	❌ No framework dependency.		✅ Used with JPA/Hibernate.		✅ Used in Spring framework.
+
+Persistence		❌ Not persisted.			✅ Mapped to a database table.		❌ Not necessarily persisted, 
+													used for application logic.
+
+Annotations		❌ No annotations required.		✅ Uses @Entity, @Table, @Id, etc.	✅ Uses @Component, @Service, @Repository, etc.
+
+Default Constructor	Optional.				✅ Required (JPA needs it).		✅ Required for Spring beans.
+
+Lifecycle Management	Managed by Java runtime.		Managed by JPA/Hibernate.		Managed by the Spring container.
+
+Use Case		DTOs, utility classes, business logic.	Database interaction (ORM).		Spring-managed components like services, 												 		controllers, repositories.
+			
+
+
+lect 38:
+=======
+
+Use of runner(it is interface):
+===============================
+ 
+#  it will overrides Run method
+#  it will executed only ones at start of the application
+#  we are using coz we need data to store  first in h2 database
+#  ref 26 application
+
+🔁 Both run() methods are executed — but in this order:
+
+1. SpringApplication.run(Application.class, args)
+This is the main method entry point.
+
+->It initializes the Spring Boot framework and starts the application.
+
+->It also scans the classpath, sets up the context, creates beans, and more.
+ 
+2. Then, your custom MyAppRunner.run() gets executed
+
+->Spring sees your class implements ApplicationRunner.
+
+->After the application context is fully initialized, Spring automatically calls your run() method.
+
+
+Feature			ApplicationRunner				CommandLineRunner
+Interface location	org.springframework.boot			org.springframework.boot
+Method to implement	run(ApplicationArguments args)			run(String... args)
+Access to parsed args?	✅ Yes (structured)				❌ No (only raw strings)
+Used for		Running logic after app context is ready	Same purpose
+When it runs		After Spring Boot app starts			After Spring Boot app starts
+
+=================================
+Embedded Database in spring boot
+=================================
+
+=> Embedded databases are called temporary databases
+
+=> H2 we can use as embedded database
+
+=> When application starts h2 db will start and when application stopped h2 db also gets stopped.
+
+Note: If application re-started then we will loose old data.(i.e why we are using runner to insert data again while starting application)
+
+=> H2 db is used only for practice purpose.
+
+====================================
+How to use H2 DB in spring boot ?
+====================================
+
+### Step-1 : Add h2 dependency in pom.xml file
+
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+### Step-2 : Configure H2 datasource properties in application.properties file
+
+
+spring.datasource.username=ashokit
+spring.datasource.password=abc
+spring.datasource.url=jdbc:h2:mem:sbms
+
+spring.jpa.show-sql=true
+
+server.port=8081
+
+
+### Step-3 : Run the application and access h2-console in browser
+
+		URL : http://localhost:port/h2-console
+
+	
+
+============================================
+How to change default container to  jetty ?
+============================================
+
+=> When we add web starter then tomcat will become default embedded container to run boot application.
+
+=> If we want to change from tomcat to jetty then we need to make below changes in pom.xml
+
+### Step-1 : Exclude tomact from web-starter dependency
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-tomcat</artifactId>
+				</exclusion>
+			</exclusions>
+			
+		</dependency>
+
+### Step-2 : Add jetty starter
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jetty</artifactId>
+		</dependency>
+
+### Step-3 : Run the application and observe console.
+
+
+=====================================
+two ways to develop controller   ==>  MsgController class in 26 th application
+=====================================
+
+| Annotation                      | Return Type | Returned Value     | Behavior                                                       | Output                                               |
+| ------------------------------- | ----------- | ------------------ | -------------------------------------------------------------- | ---------------------------------------------------- |
+| `@Controller`                   | `String`    | `"index"`          | Treated as **view name** → ViewResolver looks for `index.html` | HTML page `index.html` is rendered                   |
+| `@Controller` + `@ResponseBody` | `String`    | `"index"`          | Treated as **plain response**                                  | Response body = `index`                              |
+| `@RestController`               | `String`    | `"index"`          | Treated as **plain response**                                  | Response body = `index`                              |
+| `@RestController`               | HTML String | `"<h1>Hello</h1>"` | Sent as **raw HTML text** (not resolved via ViewResolver)      | Browser interprets HTML and renders `<h1>Hello</h1>` |
+
+lect 39:
+=========
+
+
+==============
+Requirement : 
+==============
+
+Develop  Spring Boot web application with below functionalities
+
+	Registration Page : Name, Email, Pwd and Phno fields
+
+	Login Page : Email & Pwd fields
+
+	Dashboard Page : <msg>
+
+Note: When user registered, application should send an email to the user.
+
+Email Subject : Account Created - Ashok IT
+
+Email Body : Congratuations.. you are onboard..
+
+Q.use of devtools dependency :-> it will restart application if there is any code modification.
+
+lect 40:(App 27)
+========
+=================================
+Email Sending using spring boot
+=================================
+
+=> To send emails using spring boot we have add 'mail-starter' dependency in pom.xml
+
+=> We need to configure SMTP properties in application.properties file
+
+Note: In SMTP props, we need to add our gmail account credentials for authentication purpose.
+
+Note: We need to generate "app password" for gmail for authentication.
+
+	URL To generate app pwd: https://g.co/kgs/f1ic3P9
+
+=> Spring boot provided JavaMailSender to send emails
+
+		- SimpleMailMessage (plain text)
+
+		- MimeMessage	(formats, attachments)
+
+Q. which are the server pages (servlets?)
+
+
+lect 41:app-28
+============================================
+Exception Handling in Boot web application	
+============================================
+
+=> Exception : Unexpected and unwanted situation
+
+=> When exception occurs program will be terminated abnormally
+
+=> We need to handle exceptions for app graceful termination.
+
+=> We have below keywords to handle exceptions in java
+
+		1) try
+		2) catch
+		3) throw
+		4) throws
+		5) finally	
+
+
+=> In spring boot we can handle exceptions in 2 ways
+
+		1) Controller/class Based (specific to class)  <-- write in specific class
+
+		2) Global Exception Handling (entire application)  <-- create one class that acts as global excp handler
+
+@ExceptionHandler annotation :
+------------------------------
+
+This is a method-level annotation.
+It is used within a specific controller class to handle exceptions thrown by methods in that controller.
+It provides a localized way to handle exceptions for a single controller.
+
+example:
+
+a)	@ExceptionHandler(value = ArithmeticException.class)
+	public String handleArithmeticException(Exception e) {
+   	 return "errorView";
+}
+==> this above method find page errorView coz it is normal method in controller without response body annotation.
+
+b)	@ExceptionHandler(value = Exception.class)
+	@ResponseBody
+	public String excptionHandler(Exception e) {
+		return "some errors occur";
+		}
+
+=>this method will return string response 
+
+@ControllerAdvice annotation:
+------------------------------
+
+This is a class-level annotation.
+It is used to define a global exception handler that applies to all controllers in the application.
+It provides a centralized way to handle exceptions across multiple controllers.
+
+example:
+@ControllerAdvice
+public class GlobalExceptionHandler {
+      -------
+    @ExceptionHandler(value = Exception.class)
+    public String handleGlobalException(Exception e) {
+        return "globalErrorView";
+    }
+}
+
+
+1) The purpose of the @ControllerAdvice class, like your AppExceptionHandler, is to centralize exception handling logic in one place.
+ This eliminates the need to write exception-handling code in every controller class, making your application cleaner and easier to maintain.
+
+2) If you handle exceptions at the method level using @ExceptionHandler in the same class, that handler will take precedence over any global exception handler (like one defined in a @ControllerAdvice class).
+
+3)If we want to  handle user defined exception (not predefined) then we need add that exception class having extension Exception.  
+-----------------------------------
+
+1.Controller-based vs Global exception handler in Spring
+
+Q: When to use local (@ExceptionHandler) vs global (@ControllerAdvice) handler?
+
+A:
+
+Type		Use Case
+Local 		(@ExceptionHandler in controller)	Exception specific to one controller
+Global 		(@ControllerAdvice)			Exception handled across all controllers
+Custom 		exception class	User-defined business logic errors
+
+2. How controller exception handler works (MsgController)
+
+Q: After throw in controller, how is @ExceptionHandler called?
+
+A:
+
+Exception occurs → normal execution stops.
+
+Spring detects matching @ExceptionHandler in controller.
+
+Executes handler method automatically.
+
+Lines after the exception in original method do not execute.
+
+3.. Two handlers in the same class: parent vs child
+
+Q: If both Exception (parent) and ProductNotFoundException (child) handlers exist, which runs?
+
+A: ✅ The most specific handler runs first (child).
+
+Order in code does not matter.
+
+4.. Two handlers for same exception in same class
+
+Q: If two handlers for ProductNotFoundException exist in same class?
+
+A: ❌ Ambiguous mapping → startup error
+
+Spring cannot decide which to call.
+
+Solution: merge logic or use different subclasses.
+
+5. Local vs Global handler for same exception
+
+Q: If controller has local handler and global @ControllerAdvice exists, which executes?
+
+A: ✅ Local handler always executes first.
+
+Global acts as fallback.
+
+6. Changing priority between global and local
+
+Q: Can global handler execute before local?
+
+A: ✅ Yes, using @Order on @ControllerAdvice
+
+Lower value → higher priority
+
+Example: @ControllerAdvice @Order(1) → global executes before local handler.
+
+| Scenario                                         | Who handles it                                                                      |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| Exception occurs in controller method            | Local `@ExceptionHandler` or `@RestControllerAdvice`                                |
+| Exception occurs in service called by controller | Same as above; propagates up to controller → handled by controller or global advice |
+| Exception occurs in repository/DAO               | Same; propagates up to service → controller → advice                                |
+
+
+==================================================================
+
+lect 42:
+========
+
+1) What is web mvc ?
+2) Advantages with Web MVC
+3) Web MVC Architecture
+4) What is Embedded Container
+5) How to develop boot web app
+6) How to send data from controller to UI
+7) Web MVC Form with Form Binding
+8) Embedded Database (h2)	
+9) How to change default container
+10) Email Sending using Spring Boot
+11) Exception Handling in Web MVC
+12) Login & Registration app
+13) Product Store App (CRUD Ops)
+
+====================================================
+Query Parameters (key-value)	:-> "@RequestParam"			
+====================================================
+
+=> Query Params are used to send data to server in URL
+
+=> Query Params will represent data in key-value format
+
+=> Query params will start with ?
+
+=> Query Params will be separated by &
+
+=> Query Params will present at end of the URL
+
+	ex: www.youtube.com/watch?v=ljsdf79/
+
+		www.ashokit.in/course?name=sbms
+
+		www.ashokit.in/course?cname=sbms&tname=ashok
+
+Note: We can read query parameters from URL using " @RequestParam "annotation in the controller.
+ex:
+
+@GetMapping("/product")
+public String getProduct(@RequestParam("pid") Integer pid, Model model) throws Exception {
+
+	if (pid >= 100) {
+		throw new ProductNotFoundException("Invalid Product Id"); 	// custom exception
+	} else {
+		model.addAttribute("msg", "Product Name : Apple Mobile");	// we can use this msg attribute at any place in index
+	}
+
+	return "index";
+}
+
+to access this we use : http://localhost:8080/product?pid=50
+
+===================================================
+Path Parameters  (write after / )" @PathVariable "
+===================================================
+
+=> Path Params are used to send data to server in URL(key not available)
+
+=> Path Parameters will represent value directly
+
+	ex : www.youtube.com/c/AshokIT
+
+=> Path Parameters will be separated by '/'
+
+=> Path Parameters can present anywhere in the URL
+
+	Ex :  www.ashokit.in/course/{java}/info
+
+=> We can read Path Parameters using @PathVariable annotation.
+
+ex:
+	@GetMapping("/product/{pid}")
+	public String getProduct(@PathVariable("pid") Integer pid, Model model) throws Exception {
+
+		if (pid >= 100) {
+			throw new ProductNotFoundException("Invalid Product Id"); // our own exception user define  exception 
+		} else {
+			model.addAttribute("msg", "Product Name : Apple Mobile");
+		}
+
+		return "index";
+	}
+}
+
+to access it: http://localhost:8080/product/50
+---
+@Controller
+public class MsgController {
+
+	@GetMapping("/welcome")
+	@ResponseBody
+	public String welcomeMethod(@RequestParam("name") String name) {
+		return name + ", Welcome to Ashok IT";
+	}
+
+	@GetMapping("/greet/{name}")
+	public String greetMethod(@PathVariable("name") String name, Model model) {
+		model.addAttribute("msg", name+", Good Morning");
+		return "index";
+	}
+}
+
+to access:
+http://localhost:8080/welcome?name=John
+http://localhost:8080/greet/John
+
+Q. When we have to go for QueryParm & for PathParam?
+
+🔹 @PathParam — Used for identifying resources
+Part of the URL path (after the base path).
+Used when the parameter is essential to the resource being accessed.
+
+✅ Use when:
+You want to identify a specific resource.
+The value is required and part of the URI structure.
+
+🔹 @QueryParam — Used for filtering, sorting, optional inputs
+Appended to the URL after a ?.
+
+Used for optional or additional information about the request.
+
+✅ Use when:
+You want to filter or modify a request.
+
+The parameter is not essential to identify the resource.
+
+You want to pass multiple optional inputs.
+
+*A client wants to get details of a specific movie using its ID → use @PathParam
+
+* the client wants to search for movies by genre, year, or rating → use @QueryParam
+
+=========================
+What is @ResponseBody ?
+=========================
+
+// 29  application msgcontroller class 
+
+=> It is used to send direct response to client without any view page.
+
+=> This can be used at controller class level and method level
+
+=> for method level add @ResponseBody at method 
+
+Note: If we use at class level then it is applicable for all methods in that class
+
+		@Controller + @ResponseBody = @RestController
+
+Note : In web mvc we mostly used normal controller having @controller annotation and the method inside usually send
+response as web page where return type is string ,but if we want to sent direct response from 
+one of the method then we directly use @Responsebody annotation then method will not search for web page it will 
+directly return string. 
+
+Note  : Go through ashokit 100 springboot ques?                <==IMP
+
+
+Return Type	  	Description
+
+String			View name to be resolved   <---ViewResolver is responsible for resolving that view name into the actual file (e.g., 							index.html or index.jsp).
+
+ModelAndView		View name + Model data
+void			Directly writes to response
+ResponseEntity<T>	Custom HTTP response with status & body
+Object (POJO)		Auto-converted to JSON
+Map/List<?>		Auto-converted to JSON
+CompletableFuture<T>	Async response
+
+==================================================================
+
+
+lect 43:   
+========
+
+
+=================
+Form Validations
+=================
+
+=> To restrict users to provide valid information in the form
+
+			- Client Side Validations
+
+			- Server side validation
+
+=> Client side validations will execute at browser. People can disable client side validations using inspect option in browser.
+  (client side/user side = on html pages)
+
+Q. => if we edit html and insert illegal value  after refreshing page what happen??
+   -- html page again restore to original, but again we can edit and pass illegal data .
+  
+=> Server side validations will execute in our code. These are highly recommended in application.
+
+=> To implement server side validations we will use below starter in pom.xml file
+
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+
+
+=> We can use below annotations to perform server side validations
+
+
+@Valid
+@NotEmpty
+@NotNull
+@Size
+@Email
+
+Note: We will use these annotations at " binding class ".
+
+public class User {
+
+	@NotEmpty(message = "Name is mandatory")
+	@Size(min = 3, max = 8, message = "Min 3 and Max 8 chars allowed")
+	private String name;
+
+	@NotEmpty(message = "Email is mandatory")
+	@Email(message = "Enter valid email")
+	private String email;
+
+	@NotNull(message = "Phno is mandatory")
+	private Long phno;
+}
+
+---------^^----binding class----------
+
+	@PostMapping("/user")
+	public String handleSubmit(@Valid User user, BindingResult result, Model model) { // BindingResult it used to verify form validation are failed or not.
+
+		if (result.hasErrors()) {
+			// validation failed
+			return "index";
+		} else {
+			// validation passed
+			System.out.println(user);
+			// logic to save in db
+			model.addAttribute("msg", "User Saved");
+			return "index";
+		}
+	}
+
+---------^^----controller  class method ----------
+
+
+Difference Between Binding Class and Entity Class
+Aspect			Binding Class							Entity Class
+🔗 Purpose		Used to bind data from HTTP requests (like form input, JSON)	Used to map to database tables (with JPA/Hibernate)
+📦 Package example	Often in dto, request, or model package				Usually in entity package
+📥 Example use case	Getting data from a form or API (e.g., @RequestBody)		Persisting or reading data from a database
+⚙️ Annotations used	@Valid, @NotBlank, @RequestBody, etc.				@Entity, @Id, @Column, etc.
+🔁 Reused in DB?	❌ Not necessarily						✅ Always maps to DB
+
+=======================================================================================================================
+
+Requirement : Develop spring boot web application to upload and download files.
+
+=======================================================================
+
+lett 44;
+========
+======================
+Spring Boot with JSP     ::try to get better idea about jsp
+======================
+
+=> JSP stands for Java Server Pages
+
+=> JSP is used to develop presentation layer
+
+Note: JSP will be translated to Servlet for execution.  (try to understand this line)
+
+=> Spring Web MVC supports JSP as presentation technology.
+
+## Step-1 : Add tomcat-embed-jasper dependency in pom.xml file
+
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-jasper</artifactId>
+		</dependency>
+
+## Step-2 : Create jsp pages in below location
+
+		Location : src/main/webapp/pages/index.jsp
+
+## Step-3 : Configure view resolver in application.properties file
+
+		spring.mvc.view.prefix=/pages/
+		spring.mvc.view.suffix=.jsp
+
+=========================
+Actuator in spring Boot
+=========================
+
+=> Used to monitor and manage our spring boot applications
+
+=> Production ready features...
+
+=> With the help of actuators we can get below details
+
+- Health of App
+- Beans loaded
+- Metrics
+- Loggers
+- URL Mappings
+- Config Props
+- Thread Dump
+- Heap Dump
+
+=> To work with actuators we need to add below dependency
+
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-actuator</artifactId>
+	</dependency>
+
+Note: With above dependency, By default /health will be exposed.
+
+http://localhost:8081/actuator
+http://localhost:8081/actuator/health
+
+=> We need to write below property to expose other endpoints
+
+	management.endpoints.web.exposure.include=*
+
+=> We can exclude actuator endpoint like below
+
+	management.endpoints.web.exposure.exclude=beans
+
+==============
+Endpoint URLS
+==============
+
+/health : health of the app  (UP or DOWN)	
+
+/beans : Spring Beans loaded
+
+/configprops : Properties loaded
+
+/mappings : URL patterns of our application
+
+/threaddump : Threads info
+
+/heapdump  : Heap info
+
+/loggers : Logs of our applications
+
+/shutdown : Stop server  (HTTP POST Request)
+
+
+implementation: http://localhost:8081/actuator/mappings
+
+
+=============================
+What is shutdown endpoint ?
+=============================
+
+=> It is used to stop the application.
+
+Note: We need to enable shutdown endpoint in our properties file like below
+
+		management.endpoint.shutdown.enabled=true					
+
+Note: Shutdown endpoint is mapped to POST request. We can send post request using POSTMAN software.	   <-----Post request	
+
+after executing "http://localhost:8081/actuator/shutdown" this request we get: 
+	
+	{
+    "message": "Shutting down, bye..."
+	}
+
+--> This response is automatically generated by Spring Boot Actuator — you do not have to write custom code for it.
+lect 45;
+========
+
+===================================
+What are Profiles in Spring Boot ? 
+===================================
+
+=> Environment means a platform which is used to run our application.
+
+=> In Real-time one application contains multiple environments like below
+
+			- Local
+			- Dev
+			- QA
+			- UAT
+			- PILOT
+			- PROD
+
+-> Local env is used for development purpose
+
+-> DEV env is used by developers for integration testing
+
+-> QA env is used by Testing team for system integration testing
+
+-> UAT env is used by Client side team for testing (GO/No-GO)
+
+-> PILOT env is used to test app with live data (Pre-Prod)
+
+-> PROD env is used for live access.
+
+
+=> Below properties will be changing from environment to environment.
+
+		- datasource properties
+		- smtp properties
+		- kafka properties
+		- redis properties
+		- payment-gateway properties
+
+
+
+=> If we use single application.properties file to maintain config properties then maintenance will become difficult.
+
+Note: to deploy code into env, every time we have to change config props
+
+=> To avoid this problem we will use Profiles in springboot
+
+=> Using profiles we can maintain environment specific configuration.
+
+			application.properties   ---- main file
+
+			application-dev.properties
+
+			application-qa.properties
+
+			application-uat.properties
+
+			application-prod.properties
+
+
+=> We need to activate profile in main configuration file like below, we just need to place the env after "-"
+
+			spring.profiles.active=dev			
+
+IMPLEMENTAION:
++++++++++++++
+How it works:
+
+1)Spring loads application.properties first.
+
+2)Then loads application-{profile}.properties based on the active profile.  
+
+
+========================================================================
+
+1) Develop Java application to convert java object to json and json data to java object.
+
+2) Develop Java application to convert java object to xml and xml data to java object.
+
+========================================================================
+
+
+
+
+
+
+
+
+
+
+

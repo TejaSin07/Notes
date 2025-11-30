@@ -1,0 +1,1615 @@
+
+=============================
+Spring Boot & Microservices
+=============================
+
+Ashok (10+ Yrs Java fullstack)
+
+Tech Lead (Product Based)
+
+8+ Yrs in Training
+
+
+===============
+Pre-Requisites
+===============
+
+1) Core Java
+
+		- OOPS
+		- Collections
+		- Exception handling
+		- Multi Threading
+		- I/O Streams
+		- Java 8 Features
+
+2) Adv Java
+
+		- JDBC
+		- Servlets
+		- JSP (optional)
+		- MVC Architecture	
+
+3) Database
+
+		- SQL (CRUD)
+
+==============================================
+Who should learn Spring Boot & Microservices		
+==============================================
+
+For under graduates : Optional
+
+Freshers
+Career Gap
+Working Professionals
+
+================
+Course Content
+================
+
+Module-1 : Spring Basics + Spring Core
+
+Module-2 : Spring JDBC + Spring AOP
+
+Module-3 : Spring Boot
+
+Module-4 : Spring Data JPA
+
+Module-5 : Spring Web MVC (Thymeleaf)
+
+Module-6 : REST API (distributed applications)
+
+Module-7 : Microservices (design pattern)
+
+Module-8 : Spring Cloud
+
+Module-9 : Spring Security (Authentication & Authorization)
+
+Module-10 : Spring Batch
+
+Module-11 : Tools
+
+			 - Apache Kafka
+			 - Redis Cache
+			 - Logging
+			 - JUnit
+			 - Docker
+
+Note: One mini project development at the end of course
+
+===============
+Course Details
+===============
+
+Name : Spring Boot with Microservices
+
+Course Code : 36-SBMS
+
+Class Timings : 8 AM to 9:15 AM (IST) (Mon-Sat)
+
+Class Mode : Offline & Online
+
+Course Duration : 4 Months
+
+Notes: Soft copy material will be provided
+
+Course Fee : 8,000 INR (live classes + soft copy material)
+
+Backup Videos : 10,000 INR (live classes + material + videos - 1 year) (24 hours)
+
+
+Note: 4 classes you can attend free
+
+
+##########################
+Session-02 (04-Nov-2023)
+##########################
+
+
+1) What is a programming language
+
+2) What is Technology
+
+3) What is Framework
+
+
+=======================
+Programming Language
+=======================
+
+=> Language is a medium to communicate
+
+		1) Human Languages
+
+			Ex: English, Hindi, Telugu
+
+		2) Programming Languages
+
+			Ex: C, C++, Java, Python, C#
+
+
+=> Programming Languages are used to communicate with Computer	
+
+=> Every P.L contains set of syntaxes and rules		
+
+=> Using P.L we can develop software applications
+
+Note: Java is a programming language.
+
+
+
+======================
+Software Technologies
+======================
+
+-> Technologies are developed based on programming languages only
+
+	Ex: Servlets, JSP
+
+-> Technogies are used to develop different types of applications
+
+-> We need to write duplicate code in project at several places
+
+	Ex :
+
+		1) get connection
+		2) create stmt
+		3) execute query
+		4) process results
+
+		5) capture form data
+		6) validate form data
+		7) convert form data to DTO obj
+
+
+100 Database tables
+
+100 DAO classes
+
+In every DAO we have 10 methods
+
+100 * 10 => 1000 methods
+
+
+2 Types of logics
+
+		1) Common Logics  
+
+		2) Business Logics 
+
+
+	Challenges : 
+
+			1) Duplicate Code (Boiler Plate Code)
+			2) More lines of code
+			3) More  Exceptions
+			4) Maintenance		
+
+==============
+Frameworks		
+==============
+
+-> It is a piece of software (semi developed software)
+-> Framework provides common logics required for application development
+-> Using frameworks we can develop applications quickly
+-> If we are using frameworks then we need to focus only on  business logics.
+		
+		1) no duplicate code
+		2) faster development
+		3) less lines of code
+		4) less no of bugs
+		5) easy maintenance
+		
+
+######################
+Session - 03 (06-Nov)
+######################
+
+==========================
+Layered Architecture
+=========================
+
+1) Presentation Layer   : User interface
+
+	Technologies : JSP / Angular / React / Vue JS
+
+2) Web Layer : Controllers (Handles request & response)
+
+	Technologies : Servlets / Struts framework	
+
+3) Business Layer : Services (business logic)
+
+
+4) Persistence Layer : DAO classes (DB communication)
+
+		Technologies : JDBC / Hibernate framework
+
+=============================
+What is Spring Framework ?
+=============================
+
+-> Spring is an application development framework
+
+-> Spring provides support for end to end application development
+
+-> Spring is java based framework
+
+-> Spring is free of cost
+
+-> Spring released in the year of 2004 (1.x)
+
+-> The current  version of spring is 6.x (2022)
+
+=====================
+Spring Architecture
+=====================
+
+-> Spring framework developed in modular fashion
+
+-> Spring Modules are loosely coupled (independent)
+
+-> We have several modules in spring framework like below
+
+
+Spring Core → Provides the core features of the Spring Framework like IoC (Inversion of Control) and Dependency Injection.
+
+Spring Context → Provides a way to access objects in the Spring container, supports internationalization, event handling, resource loading.
+
+Spring AOP → Enables Aspect-Oriented Programming (logging, transactions, security) without changing business logic.
+
+Spring JDBC / Spring DAO → Simplifies database access by reducing boilerplate JDBC code and handling exceptions.
+
+Spring ORM → Integrates with ORM frameworks (Hibernate, JPA, etc.) for easier database operations.
+
+Spring Web MVC → Builds web applications using the Model-View-Controller pattern.
+
+Spring REST → Provides RESTful web services development support using annotations.
+
+Spring Security → Handles authentication, authorization, and protection against security threats (like CSRF, XSS).
+
+Spring Batch → Handles batch processing jobs (like reading/writing large data, scheduled jobs, ETL).
+
+Spring Cloud → Supports building distributed systems and microservices (service discovery, configuration, load balancing).
+
+Spring Data → Simplifies data access with repositories and reduces boilerplate for working with databases (JPA, MongoDB, etc.)
+
+Note: We can use any module based on our project requirement.
+
+===========
+Spring Core
+===========
+
+-> It is base module in the spring framework
+
+-> It is providing fundamental concepts of spring
+
+		1) IOC Container
+		2) Dependency Injection
+		3) Auto wiring
+
+Note: Using spring core we can develop application classes with loosely coupling.
+
+================
+Spring Context
+================
+
+-> It is responsible for managing configurations in the application.
+
+.Creates all beans
+
+.Injects dependencies
+
+.Manages lifecycle
+
+.Loads properties
+
+Supports event handling (e.g., after saving, trigger a confirmation email)
+
+==============
+Spring AOP
+==============
+
+AOP : Aspect Oriented Programming
+
+=> AOP is used to separate primary logics and secondary logics in the application.
+
+		Primary Logic : Business logic
+
+			Ex: amt-deposit, amt-withdraw, balance check
+
+		Secondary logic : cross-cutting logics (helper logics)
+
+			Ex: security, tx, logging, auditing etc...
+
+===================
+Spring JDBC/ DAO
+===================
+
+-> It is used to develop persistence layer in the application.
+
+-> Using Spring JDBC we can avoid boiler plate code.
+
+		Register Driver : Spring jdbc will handle
+		Get connection : Spring jdbc will handle
+		Create Stmt : Spring jdbc will handle
+		execute query  : Programmer should handle
+		process result : spring jdbc will handle
+		close connection : spring jdbc will handle
+
+
+Note: Spring JDBC module internally will communicate with JDBC API.
+
+===========
+Spring ORM 
+============
+
+=> ORM stands for Object Relational Mapping
+
+=> ORM will represent data in the form of Objects
+
+=> Hibernate is called as ORM framework
+
+=> Hibernate is used to develop persistence layer
+
+=> Spring ORM developed on top of Hibernate.
+
+=> Using Spring ORM we can avoid boiler plate code in DAO layer.
+
+
+================
+Spring Web MVC
+================
+
+=> It is used to develop web application with MVC architecture
+
+=> It supports web layer + presentation layer development.
+
+=> It is used to develop C2B applications
+
+		(Customer to business)
+
+=> It supports multiple presentation technologies
+
+			1) JSP
+			2) Thymeleaf
+
+
+=============
+Spring REST
+=============
+
+=> It is used to develop distributed applications (B2B)
+
+=> One app can communicate with another application
+
+
+	passport <===========>  aadhar app
+
+	makeymytrip <===========> irctc
+
+	gpay <============> bank app
+
+================
+Spring Security
+================
+
+=> We can secure our application using Spring Security
+
+
+1) Authentication : Who can access our app
+
+2) Authorization : Role Based Access
+
+=============
+Spring Batch
+=============
+
+=> Batch operation means bulk operation
+
+=> To implement bulk operations we will use spring batch
+
+
+1) sending bulk sms to all students
+2) generate bank stmt for all account holders
+3) send credit bill for all card holder
+
+==============
+Spring Cloud
+==============
+
+=> It is used to implement microservices
+
+
+1) Service Registry
+2) API Gateway
+3) FeignClient
+4) Circuit Breaker etc...
+
+
+
+
+1) What is Framework
+
+2) Advantages with framework
+
+3) Struts Framework
+
+4) Hibernate Framework
+
+5) Layered Architecture
+
+6) Spring Framework
+
+7) Spring Architecture
+
+8) Spring Modules
+
+
+=> Project contains multiple classes
+
+		a) Controllers : To handle req & res
+
+		b) Services : Business logic
+
+		c) DAOs : Persistence logic
+
+
+=> Controller class methods should call service class methods
+
+		(controllers are dependent on services)	
+
+
+=> service class methods should call DAO class methods
+
+		(services are dependent on DAOs)
+
+================================================================
+How one java class method can access another java class method	
+================================================================
+
+1) By Inheritance (IS-A)
+
+2) By Composition (HAS-A)	
+
+===============
+IS-A Relation
+================
+
+public class Engine {
+	
+	public int start() {
+		System.out.println("Engine Starting...");
+		return 1;
+	}
+
+}
+
+public class Car extends Engine {
+
+	public void drive() {
+		int status = super.start();
+
+		if (status >= 1) {
+			System.out.println("Journey Started...");
+		} else {
+			System.out.println("Failed to start the engine...");
+		}
+	}
+}
+
+==================
+HAS-A relation
+==================
+
+public class Car  {
+	public void drive() {
+		
+		Engine eng = new Engine();
+		int status = eng.start();
+		
+		if (status >= 1) {
+			System.out.println("Journey Started...");
+		} else {
+			System.out.println("Failed to start the engine...");
+		}
+	}
+}
+
+=============
+Conclusion
+=============
+
+=> With IS-A & HAS-A relation our classes are tightly coupled.
+
+=> Developing classes with tightly coupling not recommended.
+
+=> Always we need to develop our classes with loosely coupling.
+
+=> To develop classes with loosely coupling we will use Spring Core module.
+
+
+EXAMPLE :
+
+IPayment.java
+-------------
+
+package kilo;
+
+public interface IPayment {
+	
+	public boolean payBill(double amt);
+
+}
+
+DebitCardPayment.java
+---------------------
+package kilo;
+
+public class DebitCardPayment implements IPayment{
+		public boolean payBill(double amt) {
+			System.out.println("debited payment processing....");
+			return true;
+		}
+}
+
+CreditCardPayment
+------------------
+package kilo;
+
+public class CreditCardPayment implements IPayment{
+	public boolean payBill(double amt) {
+		System.out.println("credit-card payment processing...");
+		return true;
+	}
+}
+
+RestairantService.java
+----------------------
+package kilo;
+
+public class RestaurantService {
+	
+	IPayment payment;//it can hold any implementing class object
+	//first when object is created value is null for payment, after DI CI FI value is assigned to it
+	
+//	public RestaurantService(IPayment payment) {
+//		this.payment=payment;
+//	}
+//	public void setPayment(IPayment payment) {
+//		this.payment=payment;
+//	}
+	public void collectBill(double amt) {
+		boolean status = payment.payBill(amt);
+		if(status) {
+			System.out.println("payment success...thank you...");
+		}else {
+			System.out.println("Card declined");
+		}
+	}
+}
+
+Test.java
+----------
+package kilo;
+
+public class Test {
+	public static void main(String[] args) {
+//		RestaurantService service = new RestaurantService(new CreditCardPayment());//CI
+		RestaurantService service = new RestaurantService(); 
+		service.payment = new CreditCardPayment();	     //FI
+//		service.setPayment(new CreditCardPayment());         //SI
+		service.collectBill(1323.90);
+	}
+
+}
+
+
+=============
+Spring Core
+==============
+
+-> It is base module in spring framework
+
+-> Core module providing fundamental concepts of spring
+
+		1) IOC container (IOC)
+		2) Dependency Injection (DI)
+		4) Auto wiring 
+
+=> By  using spring core concepts we can develop classes with loosely coupling.
+=> If we want our classes to be managed by IOC then we need to develop our classes with some rules.
+
+=======================
+Strategy Design Pattern
+=======================
+
+1) Favour composition over inheritance
+2) Code with Interfaces instead of implementation classes
+3) Code should be open for extension and closed for modification
+
+1️⃣ Constructor Injection
+
+Dependency is passed through the constructor.
+Defined in XML using <constructor-arg>.
+Ensures the dependency is available when the object is created (best for mandatory dependencies).
+
+<bean id="userService" class="in.ashokit.service.UserServiceImpl">
+    <constructor-arg ref="userDao" />
+</bean>
+
+
+✅ Pros: Immutable, good for required dependencies, easy to test.
+❌ Cons: Less flexible if too many dependencies.
+
+2️⃣ Setter Injection
+
+Dependency is injected through a setter method.
+Defined in XML using <property>.
+Spring first creates the object, then calls the setter to inject the dependency.
+
+<bean id="userService" class="in.ashokit.service.UserServiceImpl">
+    <property name="userDao" ref="userDao2" />
+</bean>
+
+✅ Pros: More flexible, can inject optional dependencies.
+❌ Cons: Object can exist without complete initialization.
+
+Spring will look for:
+
+public void setUserDao(IUserDao userDao)
+
+✔️ Correct → follows naming convention
+❌ Wrong → setuserDao, SetUserDao, setUserdao, or setDao
+
+Setter Naming Convention
+=========================
+
+The method must start with set.
+The next letter of the property name must be capitalized.
+The rest of the property name stays the same.
+The method must take exactly one parameter — the type of the property being injected.
+The method must be public.
+
+3️⃣ Field Injection
+
+Dependency is injected directly into a private field using @Autowired.
+Requires <context:annotation-config/> in XML.
+
+@Autowired
+private IUserDao userDao;
+
+<context:annotation-config/>
+<bean id="userDao" class="in.ashokit.dao.UserDaoImpl"/>
+<bean id="userService" class="in.ashokit.service.UserServiceImpl"/>
+
+✅ Pros: Less boilerplate, quick setup.
+❌ Cons: Harder to test, hides dependencies, not ideal for clean architecture.
+
+========================
+Constructor Injection
+========================
+
+=> Inject one class object into another class obj using constructor.
+
+	Ex : Car c = new Car(new PetrolEng());
+
+a parameterized constructor is necessary for constructor injection in Spring. Here's why:
+
+Definition of Constructor Injection: Constructor injection is a technique where Spring injects dependencies 
+into a class via its constructor. For this to work, the class must have a constructor that accepts parameters 
+corresponding to the dependencies.
+
+(dependencies are the objects that a class relies on for its behavior.)
+
+How Spring Determines Dependencies: Spring uses the parameterized constructor to determine which beans or values 
+to inject. If your class does not have a parameterized constructor, there is no mechanism for Spring to know where 
+to inject the dependencies.
+
+
+========================
+setter Injection
+========================
+
+=> Injecting one class object into another class object using setter method 
+=> we user property tag to perform SI in spring xml
+
+		Ex:   Car c = new Car();
+			 c.setEng(new DieselEng());
+
+Q) If we perform both CI & SI then what will happen ?
+
+Ans) 
+
+CI will happen first at the time of obj creation
+
+After CI, SI will happen
+
+SI will override CI
+
+So the final value will be SI injected value/obj.
+
+============================================
+why field injection not possible in spring ?
+============================================
+
+XML dependency injection can’t do field injection because it’s built on the JavaBean model, which only supports constructor and setter-based injection — not direct field access.
+Field injection became possible later using annotations and reflection, not XML tags.
+
+=====================
+Dependency Injection
+=====================
+
+=> The process of injecting dependent object into target object is called as dependency injection.
+NOTE : In normal java application programmer are responsible to perform DI.
+
+		
+		Car is dependent on Engine
+
+		Controller is dependent on Service
+
+		Service is dependent on DAO
+
+=> We can perform Dependency Injection in 3 ways
+
+		1) Constructor Injection
+		2) Setter Injection
+		3) Field Injection		
+
+
+Requirement: Develop BillPayment application using Strategy Design Pattern.
+
+	1) Cash  (device not required)
+	2) Scanner
+	3) Debit Card
+	4) Credit Card
+
+=====================================
+IOC Container (Inversion Of Control)
+=====================================
+
+=> IOC is a "principle" which is responsible to manage and collaborate dependencies among the objects in the application 
+"or"
+Inversion of Control means handing over the responsibility of controlling the program’s flow or object management to a framework or external system.
+
+=> IOC will take care of Dependency Injection
+
+=> It will create dependent object and target object and then it will inject dependent obj into target object.
+
+====================
+What is Spring Bean
+====================
+
+=> The java classes which are managed by IOC are called as Spring Bean classes.
+
+
+
+=========
+Maven
+=========
+
+=> Maven is a build tool for java applications
+
+=> Maven developed by Apache Org
+
+=> Maven s/w developed by using Java language
+
+=> Maven is free & OSS
+
+=> Using Maven we can create both stand-alone & web apps.
+
+
+#### Maven Setup  :: https://youtu.be/hV1OWzYpzxo?si=jD7vz3oJeRVclTxF
+
+###########  Note: Alternate for maven is Gradle. ##############
+
+### Gradle Tutorial : https://youtu.be/I84f9Q5bFBA?si=8qs3Ue7N_E0bBQco
+
+========================
+Creating Maven Project
+========================
+
+-> We can create maven project using CLI & IDE
+
+-> Select File -> New -> Maven Project
+
+			- Select simple project (stand-alone)
+			- groupId : in.ashokit
+			- artifactId : 01-Spring-IOC-App
+			- packaging : jar
+			- Click on Finish
+
+
+=> Once project created we can see below folder structure
+
+		- src/main/java  (source code we will keep here)
+		- src/main/resources  (config files we will keep here)
+		- src/test/java (junit classes for unit testing)
+		- src/test/resources (junit related config files)
+		- target (.class files will be stored here)
+		- Maven Dependencies (downloaded jars/dependencies)
+		- pom.xml (maven config file)
+
+=> We can search for maven dependencies using www.mvnrepository.com
+
+=> in xml ,property is variable
+----------------------------------
+public interface IEngine {
+	
+	public boolean start();
+
+}
+----------------------------------
+package in.ashokit.beans;
+
+public class DieselEng implements IEngine {
+
+	public DieselEng() {
+		System.out.println("DieselEng :: Constructor");
+	}
+
+	@Override
+	public boolean start() {
+		System.out.println("DieselEng starting.....");
+		return true;
+	}
+
+}
+----------------------------------------------------------
+package in.ashokit.beans;
+
+public class PetrolEng implements IEngine {
+	
+	public PetrolEng() {
+		System.out.println("Petrol Engine :: Constructor");
+	}
+
+	@Override
+	public boolean start() {
+		System.out.println("Petrol Engine starting...");
+		return true;
+	}
+
+}
+------------------------------------------------------------
+package in.ashokit.beans;
+
+public class Car {
+	
+	public Car() {
+		System.out.println("Car :: Constructor");
+	}
+
+	private IEngine eng;
+	
+	public void setEng(IEngine eng) {
+		this.eng = eng;
+		System.out.println("setEng() method called....");
+		System.out.println("Injected :: "+ eng.getClass().getName());
+	}
+
+	public void drive() {
+		boolean status = eng.start();
+		if (status) {
+			System.out.println("Journey Started...");
+		} else {
+			System.out.println("Engine fault...");
+		}
+	}
+
+}
+----------------------------------------------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+	<bean id="peng" class="in.ashokit.beans.PetrolEng" />
+
+	<bean id="deng" class="in.ashokit.beans.DieselEng" />
+
+	<bean id="car" class="in.ashokit.beans.Car" >
+		<property name="eng" ref="peng"/>  
+	</bean>
+
+</beans>
+-----------------------------------------------------------
+
+package in.ashokit.test;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import in.ashokit.beans.Car;
+
+public class Test {
+
+	public static void main(String[] args) {
+		ApplicationContext context = 
+				new ClassPathXmlApplicationContext("spring-beans.xml");
+		
+		System.out.println("=======================");
+		
+		Car car = context.getBean(Car.class);
+		car.drive();
+	}           
+}
+
+
+
+################# Images : https://excalidraw.com/#json=kHW-i1ngkhEv_MoXPXhuu,GN4oLpM1nIXn0BybOPaS-Q
+
+Manual Injection:
+=================
+
+1) <bean id="userService" class="in.ashokit.service.UserServiceImpl">
+    <constructor-arg ref="userDao" />                       <- constructor injection 
+   </bean>
+
+2) <bean id="userService" class="in.ashokit.service.UserServiceImpl">
+    <property name="userDao" ref="userDao" />                <- setter injection
+  </bean>
+
+
+=============
+Bean Scopes
+=============
+
+=> Bean Scope will decide how many objects should be created for spring bean class.
+
+=> We have 4 types of scopes
+
+		1) singleton   (by default)
+		2) Prototype  → new bean each time you call getBean().
+		3) request
+		4) session
+
+
+-> For singleton scoped beans only one object will be created by IOC container at the time of IOC starting (eager loading).
+
+-> For prototype scoped beans IOC will create new object every time based on demand (lazy loading).(when we use getBean)
+
+
+-> To configure bean scope we will use "scope" attribute.
+
+	<bean id="credit" class="in.ashokit.CreditCardPayment" 
+					  scope="prototype" />
+
+NOTE: For prototype beans, Spring does not manage the lifecycle beyond the creation of the bean. As a result, it does not call the destroy-method automatically when the application context is closed.
+
+You need to explicitly call the destroy() method or manage the cleanup manually.
+
+| Scope           | Description                      | Instance per     | Available In   |
+| --------------- | -------------------------------- | ---------------- | -------------- |
+| **singleton**   | One shared instance              | Spring container | All            |
+| **prototype**   | New instance each time           | Request          | All            |
+| **request**     | One per HTTP request             | Request          | Web only       |
+| **session**     | One per HTTP session             | Session          | Web only       |
+| **application** | One per web app (ServletContext) | Application      | Web only       |
+| **websocket**   | One per WebSocket session        | WebSocket        | WebSocket apps |
+
+
+Bean Lifecycle:
+================
+
+C:\Users\tejas\Desktop\springboot repo\SBMS-39-main\05-Bean-Scopes:
+
+Flow of Execution
+------------------
+ex : 	<bean id="eng" class="in.ashokit.Engine" 
+				   init-method="start" 
+				   destroy-method="stop"/>
+
+
+Observation:  
+------------
+
+- we require some method to execute automatically after beans creation for that
+  we specify that method name inside init-method tag 
+
+- also before destroying the bean we want to perform some clean up / any method we
+  want to execute before destroying we must specify that method name
+  inside destroy-method tag.
+
+Q. What if we want to execute two methods at start ?
+
+inside beans :  init-method="initAll"
+
+use that method to call others :
+
+public void initAll() {
+    start();
+    loadSettings();
+    prepareEngine();
+}
+
+============
+Assignment
+============
+
+-> Develop Java application using Spring framework
+Read book data from keyboard and insert into db table using spring-jdbc.			  
+
+===========
+Autowiring
+===========
+
+Incorrect Setter Method Name (setPrinter):   <-- byName    < 1 Note : Only for by Name 
+==========================================
+
+autowire="byName" works by matching the bean ID with the setter method name.
+The bean id in XML is sony, but the setter method is setPrinter(IPrinter xyz).
+Spring looks for setSony(IPrinter xyz), not setPrinter(IPrinter xyz).It noting to do with field variable like xyz.
+It only looks for setter method name having matching bean name ex "setBEANID".
+
+✅ Fix: Rename the setter method to match the bean id  name:
+
+public void setSony(IPrinter xyz) {  // Must match field name
+    System.out.println("ATM:: setSony() method called");
+    this.sony = xyz;
+}
+This allows Spring to inject the sony bean properly. 
+
+#Does autowire ="byType" Use Only Setter Injection ?
+==================================================
+
+No, autowire= "byType" prefers setter injection but can use constructor injection if explicitly defined with @Autowired.{not while using xml based configuration}
+
+-> Although it use setter method but does not required naming convention as byName autowiring     < 2  Imp Note (ref 1)
+
+-> We can perform dependency injection in 2 ways
+
+		1) Manual Wiring
+		2) Auto wiring
+
+=> Manual wiring means programmer will inform to IOC which is dependent obj using ref attribute like below
+
+	<bean id="pp" class="in.ashokit.PaymentProcessor">
+		<property name="payment" ref="debit" />
+	</bean>
+
+
+=> Auto wiring means IOC will identify dependent object and it will perform DI.
+
+=> In spring xml approach, by default auto wiring is disabled*.(we explicitly write autowire in xml file.)
+
+ex 1] <bean id="employee" class="com.example.Employee">
+           <!-- No autowire set; autowiring is disabled by default -->
+      </bean>
+
+If you want to enable autowiring in XML, you need to do something like:
+
+ex 2] xml
+
+	<bean id="employee" class="com.example.Employee" autowire="byName"/>
+
+
+
+=> Autowiring having 4 modes
+
+				1) byName  ----> method name is important 
+				2) byType
+
+				//the above both modes use setter injection				<-- imp
+
+				3) constructor
+
+				4) no (default) // dependency injection will not going to happen 
+========
+byName
+========
+Based on the setter method name, the IoC container identifies the dependent bean and injects it.
+The property name derived from the setter method must match the bean id.
+If no bean id matches the property name, then dependency injection will NOT happen.
+Every bean must have a unique id, otherwise the XML is invalid.
+
+Example:
+<bean id="payment" class="in.ashokit.CreditCardPayment" />
+<bean id="db" class="in.ashokit.DebitCardPayment" />
+
+<bean id="pp" class="in.ashokit.PaymentProcessor" autowire="byName" />
+
+For this to work:
+The PaymentProcessor class must have a setter like:
+
+public void setPayment(Payment p) { ... }
+
+
+Because:
+
+setPayment() → property name = payment
+
+This matches:
+bean id="payment"
+
+So DI succeeds.
+
+========
+byType
+========
+
+-> Based on data type of variable IOC will identify dependent object.
+
+-> If variable data type is interface then it will check interface implemented beans.
+
+-> If we have more than one bean which are implementing interface then IOC will get confused to take decision. Then we will get ambiguity problem.
+
+-> We can resolve ambiguity problem in 2 ways
+
+			1) autowire-candidate = false
+
+			2) primary = true		
+
+=============
+constructor
+=============
+
+Note: When we go for byName or byType then IOC will perform Setter Injection with auto wiring.
+
+-> If we want to perform Constructor Injection with Autowiring then we should configure autowire="constructor".
+
+Note : autowire=constructor will use byType mechanism to identify dependent object.	
+
+=====
+no
+=====
+
+=> The autowire ="no" option is used to disable autowiring explicitly for a bean
+
+======================
+Collection Injection
+======================
+
+public class Student {
+	
+	private Integer id;
+
+	private String name;
+
+	private List courses;
+
+	private Set hobbies;
+
+}
+
+
+java.lang.Object ====> default super class
+
+public String toString(){
+	
+ return	this.getClass().getName()+"@"+
+ 		Integer.toHexString(this.hashCode());
+}
+
+in.ashokit.Student@797lhkl
+
+
+
+in.ashokit.Student@302552ec
+
+
+
+how to inject object  (ref)
+
+how to inject value (int, string....)  (value)
+
+how to inject collections (list, set, map)
+
+
+1) What is Spring Bean
+2) Bean Scopes
+3) Bean Life Cycle
+4) Autowiring (byName, byType, Constructor)
+5) Collection Injection (list, set, map)
+6) What is IOC
+7) Dependency Injection
+8) Setter Injection
+9) Constructor Injection
+10) Field Injection
+11) Strategy Design Pattern
+12) What is Bean Configuration file
+
+
+========
+Summary
+=========
+
+1) Layered Architecture
+2) P.L vs Technology Vs Framework
+3) Struts Framework
+4) Hibernate Framework
+5) Spring Framework (2004) -> 2022 (6.x)
+6) Spring Architecture
+7) Spring Modules
+8) Tightly Coupling 
+9) Loosely Coupling
+10) Strategy Design Pattern
+11) 2 Apps using SDP
+12) Dedependency Injection
+13) CI & SI & FI
+14) IOC Introduction
+15) Bean Scopes
+16) Autowiring
+
+
+============
+Spring Boot
+============
+
+-> Spring Boot is an approach to develop spring based applications with less configuration.
+
+-> Spring Boot is an extension for Spring Framework.
+
+-> What type of apps we can develop using spring same type of apps we can develop using spring boot also.
+
+Note: Spring boot internally using spring framework.
+
+-> Spring Boot supports rapid application development.
+
+=============================
+Advantages with Spring Boot
+============================
+
+1) POM Starters (Simplied Maven dependencies)
+
+	Ex : spring-boot-starter
+	     spring-boot-starter-web
+	     spring-boot-starter-data-jpa
+	     spring-boot-starter-mail
+	     spring-boot-starter-security
+
+2) Dependency Version Conflict Solution
+
+3) Auto Configuration
+
+	Ex: if we add data-jpa starter, it will create cpool
+
+	    when we run boot app, it will start IOC container
+
+	    if we add web starter, it will deploy our app in server
+
+	    If we add security starter, it will provide login page
+
+
+4) Embedded Servers : It will provide server to run our app 
+
+	Ex:  Tomcat, jetty, netty
+
+
+5) Actuators : To monitor our application 
+               (production ready features )
+
+
+
+#####  spring boot = (spring + auto config ) - xml
+
+===========
+STS setup 
+===========
+
+
+Step-1 : download sts jar file using below link
+
+https://cdn.spring.io/spring-tools/release/STS4/4.20.1.RELEASE/dist/e4.29/spring-tool-suite-4-4.20.1.RELEASE-e4.29.0-win32.win32.x86_64.self-extracting.jar
+
+Step-2 : Run jar file using cmd
+
+		$ java -jar <jar-name>
+
+
+Step-3 : Open STS.exe file		
+
+================================
+Create Spring Boot Application
+===============================
+
+1) start.spring.io  (spring initiazr)
+
+2) STS IDE
+
+
+======================================
+What is start class in spring boot ?
+======================================
+
+-> Start class is entry point for spring boot application
+
+-> Start class is also called as main class in spring boot.
+
+
+===========================================
+How IOC will be starting in spring boot ?
+============================================
+
+=> In spring boot run ( ) method will start IOC container based on pom starter.
+
+=> run ( ) method will return ioc obj
+
+
+=> If we add spring-boot-starter then it will use below class to start IOC
+
+Class Name : AnnotationConfigApplicationContext
+
+
+=> If we add spring-boot-starter-web then it will use below class to start IOC
+
+Class Name : AnnotationConfigServletWebServerApplicationContext
+
+=> If we add spring-boot-starter-webflux then it will use below class to start IOC
+
+Class Name : AnnotationConfigReactiveWebServerApplicationContext
+
+
+==================================
+What is @SpringBootApplication ?
+==================================
+
+@SpringBootConfiguration : Represents java class as config class
+@EnableAutoConfiguration : To load auto configure classes
+@ComponentScan           : To identify spring beans available in the project
+
+
+
+==============================================
+How to represent java class as Spring Bean ?
+==============================================
+
+<bean id="udao" class="in.ashokit.UserDao" scope="prototype"/>
+
+
+@Component
+class UserDao{
+	
+
+}
+
+==============================================
+How component scanning will work internally ?
+==============================================
+
+=> Component scan will work based on base package
+
+=> start class pkg is called as base package
+
+=> boot will scan base package and its sub packages
+
+Note : The pkg name which is starting with base pkg name is called as sub package of base package.
+
+
+
+in.ashokit
+    - Application.java
+    - UserDao.java
+    - ReportDao.java
+
+in.ashokit.service
+
+in.ashokit.security
+
+in.ashokit.util    
+
+com.tcs
+    - UserService.java    
+
+
+    in.ashokit
+
+    com.tcs
+
+
+=> We can configure more than one base package also
+
+@SpringBootApplication
+@ComponentScan(basePackages = {"in.ashokit", "com.tcs"})
+public class Application {
+
+	public static void main(String[] args) {
+		ConfigurableApplicationContext context =
+				SpringApplication.run(Application.class, args);
+		
+		int count = context.getBeanDefinitionCount();
+		
+		System.out.println(count);
+	}
+}    
+
+==============================
+What is @Bean annotation ?
+=============================
+
+
+=> To customize bean obj creation we will write a method with @Bean annotation like below...
+
+
+@Configuration
+public class AppConfig {
+	
+	public AppConfig() {
+		System.out.println("AppConfig :: Constructor");
+	}
+
+	@Bean
+	public AppSecurity createSecurityObj() {
+		AppSecurity as = new AppSecurity("SHA-256");
+		return as;
+	}
+}
+
+
+=> In project we will customize bean objects for below scenarios
+
+	 - Security Customization
+
+	 - Data Source Customization
+
+	 - Kafka customization
+
+	 - Redis customization
+
+	 - Swagger Customization
+
+
+
+
+@Component
+
+@Scope
+
+@Configuration
+
+@Bean
+
+@ComponentScan
+
+
+============
+Autowiring
+=============
+
+@Autowired annotation 
+
+
+=> We can use this annotation at 3 places
+
+1) setter method level
+
+2) constructor level
+
+3) field level
+
+
+
+@Component
+public class UserService {
+
+	@Autowired
+	private UserDao dao; // field injection (reflection)
+
+	public void getUsername(Integer id) {
+		System.out.println("dependent :: "+ dao.getClass().getName());
+		String name = dao.findNameById(id);
+		System.out.println(name);
+	}
+}
+
+
+1) setter method
+
+2) Constructor
+
+3) Field
+
+@Autowired
+
+
+
+
+package in.ashokit.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import in.ashokit.dao.IUserDao;
+
+@Component
+public class UserService {
+
+	private PwdService pwdService;
+
+	private IUserDao userDao;
+
+	private EmailService emailService;
+
+	@Autowired
+	public void setPwdService(PwdService pwdService) {
+		this.pwdService = pwdService;
+	}
+
+	@Autowired
+	public void setUserDao(IUserDao userDao) {
+		this.userDao = userDao;
+	}
+
+	@Autowired
+	public void setEmailService(EmailService emailService) {
+		this.emailService = emailService;
+	}
+
+	public void registerUser(String name, String email, String pwd) {
+
+		// encrypt pwd
+		String encryptPwd = pwdService.encryptPwd(pwd);
+
+		// save user in db
+		boolean isSaved = userDao.saveUser(name, email, encryptPwd);
+
+		// send email
+		if (isSaved) {
+			boolean isSent = emailService.sendEmail(email, "Test Subject", "Test Body");
+			if (isSent) {
+				System.out.println("User Registration Completed...");
+			}
+		}
+	}
+
+}
+========================================================
+
+@Service
+public class UserService {
+
+	@Autowired
+	private PwdService pwdService;
+
+	@Autowired
+	private IUserDao userDao;
+
+	@Autowired
+	private EmailService emailService;
+
+	public void registerUser(String name, String email, String pwd) {
+
+		// encrypt pwd
+		String encryptPwd = pwdService.encryptPwd(pwd);
+
+		// save user in db
+		boolean isSaved = userDao.saveUser(name, email, encryptPwd);
+
+		// send email
+		if (isSaved) {
+			boolean isSent = emailService.sendEmail(email, "Test Subject", "Test Body");
+			if (isSent) {
+				System.out.println("User Registration Completed...");
+			}
+		}
+	}
+
+}
+
+========================================================
+
+@Component
+@Scope
+@Configuration
+@Bean (method level annotation)
+@Autowired
+@Qualifier
+@Primary
+
+
+@Component
+
+@Service : Will be used at business / service layer
+
+@Repository : Will be used in DAO layer
+
+@Controller ====> spring web mvc + c 2 b
+
+@RestController ==> spring web mvc + b 2 b (rest api)
+
+
+===========================================
+Q) @Component vs @Service  vs @Repository
+===========================================

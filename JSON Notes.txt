@@ -1,0 +1,167 @@
+ lect 46:
+=========   
+======
+JSON
+======
+
+=> JSON stands for Java Script Object Notation
+
+=> JSON represents data in key-value format
+
+Ex:
+
+	{
+		"id" : 101,
+		"name" : "Ashok",
+		"phno" : 12345,
+		"gender" : "Male"
+	}
+
+=> JSON is very light weight
+
+=> JSON is platform independent & language independent
+
+=> JSON is used to transfer data over a network	
+
+=> Distributed applications will use JSON data for request & response
+
+=========================================
+Working with JSON in Java Applications
+==========================================
+
+=> Java Applications can use JSON data
+
+=> To work with JSON in Java app, we have third party libraries
+
+		a) Jackson
+		b) Gson
+
+=> By using above libraries we can convert JSON data to Java Object and vice versa
+
+
+					jackson/gson
+			java obj <----------------------> json data		
+
+
+
+=> The process of converting java obj to json is called as Serialization.
+
+=> The process of converting json data to java obj is called as de-serialization.
+
+==============
+Jackson API
+==============
+
+1) Add below dependency in pom.xml file
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.17.0</version>
+		</dependency>
+
+2) Create binding class to represent data
+
+public class Customer {
+
+	private Integer id;
+	private String name;
+	private Long phno;
+
+}
+
+3) Develop java class convert java to json and json to java 
+
+		ObjectMapper mapper = new ObjectMapper();
+
+		mapper.writeValue(File f, Object obj);
+
+		mapper.readValue(File f, Class clz);
+
+======================================================================================
+public class App {
+
+	public static void main(String[] args) throws Exception {
+		App a = new App();
+		//a.convertJavaToJson();
+		a.convertJsonToJava();
+	}
+	
+	public void convertJsonToJava() throws Exception{
+		ObjectMapper mapper = new ObjectMapper();
+		Customer c = mapper.readValue(new File("customer.json"), Customer.class);
+		System.out.println(c);
+	}
+
+	public void convertJavaToJson() throws Exception {
+		Customer c = new Customer(101, "John", 9985396677l);
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writeValue(new File("customer.json"), c);
+		System.out.println("Serialization completed...");
+	}
+}
+
+=======================================================================================
+Notes :
+========
+--> value → where (the URL)
+
+--> consumes → what I accept (request format)
+
+--> produces → what I give (response format)
+
+--> @RequestBody → bind request body (JSON/XML) into a Java object.
+    we use this annotation in front of object parameter inside request handler method in controller class.
+
+--> Use ResponseEntity → when you want control over status & headers along with data.
+
+Handling JSON & XML in Spring Boot
+----------------------------------
+--> if we write  more than one response format in produces 
+    for ex :- produces  =  { "application/json" , "application/xml" }
+--> now while executing get request from postman by default we get json format as we set it on first preference.
+--> if we want reponse in xml  then we need to go to header tag and create new accept as below  
+     for ex = Accept - application/xml
+--> untick other Accept header
+
+Use ResponseEntity → when you want control over status & headers along with data.
+   - Send success / error messages properly.
+   - Set correct status code for REST APIs.
+   - Add custom headers if needed.
+   - Makes API more standard.
+   -  In short:  ResponseEntity = (Response Body + HTTP Status + Headers)
+
+Postman headers 
+===============
+
+Content-Type 
+------------
+-This header tells the server the format of the request body.
+
+-It’s important when you send data in POST/PUT/PATCH requests.
+
+Accept :
+--------
+This header tells the server what format you expect in the response.
+
+Client says: “I can handle only this type of response.”
+
+===========
+GSON API    <-- this library given by google
+===========
+
+### Git Hub Rep : https://github.com/ashokitschool/GSON-JSON-APP.git
+
+		-----------------------------------------------
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		---------------------------------------------
+
+		Gson gson  = new Gson ( );
+
+		gson.toJson(Object obj);
+
+		gson.fromJson(File file);

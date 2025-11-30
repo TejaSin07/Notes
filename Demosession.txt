@@ -1,0 +1,246 @@
+====================================
+Spring Boot & Microservices (SBMS)
+====================================
+
+Course Code : 39 - SBMS
+
+Trainer : Mr. Ashok (11+ Yrs exp)
+
+Role : Tech Lead
+
+Whatsapp Group : https://chat.whatsapp.com/JT6HUXiwyy962rUsQiLdd6
+
+==================================
+
+1) Who should learn this SBMS course ?
+
+2) What are pre-requisites
+
+3) What is course content
+
+4) Duration
+
+5) Demand for Spring Boot in market
+
+===============
+Pre-Requisites
+===============
+
+1) Core Java
+
+2) Adv Java (JDBC & Servlets)
+
+3) MVC Architecture
+
+4) SQL Queries
+
+5) UI Technologies (HTML, CSS, JS and BS)
+
+===============
+Course Content
+===============
+
+1) Spring Basics
+
+2) Spring Core (IOC + DI + Autowiring + Scope + Lifecycle)
+
+3) Spring Boot (Auto Configuration)
+
+4) Spring Data JPA (Persistence Layer => DB)
+
+5) Spring Web MVC ( C 2 B) (Thymeleaf)
+
+6) Spring REST (Distributed app) (B 2 B) (gpay -- sbi)
+
+7) Spring Security (Authentication & Authorization)
+
+			- HTTP Basic Auth
+			- OAuth 2.0
+			- JWT
+
+8) Microservices with Spring Cloud
+
+			- Eureka Server
+			- Admin Server
+			- Zipkin Server
+			- Api Gateway
+			- FeignClient
+			- Config Server
+			- Circuit Breaker
+
+9) Spring Batch (bulk operations)
+
+10) Tools (Junit, Logging, Docker, Jenkins, Redis, Kafka, Postman, Swagger)
+
+============
+Course Info
+============
+
+Course Code : 39-SBMS
+
+Trainer : Mr. Ashok
+
+Duration : 3 to 4 Months
+
+Timings : 9:30 AM to 11:00 AM (IST) (Mon - Sat)
+
+Mode : Classroom & Online
+
+Notes: Daily Classnotes will be provided (soft copy)
+
+Course Fee : 
+
+		Plan-1 : 8000 INR (live classes)
+
+		Plan-2 : 10,000 INR (live classes + 1 year back up videos)
+
+=============================================================
+
+1) Programming Language (Java -> Core Java) (JSE)
+
+		- Rules
+		- Syntaxes
+		- JDK + JRE + JVM
+
+	=>  stand-alone apps
+
+		Ex: Eclipse IDE, Notepad, Calculator
+
+2) Java Technologies (Adv Java) (JEE)
+
+	=> JDBC  (DB connectivity)
+
+	=> Servlets (Web Applications)
+
+	=> JSP (we can sepeare business logic and view logic)
+
+3) Java Frameworks
+
+=> Framework is a semi developed software
+
+=> Frameworks provides some common logics required for application development.
+
+
+Common Logics : db ops + forms data + validations
+
+Business Logic : banking + telecom + health care
+
+1) Hibernate framework
+2) Struts Framework (Apache)
+3) Spring Framework => Spring Boot
+
+		(interface21)
+
+
+
+=====================
+Application Layers
+======================
+
+1) Presentation layer
+
+2) Web Layer (Controller)
+
+3) Business Layer 
+
+4) DAO / Persistence layer
+
+
+
+
+
+
+
+
+==========================
+What is Spring Framework
+==========================
+
+=> Spring is a free and open source java based framework
+
+=> Spring is called as application development framework
+
+Note: Using spring we can develop all layers of our application.
+
+=> Spring is developed in modular fashion
+
+=> We have several modules in spring framework
+
+=> We can use any spring module required for our application.
+
+=> Spring modules are loosely coupled.
+
+=> Spring is an versatile framework
+
+
+===============
+Spring Modules
+================
+
+############# 1) Spring Core #############
+
+=> It is providing fundamental concepts of spring framework
+
+			a) IOC Container
+			b) Dependency Injection
+			c) Autowiring
+
+=> Using core module we can develop classes with loosely coupling.			
+
+############# 2) Spring Context module #############
+
+=> It provides configuration support for spring application development.
+
+		(xml files or annotations  or java based)
+
+############# 3) Spring JDBC / DAO module #############
+
+=> It is used to simplify Database connctivity using java
+
+		jdbc logic
+				// load driver
+				// get conn
+				// create stmt
+				// execute query
+				// close conn
+
+		spring jdbc
+
+				// execute query
+				JdbcTemplate.execute(query)	
+
+Note: Spring JDBC internally using JDBC api only.				
+				
+############# 4) Spring ORM #############
+
+=> It is used to simplify Persistence layer development with ORM principles.
+
+=> We can represent data in the form of objects
+
+=> Spring ORM provided methods to perform curd operations using objects.
+
+Note: Spring ORM internally using Hibernate and Hibernate internally uses JDBC api.
+
+
+############# 5) Spring WEB MVC #################
+
+=> It is used to develop web applications ( C 2 B)
+
+=> We can avoid boiler plate code in web app development like capturing form data and convert form data to object using Spring Web MVC module.
+
+
+############# 6) Spring REST Module ##############
+
+=> It is used to develop distributed applications ( B 2 B)
+
+				gpay --------> bank apps
+
+				angular app ---------> java backend app
+
+
+
+
+
+
+
+
