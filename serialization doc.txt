@@ -1,0 +1,49 @@
+Serialization:
+==============
+
+-> In serialization instead of saving data to database we are saving it to file
+-> Here data is not in encrypted format (encrypted means we dont want another person to able to read it)
+-> It is just a serialized format ,it has its own syntax just like any other spoken language.
+
+
+Marker Interface:
+================
+
+A marker interface in Java is an interface that does not contain any methods but is used to signal or mark that a class possesses a certain property or behavior.
+
+Key Points About Marker Interface:
+No Methods: A marker interface is empty — it doesn’t declare any methods.
+
+Indicates Special Behavior: It is used to mark or tag classes that should be treated in a special way by the JVM, libraries, or frameworks.
+
+Used for Type Identification: It is typically used for type identification during runtime.
+
+
+import java.io.*; // Import necessary classes for file I/O and serialization
+
+
+class Dog implements Serializable {
+    int i = 10;
+    int j = 20;
+}
+
+class SerializeDemo {  // Defines a class named SerializeDemo
+
+    public static void main (String args[]) throws Exception { // Main method; throws Exception to simplify error handling
+
+        Dog d1 = new Dog();                                     // Create a new Dog object named d1
+
+        FileOutputStream fos = new FileOutputStream("abc.ser"); // Open a file output stream to write to 'abc.ser'          "You are sending data out of your program to a file.""
+        ObjectOutputStream oos = new ObjectOutputStream(fos); // Wrap it with ObjectOutputStream to allow object serialization   "Writing object from program to a file"
+        oos.writeObject(d1); // Serialize the Dog object and write it to the file
+                            // At this point, the Dog object has been saved to disk
+
+        FileInputStream fis = new FileInputStream("abc.ser"); // Open a file input stream to read from 'abc.ser'            "You are taking data into your program from a file."
+        ObjectInputStream ois = new ObjectInputStream(fis);   // Wrap it with ObjectInputStream to allow object deserialization  "Reading object from file into program"
+        Dog d2 = (Dog) ois.readObject(); // Read the object back from the file and cast it to Dog  
+        // Now d2 is a new Dog object created from the serialized data
+
+        System.out.println("d2.i = " + d2.i + ", d2.j = " + d2.j); // Print the values of d1's fields i and j
+        // Note: This line prints the original object d1, not d2
+    } 
+}
