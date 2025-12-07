@@ -784,7 +784,6 @@ forEach (Consumer c) method
 
 -> This is method is used to access each element of the collection (traverse collection from start to end)
 
-
 package in.ashokit.java8;
 
 import java.util.ArrayList;
@@ -1231,7 +1230,7 @@ Filtering with Streams
 
 
 ==================== 
-Example - 1 : Filter
+Example - 1 : Filter   (use predicate logic)
 ====================
 
 
@@ -1245,6 +1244,8 @@ public class FirstDemo {
 	public static void main(String[] args) {
 
 		List<Integer> list = Arrays.asList(66, 32, 45, 12, 20);
+			
+		//1st 
 
 		/*for (Integer i : list) {
 			if (i > 20) {
@@ -1252,20 +1253,20 @@ public class FirstDemo {
 			}
 		}*/
 		
-		/*
+		//2nd
+					
 		Stream<Integer> stream = list.stream();
-		
 		Stream<Integer> filteredStrem = stream.filter(i -> i > 20);
-		
-		filteredStrem.forEach(i -> System.out.println(i));*/
-		
+		filteredStrem.forEach(i -> System.out.println(i));
+
+		//3rd
+
 		list.stream().filter(i -> i > 20).forEach(i -> System.out.println(i));
 		
 	}
 }
 
-
-==========================
+========================== 
 Example - 2 : Filter
 ========================
 
@@ -1296,7 +1297,7 @@ Note:
 			}
 
 -> It will not work ,it will print same list as you don't use
-
+-> filter() does nothing until a terminal operation is called. ("for" is not terminal ,forEach" is )
 ====================
 Example - 3 : Filter
 ====================
@@ -1347,7 +1348,7 @@ class User {
 
 
 ===================
-Mapping Operations
+Mapping Operations  (use function logic)
 ===================
 
 -> Mapping operations are belongs to intermediate operations in the Stream api
@@ -1369,6 +1370,7 @@ public class FirstDemo {
 		/*for(String name : names) {
 			System.out.println(name.toUpperCase());
 		}*/
+
 		names.stream().map(name -> name.toUpperCase()).forEach(n -> System.out.println(n));
 
 		names.stream().mapToInt(name -> name.length()).forEach(i -> System.out.println(i));
@@ -1473,14 +1475,66 @@ public class FirstDemo {
 	}
 }
 
+
+ex for Map vs flatmap
+----------------------
+
+1) map:
+import java.util.*;
+
+public class MapDemo {
+    public static void main(String[] args) {
+        
+        List<String> java = Arrays.asList("core", "adv");
+        List<String> ui = Arrays.asList("html", "css");
+
+        List<List<String>> courses = Arrays.asList(java, ui);
+
+        // Using map → gives Stream<List<String>>
+        courses.stream()
+               .map(list -> list)  // just mapping list to list
+               .forEach(System.out::println);
+
+        /*
+        OUTPUT (map):
+        [core, adv]
+        [html, css]
+        */
+    }
+}
+
+2) flatmap:
+import java.util.*;
+
+public class FlatMapDemo {
+    public static void main(String[] args) {
+
+        List<String> java = Arrays.asList("core", "adv");
+        List<String> ui = Arrays.asList("html", "css");
+
+        List<List<String>> courses = Arrays.asList(java, ui);
+
+        // Using flatMap → merges all inner lists
+        courses.stream()
+               .flatMap(list -> list.stream())
+               .forEach(System.out::println);
+
+        /*
+        OUTPUT (flatMap):
+        core
+        adv
+        html
+        css
+        */
+    }
+}
+
 ==============================
 Slicing Operations with Stream
 ==============================
 
 1) distinct ( )  => To get unique elements from the Stream
-
 2) limit ( long maxSize )  => Get elements from the stream based on given size
-
 3) skip (long n)  => It is used to skip given number of elements from starting position of the stream 
 
 
@@ -1496,13 +1550,11 @@ public class FirstDemo {
 	public static void main(String[] args) {
 
 		List<String> javacourses = Arrays.asList("corejava", "advjava", "springboot", "restapi", "microservices");
-
-		javacourses.stream().limit(3).forEach(c -> System.out.println(c));
-
-		javacourses.stream().skip(3).forEach(c -> System.out.println(c));
-
+		javacourses.stream().limit(3).forEach(c -> System.out.println(c)); // limit(3) → prints first 3 elements
+		javacourses.stream().skip(3).forEach(c -> System.out.println(c)); // skip(3) → skips first 3 elements, prints the rest
 		List<String> names = Arrays.asList("raja", "rani", "raja", "rani", "guru");
-		names.stream().distinct().forEach(name -> System.out.println(name));
+		names.stream().distinct().forEach(name -> System.out.println(name)); // distinct() → removes duplicates, prints unique names
+
 
 	}
 }
@@ -1515,10 +1567,8 @@ Matching Operations with Stream
 2)  boolean allMatch (Predicate p )
 3)  boolean noneMatch (Predicate p )
 
-Note: The above 3 methods are belongs to Terminal Operations because they will do operation and they will return result directley (they won't return stream)
-
+Note: The above 3 methods are belongs to Terminal Operations because they will do operation and they will return result directly (they won't return stream)
 -> The above methods are used to check the given condition and returns true or false value based on condition.
-
 
 package in.ashokit.streams;
 
@@ -1569,7 +1619,6 @@ Collectors with Stream
 
 -> Collectors are used to collect data from Stream
 
-		
 =======================
 Example-1 : Collectors
 =======================
@@ -1593,9 +1642,8 @@ public class FirstDemo {
 		List<Person> persons = Arrays.asList(p1, p2, p3, p4, p5);
 		
 		List<Person> indians = persons.stream()
-									  .filter(p -> p.country.equals("INDIA"))
-									  .collect(Collectors.toList());
-		
+					      .filter(p -> p.country.equals("INDIA"))
+	    				      .collect(Collectors.toList());
 		indians.forEach(i -> System.out.println(i));
 
 	}
@@ -1643,9 +1691,9 @@ public class FirstDemo {
 		// collect names of persons who are belongs to india and store into names collection
 		
 		List<String> names = persons.stream()
-									.filter(p -> p.country.equals("INDIA"))
-									.map(p -> p.name)
-									.collect(Collectors.toList());
+					    .filter(p -> p.country.equals("INDIA"))
+	 				    .map(p -> p.name)
+					    .collect(Collectors.toList());
 		System.out.println(names);
 	}
 }
@@ -1691,16 +1739,11 @@ Collecting  ---> collect ( )
 
 
 
-
-
-
-
 ============
 Requirement
 ===========
 
 => Write a java program to get MAX, MIN and AVG salary from given employees data using Stream API.
-
 
 
 package in.ashokit.streams;
@@ -1724,12 +1767,12 @@ public class FirstDemo {
 		List<Employee> list = Arrays.asList(e1, e2, e3, e4, e5);
 
 		Optional<Employee> max = list.stream()
-								.collect(Collectors.maxBy(Comparator.comparing(e -> e.salary)));
+					     .collect(Collectors.maxBy(Comparator.comparing(e -> e.salary)));
 
 		System.out.println("Max Salary :: " + max.get().salary);
 
 		Optional<Employee> min = list.stream()
-									.collect(Collectors.minBy(Comparator.comparing(e -> e.salary)));
+			    		     .collect(Collectors.minBy(Comparator.comparing(e -> e.salary)));
 		
 		System.out.println("Min Salary :: " + min.get().salary);
 		
@@ -1755,9 +1798,7 @@ Group By using Stream
 ====================
 
 -> Group By is used categorize the data / Grouping the data
-
 -> When we use groupingBy ( ) function with stream they it will group the data as Key-Value(s) pair and it will return Map object
-
 -> In below example employees will be grouped based on Country name.
 
 package in.ashokit.streams;
@@ -1780,7 +1821,7 @@ public class FirstDemo {
 		List<Employee> list = Arrays.asList(e1, e2, e3, e4, e5);
 		
 		Map<String, List<Employee>> data = list.stream()
-			.collect(Collectors.groupingBy(e -> e.country));
+			                               .collect(Collectors.groupingBy(e -> e.country));
 		
 		System.out.println(data);
 	}
@@ -1800,17 +1841,21 @@ class Employee {
 	}
 }
 
-================
+=================
 Parallel Streams
-===============
+=================
 
 -> Generally Streams will execute in sequence order
-
 -> To improve execution process of the stream we can use parallel streams
-
 -> Parallel Streams introduced to improve performance of the program.
-
-
+->Parallel stream works by splitting your data into smaller parts and 
+giving each part to a different worker thread so multiple elements are 
+processed at the same time instead of one-by-one like a normal stream. 
+Think of it like replacing a single cashier with multiple cashiers: each 
+cashier handles different customers in parallel, so the overall work finishes faster.
+Java uses a thread pool (ForkJoinPool) under the hood to run these tasks simultaneously,
+which means output order is not guaranteed, but performance improves when the 
+data is large and operations are heavy.
 
 package in.ashokit.streams;
 
@@ -1830,23 +1875,33 @@ public class ParallelDemo {
 	}
 }
 
+output:
+
+====== Serial Stream ========
+1 :: Thread[main,5,main]
+2 :: Thread[main,5,main]
+3 :: Thread[main,5,main]
+4 :: Thread[main,5,main]
+
+====== Parallel Strem =======
+3 :: Thread[ForkJoinPool.commonPool-worker-1,5,main]
+1 :: Thread[ForkJoinPool.commonPool-worker-2,5,main]
+4 :: Thread[ForkJoinPool.commonPool-worker-1,5,main]
+2 :: Thread[ForkJoinPool.commonPool-worker-3,5,main]
+
 
 =================
 Java Spliterator
 =================
 
 -> Like Iterator and ListIterator, Spliterator is one of the Java Iterator
-
 -> Spliterator introduced in java 1.8v
-
 -> Spliterator is an interface in collections api
-
 -> Spliterator supports both serial &  parallel programming
-
 -> Spliterator we can use to traverse both Collections & Streams
-
 -> Spliterator can't be used with Map implementation classes
-
+-> Spliterator exists mainly to help parallel streams split work efficiently.
+-> If you don’t need splitting, Iterator is enough.
 
 package in.ashokit.streams;
 
@@ -1867,11 +1922,11 @@ public class ParallelDemo {
 }
 
 
-
-
 =============
 Stream Reduce
 =============
+-> reduce() is just a clean, functional way to collapse many values into one result.
+-> In your example, it simply calculates the sum.
 
 package demo;
 
@@ -1902,7 +1957,6 @@ Nashorn Engine in Java 1.8
 ===========================
 
 -> Nashorn is a Java Script Engine which is used to execute Java Script code using JVM
-
 -> Create a javascript file like below (filename : one.js)
 
 --------------------- one.js --------------------------
@@ -2061,7 +2115,7 @@ employeeList.add(new Employee(16, "Sanvi", 26, "Female", "Development", 2015, 28
 
 Map<String, Long> map1 = emps.stream().collect(Collectors.groupingBy(Employee::getGender, Collectors.counting()));
 		System.out.println(map1);
-		
+->Internal working notes below*		
 
 2. Print the name of all departments in the organization ?
 
@@ -2147,5 +2201,142 @@ Map<String, Long> map1 = emps.stream().collect(Collectors.groupingBy(Employee::g
 15.  Who is the oldest employee in the organization?
 
 
+Internal Execution Flow (very close to actual JDK code)
+=======================================================
+
+Step 1 → groupingBy detects key from each employee
+
+For employee e, Java computes:
+
+key = e.getGender();
+
+
+Example sequence:
+
+Jhansi → "Female"
+Smith  → "Male"
+David  → "Male"
+Gita   → "Female"
+...
+
+Step 2 → Each entry goes into its group
+
+Internally:
+
+groups["Male"] receives 1 more employee
+groups["Female"] receives 1 more employee
+
+Step 3 → Instead of storing the employee list, counting() simply increments a counter
+
+Pseudocode:
+
+Map<String, Long> result = new HashMap<>();
+
+for (Employee e : emps) {
+    String key = e.getGender();
+    long currentCount = result.getOrDefault(key, 0L);
+    result.put(key, currentCount + 1);
+}
+
+
+THIS is exactly what Collectors.groupingBy(..., counting()) does.
+
+
+
+1. stream()
+Purpose: Create a pipeline to process collection elements functionally.
+Where to Implement: Call on any Collection → emps.stream().
+Internal Working: Returns a lazy pipeline object.
+Nothing executes until a terminal operation runs.
+
+2. filter(Predicate)
+Purpose: Keep only elements that satisfy a condition.
+Where to Implement: Use inside stream pipelines before mapping or collecting.
+Internal Working: For each element, predicate is checked.
+Only elements returning true move forward in the pipeline.
+
+3. map(Function)
+Purpose :Transform each element into another value (Employee → Name, Salary, Dept).
+Where to Implement :Use when you need a specific field: map(Employee::getName).
+Internal Working :Applies mapper function on each element and produces a new stream of mapped values.
+
+4. distinct()
+Purpose :Remove duplicates.
+Where to Implement :After mapping (like departments) or on objects with proper equals() and hashCode().
+Internal Working : Maintains a Set of seen elements and filters out duplicates.
+
+5. forEach(Consumer)
+Purpose: Terminal operation to perform an action (print, store, etc.)
+Where to Implement: End of pipeline when you want side effects: .forEach(System.out::println).
+Internal Working :Iterates each processed element and executes consumer; forces pipeline execution.
+
+6. max(Comparator) / min(Comparator)
+Purpose :Find element with highest/lowest value based on comparator.
+Where to Implement :Used for highest salary, youngest employee, earliest joining year.
+Internal Working :Does a single-pass scan comparing elements using comparator.
+
+7. Comparator.comparingInt/Double()
+
+Purpose: Create comparator using a numeric field.
+Where to Implement :Inside max, min, or sorted.
+Internal Working :Extracts numeric key from each element and compares those numbers.
+
+8. Optional.ifPresent()
+Purpose :Run logic only if value exists — avoids null checks.
+Where to Implement :After max() or min() which return Optional.
+Internal Working : Checks internal flag isPresent() → runs consumer if true.
+
+9. collect(Collector)
+Purpose: Terminal operation to accumulate results (Map, List, group, stats).
+Where to Implement: End of pipeline to build final output structure.
+Internal Working
+
+Collector defines:
+supplier (create structure),
+accumulator (add element),
+combiner (merge partials — used in parallel).
+Runs reduction over stream.
+
+10. groupingBy(classifier, downstream)
+Purpose : Group elements by a key → returns Map<key, value>.
+Where to Implement :Counting per gender, average salary per department, names per department.
+
+Internal Working
+For each element:
+compute key
+put value into appropriate bucket
+downstream collector processes bucket contents
+
+11. counting()
+Purpose : Count elements in each group.
+Where to Implement: Inside groupingBy → counting().
+Internal Working: Keeps long counter and increments once per element.
+
+12. averagingInt / averagingDouble
+
+Purpose: Calculate average numeric field.
+Where to Implement: Inside grouping — average age, salary.
+Internal Working: Tracks sum + count → returns sum / count as Double.
+
+13. mapping(mapper, toList())
+Purpose: Map values inside each group → e.g., names per department.
+Where to Implement: groupingBy(..., mapping(Employee::getName, toList()))
+Internal Working: Executes mapper for each element and passes result into downstream collector (list).
+
+14. toList()
+Purpose: Collect stream items into a List.
+Where to Implement :After map or inside mapping.
+Internal Working: Creates ArrayList, adds elements in original order (sequential).
+
+15. summarizingDouble()
+Purpose :Get total, min, max, count, and average of numeric field.
+Where to Implement: emps.stream().collect(summarizingDouble(Employee::getSalary))
+Internal Working: Maintains DoubleSummaryStatistics object updated per element.
+
+16. partitioningBy(Predicate)
+Purpose : Split employees into two groups based on boolean condition.
+Where to Implement :Age partition: age <= 25 and >25.
+Internal Working:Predicate decides which bucket (true/false).
+Two lists created automatically.
 
 
