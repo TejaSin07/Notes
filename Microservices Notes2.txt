@@ -1079,10 +1079,10 @@ Redis Cache(30 min)
 
 email: tejassinkar10@gmail.com
 
-redis username : default
-redis database password: SFfPCabioGPcLieWieA1Z1aWLFWx9IIW
-redis database name : Tejas-redis-db
-url: redis-15919.c261.us-east-1-4.ec2.redns.redis-cloud.com:15919
+redis username : 
+redis database password: 
+redis database name : Tejas
+url:
 
 1) What is Cache ?
 
