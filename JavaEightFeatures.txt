@@ -2313,7 +2313,6 @@ Where to Implement: Inside groupingBy → counting().
 Internal Working: Keeps long counter and increments once per element.
 
 12. averagingInt / averagingDouble
-
 Purpose: Calculate average numeric field.
 Where to Implement: Inside grouping — average age, salary.
 Internal Working: Tracks sum + count → returns sum / count as Double.
@@ -2340,3 +2339,19 @@ Internal Working:Predicate decides which bucket (true/false).
 Two lists created automatically.
 
 
+17. mapToObj()
+
+Purpose:
+Convert an IntStream / LongStream / DoubleStream (primitive stream) into a Stream of objects.
+Example: input.chars().mapToObj(c -> (char) c) converts each char code (int) into a Character object.
+
+Where to Implement:
+Use when you start with a primitive stream (like chars(), mapToInt(), etc.) but want to apply object-based stream operations afterward (filtering characters, mapping to strings, collecting into List, etc.).
+
+Internal Working:
+Each primitive value is passed to the mapper function.
+The mapper returns an object (wrapper or any custom object).
+A new Stream<T> is created from these returned objects.
+This allows you to use normal Stream methods that do not exist on primitive streams.
+
+18.IntStream.range(0, input.length()) → stream of indexes

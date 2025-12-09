@@ -1,0 +1,2195 @@
+####################
+Microservices
+##################
+
+
+lect 1
+======
+================================
+What is Monolith Architecture
+================================
+-> If we develop all the functionalities in single project then it is called as Monolith architecture based application
+-> We will package our application as a jar/war to deploy into server
+-> As monolith application contains all functionalities, it will become fat jar/war
+
+-------------
+Advantages
+-------------
+1) Simple to develop
+2) Everything is available at once place
+3) Configuration required only once
+
+---------------
+Dis-Advantages
+----------------
+
+1) Difficult to maintain
+2) Dependencies among the functionalities
+3) Single Point Of Failure
+4) Entire Project Re-Deployment
+
+****** To overcome the problems of Monolithic, Microservices architecture came into market******
+
+-> Microservices is not a programming language
+-> Microservices is not a framework
+-> Microservices is not an API
+
+######	Microservices is an architectural design pattern #####
+
+-> Microservices suggesting to develop application functionalities with loosely coupling
+-> In Microservices architecture we don't develop all the functionalities in single project. We will divide project functionalities into several REST APIs.
+
+*********************Note: One REST API is called as one Microservice************************
+
+-> Microservices architecture based project means collection of REST APIs.
+-> Microservices is not related to only java. Any programming language specific project can use Microservices Architecture.
+
+
+-------------
+Advantages
+-------------
+
+1) Loosely Coupling
+2) Easy To maintain
+3) Faster Development
+4) Quick Deployment
+5) Faster Releases
+6) Less Downtime
+7) Technology Independence (We can develop backend apis with multiple technologies)
+
+---------------
+Dis-Advantages
+----------------
+
+1) Bounded Context (Deciding no.of services to be created) i.e, rest apis
+2) Lot of configurations
+3) Visibility
+4) Pack of cards
+
+===========================
+Microservices Architecture
+===========================
+
+-> We don't have any fixed architecture for Microservices
+-> People are customizing microservices architecture according to their Project requirement
+-> Most of the projects will use below components in Microservices Architecture
+
+1) Service Registry (Eureka Server)
+2) Services (REST APIs)
+3) Interservice Communication (FeginClient)
+4) API Gateway
+5) Admin Server
+6) Zipkin
+
+
+How to run multiple instances of application ?
+----------------------------------------------
+1) go to run option -> run configuration -> spring boot -> select project 
+2) Arguments -> -Dserver.port=9093  give port number like that
+3) It will override port in properties file
+
+===================
+Service Registry    (app-43)
+===================
+-> Service Registry acts as DB of services available in the project.Like a central directory where all microservices (clients) register themselves.
+-> It provides the details of all the services which are registered with Service Registry
+-> Other microservices don’t need to know hardcoded URLs → they just query Eureka for the location of another service.
+-> We can identify how many services available in the project
+-> We can identify how many instances available for each service
+-> We can use "Eureka Server" as service registry
+-> Eureka Server provided by "Spring Cloud Netflix" library
+
+-> @EnableEurekaServer
+	:This turns your Spring Boot app into a Service Registry (Eureka Server) 
+	where other microservices can register themselves and discover each other.
+	:This we give above start class annotation.
+-> properties file :
+	spring.application.name → Logical name of this app (useful for logs & configs).
+	server.port=8761 → Standard port for Eureka Server.
+	eureka.client.register-with-eureka=false → Because this is the server, it should not try to register itself as a client.
+
+what if we not provide logical name in properties file?
+If you do not provide a logical service name (spring.application.name) in the properties file, Eureka will automatically use application as the default name.
+So if you have multiple services without a logical name, all of them will register on Eureka with the same name APPLICATION, which causes name collisions, makes service discovery impossible to use correctly, and breaks routing/load balancing.
+
+What if we make that last property true?
+-> Standalone Eureka Server → keep false.  (coz why to register same api with itself)
+-> Eureka Cluster (multiple servers) → set true, so servers register with each other for replication.
+
+-> pom.xml – Key Dependencies
+
+	<dependency>
+    		<groupId>org.springframework.cloud</groupId>
+   		<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+	</dependency>
+
+        : above dependence Brings in Eureka Server capability.
+	: Other services will use spring-cloud-starter-netflix-eureka-client to connect to this registry.
+
+	<dependencyManagement>
+    		<dependency>
+        	<groupId>org.springframework.cloud</groupId>
+        	<artifactId>spring-cloud-dependencies</artifactId>
+        	<version>${spring-cloud.version}</version>
+        	<type>pom</type>
+        	<scope>import</scope>
+    		</dependency>
+	</dependencyManagement>
+
+       : above dependency  ensures consistent version management of Spring Cloud libraries with your Spring Boot version (3.2.5 here).
+
+=============
+Admin Server
+=============
+
+-> Admin Server is used to manage all backend apis actuator endpoints at one place
+-> Our backend apis will be registered with Admin Server
+-> Admin Server will provide User interface to monitor apis actuator endpoints
+-> Setting up a Spring Boot Admin Server, which acts as the monitoring dashboard for your microservices.
+
+-> @EnableAdminServer: Turns this application into a Spring Boot Admin Server.
+		     : This is a monitoring dashboard for your Spring Boot microservices.
+                     : It shows details like health, metrics, logs, environment, thread dumps, etc.
+		     : this annotation we give above start class.
+
+-> properties file is normal just mention on which port you want this server 
+
+pom.xml – Key Dependencies
+--------------------------
+
+<dependency>
+    <groupId>de.codecentric</groupId>
+    <artifactId>spring-boot-admin-starter-server</artifactId>
+</dependency>
+
+
+->above dependency Brings in the Admin Server functionality.
+
+<dependencyManagement>
+    <dependency>
+        <groupId>de.codecentric</groupId>
+        <artifactId>spring-boot-admin-dependencies</artifactId>
+        <version>${spring-boot-admin.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+    </dependency>
+</dependencyManagement>
+-> above dependency ensures proper version alignment of Spring Boot Admin with your Spring Boot version.
+
+🔄 What You Are Building
+-> A centralized monitoring dashboard for all Spring Boot microservices.
+-> Each microservice (like WELCOME-API, ORDER-API, etc.) must include the Spring Boot Admin Client dependency and point to this server (http://localhost:1111).
+-> Once registered, you can monitor them from this UI.
+
+=============
+Zipkin Server
+=============
+
+-> Zipkin Server is used for Distributed Tracing
+-> Using this Zipkin, we can monitor which API is taking more time to process our request.
+=> Run below query in cmd for execution:
+   C:\Users\tejas\Desktop\springboot repo\jar zipkin>java -jar zipkin-server-3.5.0-exec.jar	
+
+=> check their for port number in cmd (http://localhost:9411)
+
+Micrometer + Brave (Tracing Bridge)
+------------------------------------
+
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-tracing-bridge-brave</artifactId>
+</dependency>
+
+->Provides distributed tracing capability using Brave (a library for Zipkin).
+->Works with Micrometer (Spring’s metrics/tracing abstraction).
+->This generates trace IDs and span IDs for each request.
+
+Zipkin Reporter
+---------------
+
+<dependency>
+    <groupId>io.zipkin.reporter2</groupId>
+    <artifactId>zipkin-reporter-brave</artifactId>
+</dependency>
+
+-> Responsible for sending the trace data (from Sleuth/Brave) to the Zipkin Server (http://localhost:9411).
+
+-> to stop zipkin use  => ctrl+ c
+=============
+Config Server
+=============
+=> It is used to separate configuration properties file from application.
+=> It is used to externalise config props of our application.
+=> It makes our application  loosely coupled with properties file or yml file.
+
+=============
+Kafka Server
+=============
+Apache Kafka
+-> It is a message broker. It is used to develop Event Driven Microservices.
+-> it works on pub-sub model
+-> distributed streaming platform
+
+=============
+Redis Server
+=============
+=> Redis is a cache server.
+=> It is used to maintain distributed cache.
+=> It is used to reduce no.of db calls from our application to DB.
+=> Redis represent data in key-value format.
+
+===========
+FeignClient:
+===========
+=> It  is used for interservice communication
+=> If one api communicate with another api with in the same 
+application then it is called as Inter service communication.
+
+============
+API Gateway
+=============
+-> API Gateway is used to manage our backend apis of the project
+-> API Gateway acts as mediator between end users and backend apis
+-> API Gateway can contain filter logic to decide request processing (Authentication)
+-> API Gateway will contain Routing logic (which request should go to which REST API)
+-> API Gateway also will be registered with Service Registry
+-> Spring Cloud Gateway we can use as API Gateway
+
+===================
+Backend Services
+===================
+-> Services means REST APIs / Microservices
+-> Services contains backend business logic
+-> In the project, some services will interact with DB
+-> In the project, some services will interact with third party REST API ( external communication )
+-> In the project, some services will interact with another services with in the project
+   ( inter-service communication )
+-> For inter-service communication we will use feign-client   <-- Imp to note here not external
+-> To distribute the load, we can run one service with Multiple Instances (Load Balancing)
+
+Note: We will register every service with Service Registry
+
+Note:
+=====
+
+Inter-service → FeignClient (with service discovery like Eureka).
+
+External APIs → WebClient (preferred) or RestTemplate.
+
+Q. why we not use feign client for communication with external api?
+-> for external communication we don’t use Feign with service discovery, because external APIs are not registered in Eureka.
+-> feign client we call to api by using name not by url
+-> common options are:
+
+	:RestTemplate (older, synchronous, still widely used but gradually being replaced).
+	:WebClient (from Spring WebFlux, modern, supports async and reactive calls).
+	:Feign Client can still be used for external APIs, but you configure it with a fixed URL instead of Eureka. 
+
+
+
+===============================================================
+Steps to develop Service Registry Application (Eureka Server)
+===============================================================
+1) Create Service Registry application with below dependency
+
+	 - EurekaServer (spring-cloud-starter-netflix-eureka-server)
+
+2) Configure @EnableEurekaServer annotation in boot start class
+
+3) Configure below properties in application.yml file
+
+server:
+  port: 8761
+  
+eureka:
+  client:
+    register-with-eureka: false
+
+Note: If Service-Registry project port is 8761 then clients can discover service-registry and will register 
+automatically with service-registry. If service-registry project running on any other port number then we have
+ to register clients with service-registry manually.
+
+=>suppose we use 9090 port then we need to give eureka server in client properties file explicitly
+eureka.client.service-url.defaultZone=http://localhost:9090/eureka/
+
+4) Once application started we can access Eureka Dashboard using below URL
+
+		URL : http://localhost:8761/
+
+app - 45 
+----------
+NOTE: Focus on Spring cloud version we adding in dependency.
+
+
+# IMP =>To Create Api that acts as a client to Admin, Eureka, zipkin add below dependencies to it along with other dependencies:
+
+1) Zipkin
+2) Codecentric's Spring Boot Admin(Client)
+3) Eureka Discovery Client
+
+=> also add actuator dependency to monitor and manage application by with the help of admin server.
+
+=> also give @EnableDiscoveryClient this annotation to main class. Then it will act as client to eureka server.
+
+=> management.endpoints.web.exposure.include=*    <--- to enable actuator.
+
+=> spring.boot.admin.client.url=http://localhost:1111/   <--- configuring endpoint url to register this application with admin client
+
+# Our api need to manually register with admin server to act as client, for zipkin and eureka it will auto register
+
+app - 46: 
+--------
+we are using feign client here to interservice communication.
+
+-> to add feign client we need add OpenFeign dependency.
+
+what happen when we call http://localhost:5587/greet i.e fixed url each time :
+-----------------------------------------------------------------------------
+
+The Greet service always runs on port 5587, so that part stays constant.
+But the Welcome API is running on multiple instances (e.g., 8888, 9999, 7777).
+Your Feign client calls the service by name, not by a fixed URL.
+Because of this, Spring Cloud performs client-side load balancing(implicitly present there ) 
+automatically and selects a different Welcome API instance for each request.
+That’s why the Welcome API port keeps changing on every call
+
+
+=============================================================
+Mini Project Implementation using Microservices Architecture
+=============================================================
+
+STOCK-PRICE-API : It will maintain companies stock price details in db table
+
+-> Input : Company Name
+-> Output : Company Stock Price Value
+
+Sample Data
+------------
+TCS-3000
+HCL-1500
+AXIS-1200
+
+
+STOCK-PRICE-CALC-API : It is used to calculate total stocks cost based on company name and quantity
+
+-> Input  : Company Name & Quantity
+-> Output : Total Stocks Cost
+
+Note: To calculate total stocks cost, STOCK-PRICE-CALC-API should get company stock price from STOCK-PRICE-API (INTER SERVICE COMMUNICATION)
+
+
+
+Steps to develop stock-price-api (Eureka-Client-1)
+++++++++++++++++++++++++++++++++++++++++++++++++++
+1) Create Spring Boot application with below dependencies
+
+		- eureka-discovery-client
+		- starter-web
+		- starter-datajpa
+		- h2
+		- devtools
+
+2) Configure @EnableDiscoveryClient annotation at start class
+
+3) Configure below properties in application.yml file
+
+			server-port
+			h2-datasource-properties
+			application-name
+
+-----------------------------------application.yml-----------------------------------------
+server:
+  port: 1111
+spring:
+  application:
+    name: STOCK-PRICE-API
+  datasource:
+    username: sa
+    password: sa
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+  jpa:
+    defer-datasource-initialization: true
+
+--------------------------------------------------------------------------------------------------
+4) Create Entity class & Repository interface for COMPANY STOCK PRICE DETAILS
+
+5) Create "data.sql" file under src/main/resource folder with insert queries to load data into db table like below
+
+INSERT INTO STOCK_PRICE_DTLS (STOCK_ID, COMPANY_NAME, COMPANY_PRICE) VALUES (101, 'TCS', 3000.00);
+INSERT INTO STOCK_PRICE_DTLS (STOCK_ID, COMPANY_NAME, COMPANY_PRICE) VALUES (102, 'HCL', 1500.00);
+INSERT INTO STOCK_PRICE_DTLS (STOCK_ID, COMPANY_NAME, COMPANY_PRICE) VALUES (103, 'HDFC', 4500.00);
+INSERT INTO STOCK_PRICE_DTLS (STOCK_ID, COMPANY_NAME, COMPANY_PRICE) VALUES (104, 'SBI', 450.00);
+
+6) Create RestController to handle request & response
+
+		Input : CompanyName (Path Parameter)
+		Output : Stock Price Details
+
+7) Run the application and check in Eureka Dashboard (It should display in eureka dashboard)
+
+
+
+Steps To Develop STOCK-PRICE-CALC-API (EUREKA-CLIENT-2)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+1) Create Spring Boot application with below dependencies
+
+			- web-starter
+			- devtools
+			- eureka-discovery-client
+			- fegin-client
+
+2) Configure @EnableDiscoveryClient annotation at boot start class
+
+3) Configure Server Port & application name in application.yml file
+
+4) Create Rest Controller with required method
+
+		Input : Company Name & Quantity (Path Paramters)
+
+		Output : Total Cost
+
+Note: In Rest Controller we should have logic to access STOCK-PRICE-API
+
+---------------------------------------------------------------------------------------------------------
+@RestController
+public class StockCalcRestController {
+
+	@GetMapping("/calc/{cname}/{qty}")
+	public ResponseEntity<String> calculate(@PathVariable String cname, @PathVariable Integer qty) {
+
+		String url = "http://localhost:1111/price/{cname}";
+		RestTemplate rt = new RestTemplate();
+		ResponseEntity<StockPrice> resEntity = rt.getForEntity(url, StockPrice.class, cname);
+		StockPrice body = resEntity.getBody();
+		Double companyPrice = body.getCompanyPrice();
+
+		Double totalCost = companyPrice * qty;
+
+		String msg = "Total Cost : " + totalCost;
+
+		return new ResponseEntity<>(msg, HttpStatus.OK);
+	}
+}
+
+--------------------------------------------------------------------------------------------------------
+
+Why FeignClient??(all imp)
+=========================
+-> For rest-Template and web-client we need fixed url. 
+-> In FeignClient we communicate through API name ,
+-> In the above logic we have hard coded STOCK-PRICE-API url
+-> If STOCK-PRICE-API url changed then calc-api logic should be changed
+-> If STOCK-PRICE-API is running in Multiple instances for load balancing our calc-api should access all the instances in round-robbin methodology
+-> FeignClient use ribbon internally to give response in round ribbon format .
+-> To overcome these problems we can use Interservice Communication using FeignClient
+-> Using FeginClient we can make rest call to another service using name of the service (no need of url)
+-> FeginClient will get service URL from service-registry based on service-name
+-> @EnableDiscoveryClient: makes it a Eureka/Consul client (so the service can register + discover).
+			 : “How services find each other.”
+-> @EnableFeignClients   :it is going to act as client 
+			 : “How services actually talk to each other.”
+
+Note:
+======
+
+-> If your app doesn’t participate in service discovery (like Eureka/Consul) → you don’t need @EnableDiscoveryClient
+
+-> If your app doesn’t call other APIs → you don’t need @EnableFeignClients.
+
+--------------------------------------------------------------------------------------------------------
+
+@FeignClient(name = "STOCK-PRICE-API")
+public interface StockPriceClient {
+	
+	@GetMapping("/price/{cname}")
+	public StockPrice invokeStockPrice(@PathVariable String cname);
+
+}
+-------------------------------------------------------------------------------------------------------------
+Note : Write @EnableFeignClients annotation at boot start class
+-------------------------------------------------------------------------------------------------------------
+@RestController
+public class StockCalcRestController {
+	
+	
+	@Autowired
+	private StockPriceClient priceClient;
+
+	@GetMapping("/calc/{cname}/{qty}")
+	public ResponseEntity<String> calculate(@PathVariable String cname, @PathVariable Integer qty) {
+
+		StockPrice stockPrice = priceClient.invokeStockPrice(cname);
+		Double companyPrice = stockPrice.getCompanyPrice();
+
+		Double totalCost = companyPrice * qty;
+
+		String msg = "Total Cost : " + totalCost;
+
+		return new ResponseEntity<>(msg, HttpStatus.OK);
+	}
+}
+-------------------------------------------------------------------------------------------------------------
+
+To Run Application with multiple instance:
+=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=
+
+Note: Run price-api with multiple instances using Run Configuration Option
+
+
+Note: Configure Port Number as VM Argument in Run Configuration
+	
+		-Dserver.port=port-number
+
+To stop one of the instance:
+============================
+
+1) Go to console and click on display selected console arrow.
+
+Note : for both adding and deleting instance of any api registry will take time.
+During that period we may receive error. 
+
+Note: In feign client we can directly connect to url also.
+
+    => we can say we will use restTemplate and webclient for external service communication and for internal we can use feignClient
+
+lect 4:(23 march 25)
+========
+
+#############
+API Gateway
+##############
+
+-> API Gateway will act as mediator between client requests & backend apis
+-> API Gateway will provide single entry point to access our backend apis
+-> In Api Gateway we will write mainly below 2 types of logics
+
+			1) Filters
+			2) Routing
+
+-> Filters are used to execute some logic before request processing and after request processing
+-> Routing is used to tell which request should go to which REST API
+-> In Spring Cloud we have 3 options to create API Gateway
+
+				1) Zuul Proxy (old approach)
+				2) Cloud Gateway (latest approach)
+				3) APIGEE (google)
+
+Note: Zuul Proxy is not supported by latest versions of spring boot
+
+
+#####################################
+Working with Spring Cloud API Gateway
+#####################################
+App 47:
+------
+
+-run app 43,44
+-execute zipkin cmd
+-run 45,46 after that run 47
+
+- now in potman add header :: key: secret  value : tejas
+- http://localhost:3333/greet
+- http://localhost:3333/welcome
+
+Note IMP:
+========
+
+	1) we do routing in yml file
+	2) and we apply filter by extending class with Global filter Interface .we need to override filter method
+
+
+1) Create Spring boot application with below dependencies
+
+		-> web-stater
+		-> eureka-client    <- our application is eureka client
+		-> cloud-gateway
+		-> dev-tools
+
+2) Configure @EnableDiscoveryClient annotation at boot start class
+
+3) Configure API Gateway Routings in application.yml file like below   <-- Imp
+
+----------------------------------------application.yml file-----------------------------------------------
+spring:
+  cloud:
+    gateway:
+      discovery.locator:
+        enabled: true
+        lowerCaseServiceId: true
+      routes:
+      - id: stock-price-api
+        uri: lb://STOCK-PRICE-API
+        predicates:
+        - Path=/price/{companyName}
+      - id: stock-calc-api
+        uri: lb://STOCK-CALC-API
+        predicates:
+        - Path=/calc/{companyName}/{qty}
+  application:
+    name: CLOUD-API-GATEWAY
+server:
+  port: 3333
+------------------------------------------------------------------------------------------------------------
+
+In API gateway we will have 3 types of logics
+
+1) Route
+
+2) Predicate
+
+3) Filters
+
+-> Routing is used to defined which request should be processed by which REST API in backend. Routes will be configured using Predicate
+
+-> Predicate : This is a Java 8 Function Predicate. The input type is a Spring Framework ServerWebExchange. This lets you match on anything from the HTTP request, such as headers or parameters.
+
+-> Filters are used to manipulate incoming request and outgoing response of our application
+
+Note: Using Filters we can implement security also for our application.
+
+--------------------------------------------------------------------------------------------------------------
+
+@Component
+public class MyFilter implements GlobalFilter {
+
+	@Override
+	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {   //whats the meaning of mono  //return type is void but we are returning a method
+
+		System.out.println("filter ( ) - executed.....");
+		
+		ServerHttpRequest request = exchange.getRequest();    <-- we can access all headers by  using request
+
+		HttpHeaders headers = request.getHeaders();
+		Set<String> keySet = headers.keySet();
+		
+		keySet.forEach(key ->{      // all headers we can get by traversing keys
+			List<String>values = headers.get(key);
+			System.out.println(key + " :: " + values);
+		});
+
+		// validate request
+		if(!keySet.contains("secret")) {
+			throw new RuntimeException("Invalid Request");
+		}
+		
+		List<String> list = headers.get("secret");
+		if(!list.get(0).equals("ashokit@123")) {      < -- In postman we need to add header as key - secret and value "ashokit@123" then only request will going to execute .   IMP
+			throw new RuntimeException("Invalid Token");
+		}
+		return chain.filter(exchange);   <-- it returns nothing . 
+	}
+}
+
+----------------------------------------------------------------------------------------------------
+@Component
+public class MyPostFilter implements GlobalFilter {
+
+	final Logger logger = LoggerFactory.getLogger(MyPostFilter.class);
+
+	@Override
+	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+
+		return chain.filter(exchange).then(Mono.fromRunnable(() -> {
+			logger.info("Global Post-filter executed...");
+		}));
+	}
+
+}
+----------------------------------------------------------------------------------------------------------
+
+
+
+-> We can validate client given token in the request using Filter for security purpose
+
+-> We can write request and response tracking logic in Filter
+
+-> Filters are used to manipulate request & response of our application
+
+-> Any cross-cutting logics like security, logging, monitoring can be implemented using Filters
+
+
+
+===========================================
+Spring Boot Admin Server and Admin Client
+============================================
+
+-> Admin server will provide user interface to monitor and manage all the apis actuator endpoints
+-> The REST APIs of our application should register with admin server (It is called as Admin client)
+
+Note: Using this approach we can monitor all the apis at one place
+
+
+---------------------------
+Working with Admin-Server
+---------------------------
+1) Create Boot application with admin-server dependency (select it while creating the project)
+
+2) Configure @EnableAdminServer annotation at start class
+
+3) Run the boot application
+
+4) Access application URL in browser (We can see Admin Server UI)
+
+
+---------------------------
+Working with Admin-Client
+---------------------------
+1) Create Spring Boot application with below dependecies
+
+		a) starter-web
+		b) starter-actuator
+		c) admin-starter-client
+		d) devtools
+
+2) Configure below properties in application.yml file
+
+		a) server-port
+		b) application-name
+		c) enable-actuator-endpoints
+		d) configure admin serve URL to reiger
+
+----------------------------------application.yml-------------------------------------
+server:
+  port: 1111
+spring:
+  application:
+    name: CLIENT-ONE
+  boot:
+    admin:
+      client:
+        url: http://localhost:8080/
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+-------------------------------------------------------------------------------
+
+3) Create Rest Controller with required methods
+
+4) Run the application (It will register in Admin Server)
+
+---------------------------------------------------------------------------------
+
+lect 5:
+========
+######################
+Cloud Config Server
+######################
+
+-> If we want to make any changes to properties then we have to re-package our application and we have to re-deploy our application.
+
+-> If any changes required in config properties then we have to repeat the complete project build & deployment which is time consuming process.
+
+-> It is used to separate our application and application config properties
+
+	Ex: SMTP props, DB props, App msgs etc...
+
+-> We can externalize configuration properties by using Config Server
+
+-> We will maintain application configuration yml files in git hub repo.
+
+-> cloud config server is part of spring cloud library.
+
+-> Config Server application will connect with Git Hub repo to load all ymls
+ 
+-> Our APIs (Microservices) will connect with config server to load yml data based on application name.
+
+Note: app name and yml file name should be same.
+
+Note: If we use config server then we no need to re-package(jar) our application when we make some changes in properties.
+
+
+==================
+Config Server App
+===================
+
+1) Create Git Repository and keep ymls files required for projects 
+
+			Note: We should keep file name as application name
+
+			app name : greet  then file name : greet.yml
+
+			app name : welcome then file name : welcome.yml
+
+
+		### Git Repo : https://github.com/ashokitschool/configuration_properties
+
+
+2) Create Spring Starter application with below dependency
+
+	<dependency>
+		<groupId>org.springframework.cloud</groupId>
+		<artifactId>spring-cloud-config-server</artifactId>
+	</dependency>
+
+3) Write @EnableConfigServer annotation at boot start class
+
+
+@SpringBootApplication
+@EnableConfigServer
+public class Application {
+
+	public static void main(String[] args) {
+		SpringApplication.run(Application.class, args);
+	}
+
+}
+
+4) Configure below properties in application.yml file
+
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/ashokitschool/configuration_properties
+          clone-on-start: true
+
+5) Run Config Server application
+
+=================================
+Config Server Client Development
+=================================
+
+1) Create Spring Boot application with below dependencies
+
+				a) web-starter
+				b) config-client
+				c) dev-tools
+
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-starter-config</artifactId>
+</dependency>
+
+
+2) Create Rest Controller with Required methods
+
+@RestController
+public class WelcomeRestController {
+
+	@Value("${msg}")
+	private String msg;
+
+	@GetMapping("/")
+	public String getWelcomeMsg() {
+		return msg;
+	}
+}
+
+✅ Use Cases of @Value
+Injecting single property values
+
+Reading environment variables
+
+Injecting default values (like: @Value("${port:8080}"))
+
+Fetching values from external config (like Spring Cloud Config!)
+
+
+3) Configure ConfigServer url in application.yml file like below
+
+server:
+  port: 8081
+spring:
+  config:
+    import: optional:configserver:http://localhost:8080
+  application:
+    name: greet
+
+
+4) Run the application and test it.
+
+###############
+CIRCUIT BREAKER:(design pattern)
+###############
+
+IMP: why not achieving same logic by using try catch block
+--> If we use try catch each time request go to try block  first if it failed then only goes to catch.
+But in circuit breaker we can stop method which is causing problem for particular time and executes another method till that time. So 
+in circuit breaker most of the time only one method executes. 
+
+ref app -> 51:
+-------------
+=> It is one of the most famous design pattern in microservices.
+ 
+=> It is used to implement fault tolerant systems
+
+=> Fault Tolerant systems also called as Resilience system.
+
+=> In Java Spring Boot, a circuit breaker is a design pattern used to detect failures and encapsulate the logic of preventing
+   a failure from constantly recurring, which helps in providing stability and resilience in distributed systems.
+  
+=> The most commonly used library for implementing circuit breakers in Spring Boot is **Resilience4j**.
+
+=> It works on three mode
+1) CLOSED
+2) Open
+3) Half_Open(more idea lect 6 -35 min) 
+
+=> Internaly circuit breaker using aop mechanism.(we adding dependency for aop)
+
+
+Here’s a brief overview of how to implement a circuit breaker using Resilience4j in a Spring Boot application:
+
+1. **Add Dependencies:**
+   Include the Resilience4j dependencies in your `pom.xml` file.
+
+	1) web-starter
+	2) actuator
+	3) aop (aspect oriented programing)        			<--it is mandatory to add ,used to provide status in actuator/health.
+	4) resilence4J
+   ```xml
+   <dependency>
+       <groupId>io.github.resilience4j</groupId>
+       <artifactId>resilience4j-spring-boot2</artifactId>
+       <version>1.7.1</version>
+   </dependency>
+   <dependency>
+       <groupId>io.github.resilience4j</groupId>
+       <artifactId>resilience4j-circuitbreaker</artifactId>
+       <version>1.7.1</version>
+   </dependency>
+   ```
+
+2. **Configure Circuit Breaker:**
+   Define the circuit breaker configuration in your `application.properties` or `application.yml`.
+   ```properties
+   resilience4j.circuitbreaker.instances.yourServiceName.register-health-indicator=true
+   resilience4j.circuitbreaker.instances.yourServiceName.sliding-window-size=10
+   resilience4j.circuitbreaker.instances.yourServiceName.failure-rate-threshold=50
+   resilience4j.circuitbreaker.instances.yourServiceName.wait-duration-in-open-state=10000
+   ```
+
+3. **Use Circuit Breaker:**
+   Annotate the service method where you want to apply the circuit breaker.
+   ```java
+   import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+   import org.springframework.stereotype.Service;
+
+   @Service
+   public class YourService {
+
+       @CircuitBreaker(name = "yourServiceName", fallbackMethod = "fallbackMethod")
+       public String yourMethod() {
+           // Code that might fail
+       }
+
+       public String fallbackMethod(Throwable t) {
+           return "Fallback response";
+       }
+   }
+   ```
+
+In this example:
+- **`@CircuitBreaker` Annotation:** This applies the circuit breaker to the method.
+- **`name` Parameter:** Refers to the configuration instance defined in `application.properties`.
+- **`fallbackMethod` Parameter:** Specifies the method to be called when the circuit is open or an exception is thrown.
+
+This setup helps manage service failures gracefully, ensuring that the system remains stable and responsive.
+
+-----------------------------------------------------------------
+
+
+========================================================================== 
+
+lect 6: (24 march)
+-------
+============
+Apache Kafka
+============
+
+=> It is an open source distributed streaming platform
+
+=> It is used as message broker to exchange data among application.
+
+=> It works based on pub-sub model.
+	1) Publisher
+	2) Subscriber
+
+=> The application which is publishing message to kafka called as publisher.
+
+=> The application which is reading message from kafka called as subscriber.
+
+Kafka Architecture:
+-------------------
+
+1) zookeeper
+2) Kafka server
+3) Kafka topic 
+4) publisher
+5) Subscriber 
+
+lect 7: (learn more about kafka)
+Note: Kafka server setup done  by Kafka team .
+
+==> get more info about kafka topic 
+
+extra -> in aws there is also one servise called canasis works same as kafka.
+
+#Step 1: Download zookeeper from below url
+	url: http://mirrors.estointernet.in/apache/zookeeper/
+
+#Step 2:Download apache kafka
+	url: http://mirrors.estointernet.in/apache/kafka/
+
+#Step 3: Set Path to ZOOKEEPER in environment variables upto bin folder
+
+
+NOTE: Copy zookeeper.properties and server.properties files from kafka/config folder to kafka/bin/windows folder.
+
+#step 4: Start zookeeper srever using below command from kafka/bin/windows folder
+
+     command: zookeeper-server-start.bat zookeeper.properties
+
+#Step 5 : Start kafka server using below command from kafka/bin/windows folder
+    command: kafka-server-start.bat server.properties
+
+Note:" If kafka server is getting stopped , delete kafka logs from c:/tmp/folder.
+
+#Step 6: Create kafka topoic using below command from kafka/bin/windows folder
+
+	command: kafka-topics.bat --create --bootstrap-server localhost:9092 --replication-factor 1 --partition 1 == topic ashokit_topic_009
+
+#step 7: View created topics using below command
+
+	command: kafka-topics.bat --list --bootstrap-server localhost:9092
+
+
+watch utube video for kafka zookeeper setup
+
+youtube:https://www.youtube.com/watch?v=VInk1_9vvCY
+
+Q. Why to  use yml? and what errors will come if both we use at a time? 
+
+
+lect 8:(23 April )
+=======
+
+============
+Redis Cache(30 min)
+============
+
+=> 2 types of table in application
+
+1) Transactional Tables: CRUD Operation
+2) Non-Transactional Table : SELECT Operation
+
+email: tejassinkar10@gmail.com
+
+redis username : default
+redis database password: SFfPCabioGPcLieWieA1Z1aWLFWx9IIW
+redis database name : Tejas-redis-db
+url: redis-15919.c261.us-east-1-4.ec2.redns.redis-cloud.com:15919
+
+1) What is Cache ?
+
+2) Why we need to go for Cache ?
+
+3) What is Redis ?
+
+4) Spring Boot with Redis Integration 
+
+
+=> Cache is a temporary storage
+
+=> Cache will represent data in key-value format
+
+=> By using Cache data, we can reduce no.of db calls from our application.
+
+Note: DB call is always costly (it will take more time to execute)
+
+=> By using Cache data (Cache Memory) we can increase performance of the application.
+
+##### Redis Cache is one of the most famous Cache available in Market #####
+
+=> The open source, in-memory data store used by millions of developers as a database, cache, streaming engine, and message broker.
+
+
+=> Spring Boot provided below starter to communicate with Redis Server
+
+				### springboot-starter-redis ###
+
+=> We will use below components to communicate with Redis Server
+
+
+1) JedisConnectionFactory : It represents connection with Redis Server
+
+2) RedisTemplate : It provides methods to perform operations with Redis Server
+
+3) OpsForHash: It is providing methods to peform operations based on Hash key
+
+
+put (...)
+
+get(..)
+
+entries (.)
+
+delete(..)
+
+
+Key-Value
+
+KEY - EMP
+101 - Raju
+102 - Rani
+
+KEY - BOOKS
+103 - Java
+
+KEY - CITIES
+104 - Hyd
+
+=================================
+Working with Mono & Flux Objects
+=================================
+
+-> Mono & Flux objects are used to achieve reactive programming
+
+-> Reacting Programming means Non-Blocking execution based on events
+
+-> In Spring 5.x version Reactive Programming got introduced
+
+-> To work with reactive programming Spring Boot provided below starter
+
+			'spring-boot-starter-webflux'
+
+-> Mono object represents single response
+
+-> Flux object represents stream of responses
+
+-------------------------------pom.xml-------------------------
+
+
+<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+-------------------------------Binding class-----------------------------------------------
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CustomerEvent {
+	
+	private String name;
+	private Date eventDate;
+
+}
+-------------------------------RestController------------------------------------------------
+@RestController
+public class CustomerRestController {
+
+	@GetMapping("/event")
+	public Mono<CustomerEvent> getCustomerEvent() {
+
+		CustomerEvent event = new CustomerEvent("Smith", new Date());
+		
+		Mono<CustomerEvent> mono = Mono.just(event);
+
+		return mono;
+	}	
+	
+
+	@GetMapping(value = "/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+	public ResponseEntity<Flux<CustomerEvent>> getCustomerEvents() {
+
+		// Creating Customer data in the form of object
+		CustomerEvent event = new CustomerEvent("Smith", new Date());
+
+		// Create Stream object to send the data
+		Stream<CustomerEvent> customerStream = Stream.generate(() -> event);
+
+		// Create Flux object with Stream
+		Flux<CustomerEvent> customerFlux = Flux.fromStream(customerStream);
+
+		// Setting Response Interval
+		Flux<Long> interval = Flux.interval(Duration.ofSeconds(3));
+
+		// Combine Flux Interval and Customer Flux
+		Flux<Tuple2<Long, CustomerEvent>> zip = Flux.zip(interval, customerFlux);
+
+		// Getting Flux value from the zip
+		Flux<CustomerEvent> fluxMap = zip.map(Tuple2::getT2);
+
+		// Returning Flux Response
+		return new ResponseEntity<>(fluxMap, HttpStatus.OK);
+	}
+}
+
+
+
+
+============
+Redis Cache
+============
+
+1) What is Cache ?
+
+2) Why we need to go for Cache ?
+
+3) What is Redis ?
+
+4) Spring Boot with Redis Integration 
+
+
+=> Cache is a temporary storage
+
+=> Cache will represent data in key-value format
+
+=> By using Cache data, we can reduce no.of db calls from our application.
+
+Note: DB call is always costly (it will take more time to execute)
+
+=> By using Cache data (Cache Memory) we can increase performance of the application.
+
+##### Redis Cache is one of the most famous Cache available in Market #####
+
+=> The open source, in-memory data store used by millions of developers as a database, cache, streaming engine, and message broker.
+
+
+=> Spring Boot provided below starter to communicate with Redis Server
+
+				### springboot-starter-redis ###
+
+=> We will use below components to communicate with Redis Server
+
+
+1) JedisConnectionFactory : It represents connection with Redis Server
+
+2) RedisTemplate : It provides methods to perform operations with Redis Server
+
+3) OpsForHash: It is providing methods to peform operations based on Hash key
+
+
+put (...)
+
+get(..)
+
+entries (.)
+
+deleet(..)
+
+===================================
+Spring Boot with Redis Integration
+===================================
+
+0) Download Redis Server
+
+Link : https://www.mediafire.com/file/ul4aeeirc8nrs2a/Redis-x64-3.0.504.rar/file
+
+-> Extract rar file and Run Redis-Server.exe and Run Redis-Client.exe
+
+
+1) Create Spring Boot application with below dependencies
+
+<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+
+
+2) Create binding class to represent data
+
+@Data
+public class Country implements Serializable {
+	
+	private Integer sno;
+	private String name;
+	private String countryCode;
+
+}
+
+
+3) Create Redis Config Class
+
+@Configuration
+public class RedisConfig {
+
+	@Bean
+	public JedisConnectionFactory jedisConn() {
+		JedisConnectionFactory jedis = new JedisConnectionFactory();
+		// Redis server properties
+		return jedis;
+	}
+
+	@Bean
+	public RedisTemplate<String, Country> redisTemplate() {
+		RedisTemplate<String, Country> rt = new RedisTemplate<>();
+		rt.setConnectionFactory(jedisConn());
+		return rt;
+	}
+}
+
+4) Create RestController class with Requird methods
+
+@RestController
+public class CountryRestController {
+
+	private HashOperations<String, Integer, Country> opsForHash = null;
+
+	public CountryRestController(RedisTemplate<String, Country> rt) {
+		this.opsForHash = rt.opsForHash();
+	}
+
+	@PostMapping("/country")
+	public String addCountry(@RequestBody Country country) {
+		opsForHash.put("COUNTRIES", country.getSno(), country);
+		return "Country Added";
+	}
+
+	@GetMapping("/countries")
+	public Collection<Country> getCountries() {
+		Map<Integer, Country> entries = opsForHash.entries("COUNTRIES");
+		Collection<Country> values = entries.values();
+		return values;
+	}
+
+}
+
+5) Run the application and test it using Postman.
+
+
+ 	{
+        "sno": 1,
+        "name": "India",
+        "countryCode": "+91"
+    }
+
+======================================================================
+
+
+
+
+
+
+lect 10:
+=======
+
+ 
+
+IMP : NEED TO COMPLETE: 1) Docker
+		  2) Kubernetes
+		  3) Jenkins
+		  4) AWS cloud 
+
+
+================
+Spring Security: 
+(if got any problem with security notes then spring security notes are there in start of 15th lect ) 
+================
+
+=> One module in spring  framework
+=> using spring security we can implement below 2 things in the project.
+	1) Authentication (Login)
+	2) Authorization (Role based access)
+
+
+=> By using spring security we can implement below things
+
+1) http basic auth
+2) In memory Auth
+3) Db authentication
+4) OAuth 2.0
+5) JWT(lot of demand)
+
+-> spring security concept we use to secure our web application.
+
+1) Http basic auth (53 app):
+===========================
+
+=> we need to add "spring security" dependency.
+
+(basic security -->  base64))
+
+=> to override default credential we can configure security credentials in application in application.properties file or yml file.
+
+spring.security.user.name = ashokit
+spring.security.user.password = ashokit@123
+
+steps to access url through get method from postman:
+					    -------
+1) Go  to 2nd heading authorization at the side of header 
+2) select basic auth option their 
+3) add your password and username
+
+then you will see below format in headers tag 
+
+=> format for authorization under header : --> Authorization: { Basic Base64.encode(uname.pwd)}
+
+  
+1) Develop spring boot rest api application with spring security (basic authentication ) and override credentials for Authentication.  
+2) Develop Consumer application and access secured provider.
+
+
+
+lect 11:
+---------
+===============================
+spring security customisation:
+===============================
+ (C:\Users\tejas\Desktop\springboot repo\project\springSecurity)
+
+-> when we add "security " in pom.xml then it will apply for all http methods of our project.
+-> but in reality we need to secure only few methods not all methods in our application.
+
+for example:
+
+/transfer -> required security
+/contact-us -> security not required 
+
+->  to achieve above customization we requires spring security customization. 
+
+
+
+
+=========================
+In-memory authentication
+==========================
+=> we can configure multiple user credentials with in the application for authentication purpose.
+=> real time we use database authentication.
+
+
+lect 12:
+========
+
+=============================================
+Registration and login using spring security
+=============================================
+app 55
+------
+
+1) securityFFilterChain    : to customize security config
+2) PasswordEncoder         : to encrypt original pwd
+3) AuthenticationProvider  : to load user record using service
+4) Authentication manager  : to manage authentication(logic check)
+5) UserDetailsService      : to retrieve record using repo
+6) UsernamePasswordAuthenticationToken : represent user credentials 
+
+all config in app 55
+ 
+Note : we will inject userDtlsService and pwdEncoder beans into authProvider object.
+
+
+
+lect 13:
+========
+------
+OAuth:
+------
+(app 56)
+
+1) Create spring boot application with below dependencies
+	
+	-web-starter
+	-security-starter
+	-Oauth-client
+
+2) Create OAuth App in Github.com
+ ( Login-Profile->setting--> Developer--> setting-->
+ Oauth apps -->Create App --> copy client ID && Client Secret)
+
+3) confgure github  Oauth app client id & client secret in appllicaton.yml file like below
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            clientId: 
+            clientSecret: 
+
+4) Create rest controller with method
+ 
+
+Assignment: spring boot with oAuth using google account .Get username also from google and display that in response.
+
+
+=====================
+Spring boot with JWT
+=====================
+
+- JWT stands for JSON Web tokens
+- JSON web tokens are an open, industry standard RFC 7519 method for representing claims securely between two parties
+- JWT official website : http://jwt.io/
+- below is the sample JWT token.
+
+lect 14:
+========
+(just need to understand flow and concept)
+
+JWT contains 3 parts:
+
+1) Header
+2) Payload
+3) Signature
+
+Note: JWT 3 parts will be separated by using dot(.)
+
+token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2huIiwiaWF0IjoxNzQ1ODE0OTA5LCJleHAiOjE3NDU4MTQ5Njl9.5Xp7Ev5oTOaHI0-6P7eCm6cm1eztq_kYds33A92_Zxo
+
+1) JWT Token generation (JwtService.java)
+	- generateToken()
+	- validateToken()
+ 
+2)JWT token validation filter(AppFilter.java) -OncePerRequest
+
+	- check Authorization header present or not
+	- retrieve bearer token from header
+	- validate token
+	- if token is valid, update security context to process req
+
+3) Customize SecurityFilterChain
+	- permit/api/register & /api/login urls 
+	- authenticate any other request
+	- set security context as stateless
+
+
+
+below are the extra dependencies we need to add:
+-----------------------------------------------
+		
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.5</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.5</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.11.5</version>
+		</dependency>
+
+
+
+lect 15:
+========
+
+# In microservices token generated in one api(suppose auth service),and to validate another api we use API gateway filter.(filter will not be available for auth api as we
+required anybody to login and register)
+ 
+below microservices repo
+
+https://github.com/ashokitschool/Microservices_Security  
+
+
+lect 17:
+========
+
+What is Junit:
+==============
+
+- free and open source java based framework
+- it is used for unit testing
+
+Note: It is only used for java project unit testing
+
+
+what is unit testing:
+=====================
+- Testing individual components of the application is called as unit testing.
+- Unit testing is used to identify weather code is working as expected or not.
+- unit testing is used to identify bugs in the code.
+- with the help of unit testing we can identify bugs at early stage
+ (before giving to testing team) 
+- By performing unit testing we can provide quality code(bug free code) to 
+ higher environments.
+
+What is isolated unit testing?
+==============================
+
+=> Controller methods are depends on service method and service methods depends on dao/repo methods.
+=> when we are testing controller method that time only controller method should be executed (service method shouldn't be called)
+=> to perform isolated unit testing we will use mocking
+
+
+what is mocking ?
+================
+=> The process of creating substitute object for rela-object is called as mocking
+=> to perform mocking we have several mocking frameworks
+
+a) Mockito
+b) Easy Mock
+c) Power Mock
+d) JMock
+
+
+What is code coverage?
+======================
+
+=> The process of identifying which lines of code is unit tested and which lines of code is missed in unit testing.
+=> Industry standard is minimum 80% code coverage for the project.
+=> To get code coverage report we can use 'jacocco' plugin.
+
+=> we can check code coverage by running application as maven test. And check for target -> sites -> index.html 
+=> If we want to exclude some classes then inside plugin do below configuration
+
+		<configuration>
+			<excludes>
+				<exclude>in/ashokit/dto/**</exclude>
+			</excludes>
+		</configuration>
+
+
+Unit Testing for boot application
+=================================
+=> spring boot provided 'spring-boot-starter test' test dependency to perform unit testing.
+Note : This dependency will be added by default when we create boot application.
+
+
+SpringBoot Rest API + Junit + Mocking + Jacoco
+==============================================
+
+https : //GitHub.com/ashokitschool/sb_rest_api_junit_app.git
+
+
+
+-@Test
+
+Explanation: This annotation tells JUnit (a Java testing framework) that the method below is a test method.
+It indicates that this method should be run as a test when using a test runner.
+You must import it from org.junit.Test.
+
+-assertEquals(expectedRes, actualRes);
+
+Explanation: This is an assertion provided by JUnit.
+It compares the expectedRes and actualRes. If they are equal, the test passes.
+If they are not equal, the test fails, indicating a potential bug in the mul() method.
+
+-@SpringBootTest
+
+Explanation: This annotation tells Spring Boot to start the full application context for testing.
+It’s useful when you want to test how different components work together, not just in isolation.
+It loads all the beans like in a real application, so the test class behaves as if it's running inside the Spring Boot app.
+
+
+
+-@ExtendWith(value = { MockitoExtension.class })
+
+
+Explanation: This is a JUnit 5 annotation that tells the test to use Mockito’s features, like mock injections.
+It's typically used in pure Mockito tests, but when you're using @SpringBootTest, this annotation may not be necessary unless you're doing hybrid mocking (can be omitted here).
+However, it's not harmful and works for enabling Mockito annotations.
+
+-@MockBean
+
+@MockBean tells Spring to create a mock object of UserDao and inject it into the application context.
+So when Spring initializes UserService (which depends on UserDao), it injects this mock instead of a real DAO implementation.
+This is useful for unit testing the service layer without hitting the database.
+
+
+-@InjectMocks
+
+This tells Mockito to inject the mock dependencies (like userDao) into this UserService instance.
+Since @SpringBootTest is also in use, Spring will usually handle this automatically, but it can act as a safeguard for manual setup.
+This makes sure you're testing a UserService instance with a mocked UserDao.
+
+
+-two ways :
+-----------
+
+@SpringBootTest
+public class MsgServiceTest {
+	
+	@Autowired
+	private MsgService service;
+	
+
+//	private MsgService service = new MsgService(); // No Autowiring no SpringBootTest required
+	
+}
+
+
+-@WebMvcTest(controllers = MsgRestController.class)
+
+Loads only the web layer (Spring MVC components like @Controller, @RestController, @ControllerAdvice)
+It does not load full Spring context.
+It scans and initializes only MsgRestController.
+Other beans like MsgService must be provided as mocks.
+
+-@Autowired
+ private MockMvc mockMvc;
+
+Purpose: Injects a MockMvc object.
+MockMvc is a Spring utility to simulate HTTP requests (GET, POST, etc.) to controller endpoints without starting a server.
+Used to simulate real client requests.
+
+for below table follow 58 app
+
+| Annotation / Line                      | Purpose                                       |
+| -------------------------------------- | --------------------------------------------- |
+| `@WebMvcTest(MsgRestController.class)` | Loads only the web layer (controller)         |
+| `@MockBean MsgService`                 | Mocks the service and injects into controller |
+| `@Autowired MockMvc`                   | Used to send fake HTTP requests to controller |
+| `when(...).thenReturn(...)`            | Defines mock behavior                         |
+| `MockMvcRequestBuilders.get("/path")`  | Builds a mock GET request                     |
+| `mockMvc.perform(...)`                 | Sends the request and returns the response    |
+| `assertEquals(...)`                    | Validates expected vs actual result           |
+
+
+
+
+PostRequest:
+------------
+
+| **Item**                               | **Explanation**                                                             |
+| -------------------------------------- | --------------------------------------------------------------------------- |
+| `@WebMvcTest`                          | Loads **only the controller layer**. Doesn't load services or full context. |
+| `MockMvc`                              | Utility to simulate HTTP requests and test Spring controllers.              |
+| `@Autowired`                           | Injects Spring-managed beans like `MockMvc` into the test class.            |
+| `@Test`                                | Marks a method as a JUnit test case.                                        |
+| `MockMvcRequestBuilders.post("/url")`  | Creates a mock **POST** request to the specified URL.                       |
+| `.contentType("application/json")`     | Specifies the **Content-Type** of the request.                              |
+| `.content(...)`                        | Sets the **request body** for the HTTP call.                                |
+| `ObjectMapper.writeValueAsString(obj)` | Converts a Java object to its JSON string equivalent.                       |
+| `MvcResult`                            | Holds the result of the HTTP request.                                       |
+| `MockHttpServletResponse`              | Represents the HTTP response; used to extract status, headers, body.        |
+| `assertEquals(expected, actual)`       | Verifies that the actual result matches the expected one.                   |
+
+
+
+
+
+
+
+
+
+
+Junit 5:(you tube)(previous notes in office laptop) 
+---------------------------------------------------
+
+
+- two give multiple inputs we need to give @ParameterizedTest and below that give "@ValueSource" and inside () after this annotation put multiple input.
+- if we want to take input from csv i.e excel then write "@CsvFileSource" and inside () mention csv file {we kept that csv inside test/resource }.
+- assertThrows we will use when we are expecting exception from method.
+
+
+
+What is Mocking ?
+----------------
+
+class UserService{
+	private UserDao dao;
+
+public string getUserEmail(Integer  uid){
+	String email = dao.findEmailByid(uid);
+	Stringh format = email.toLowerCase();
+	return format;
+}
+
+}
+
+
+
+class UserDao{
+	String findByEmailById(Integer uid){
+		return email;	
+	}
+}
+
+
+
+-> Mocking is a process used in unit testing when the unit being tested has external dependencies.(above experience)
+-> The purpose of mocking is to isolate and focus on the code being tested and not on the behavior or state of external dependencies.
+-> In mocking, the dependencies are replaced by closely controlled replacement objects that simulate the behavior of real once.
+-> There are three main possible types of replacement objects- fakes, stubs and mocks.
+
+There are two types of Mocking Frameworks are available
+
+	- stubs based mock frameworks(ex : Easy Mock)
+	- ByteCode Manipulation Based Mock Frameworks(ex : Power Mock){add power mock dependencies  }
+
+
+
+-> by using spy object we perform unit testing for private method.
+
+
+
+Interview Question:
+------------------
+
+Q. how to do unit testing for private method ??
+
+lect 18:
+-------
+
+
+follow youtube videos for:
+
+1) 100 + springboot Faq
+2) Spring Batch
+3) Spring boot with multiple dbs
+4) spring boot with mongo db
+
+
+
+
+Spring Batch ( You tube )https://www.youtube.com/watch?v=2sdY-fKaR2o
+=========================
+
+=> Spring Batch is lightweight, comprehensive batch framework designed to enable the development of robust batch application
+
+what is batch application:
+-------------------------
+-> The application which processes bulk of records is called as batch application.
+
+ex:
+1)sending monthly salaries to all employee
+2)Sending Monthly statement to acc holder
+3)sending greetings to multiple customer.
+
+
+
+	     process		    process
+CSV  file =============> Database ============> CSV File
+
+CSV file ---[spring batch framework]---> Database
+
+
+Spring Batch Terminology:
+=========================
+
+1)JobLauncher
+2)Job
+3)Step					    ______
+4)ItemReader    : read data from source      	  |
+5)ItemProcessor : process data  		ONE STEP  <=  JOB(it can contain multiple Step)  <= JOB launcher <= Execution order start here 
+6)ItemWriter    : write data to destination ______|
+
+refer batch architecture diagram  
+
+C:\Users\tejas\Desktop\springboot repo\project\batchAppClone
+
+Spring Boot with batch processing:
+================================
+Requirement: read customers data from csv file and write into database table
+
+follow project on you tube
+
+1) create Spring Starter project with below dependencies
+
+a) web starter
+b) batch
+c) data jpa
+d) mysql-driver
+e) Lombok
+
+
+2) Configure data source properties in application.yml file
+
+3) keep source file under src/main/resources folder (customer.csv)
+
+4) create entity class and repository interface
+
+5) crate batch configuration class
+
+lect 19:
+=======
+
+===================================
+Angular Integration with spring Boot
+===================================
+
+=> angular is client side framework.
+=> Angular framework developed by google company
+=> Angular developed using typescript
+=> Angular is free and open
+=> Angular support multiple browsers
+=> Angular is mainly used for SPA(single page application)
+Note : Angular JS and Angular framework both are not same
+=> Angular JS developed using JavaScript.
+=> Google identified some performance issues in Angular JS 1.x version then they re-developed
+angular with typescript which is called as angular framework.
+
+Note : From 2.x version onward it is called as Angular Framework .
+
+
+==============
+Angular Setup
+==============
+
+Step 1: Download and install node.js
+
+	https://nodejs.org/en
+
+Note : After installation,verify node version
+	$ node -v
+ 
+Step 2: Install typescript
+
+	$ npm install -g typescript
+	$ tsc -v
+
+
+step 3: install Angular CLI
+	$ npm install @angular/cli -g
+	$ ng v
+
+
+step 4: download and install vs code ide
+
+step 5: Create Angular Application
+	$ ng new app1
+	$ cd app1
+	$ ng serve --open
+NOTE: Angular apps will use live server for execution and it will run on  4200 port number.
+
+=> Angular application nothing but collection of component
+	Ex: menu-component ,login-component, register-component ,dashboard-component....
+
+=> In angular application by default "app-component" will be created. It is called as parent component. 
+
+Note : Every component content 3 files
+	1) component.ts(logic to handle req & response)
+	2) component.html(presentation file-template)
+        3) component.css (style for specific component)
+=> Every component will have a selector to access that component.
+	EX: <app-root></app-root>
+
+Note: App-component is a entry point for angular application. 
+
+=> index.html page is called as welcome page in angular application
+=> when we run angular application ,index.html page will be loaded and 
+it will invoke app-component hence we will get response from app.component.html page. 
+
+Note: to apply styles for app-component template we have app-component.css file.
+
+=> index.html page is called as welcome page in angular application.
+
+=> when we run angular app,index.html page will be loaded and it will invoke app-component hence we will get
+response from app.component.html page.
+
+Note: To apply styles for app-component template we have app-component.css file.
+
+=======================
+Angular building blocks
+=======================
+
+1) component  => it represent small portion of our web page 
+Ex: header component ,footer component ,menu component, logon component ,reg component..
+
+2) templates => it represent view page(html)
+Note: Every component will have its own template(html)
+ 
+3) data bindings => it is used to transfer the data between component and template
+	component <--------> template
+
+4) Directions => they are used to manipulate DOM elements in the template
+	EX: ngIf, ngFor, ngModel......
+
+5) Pipes=> pipes are used to transform the data
+	EX: uppercase, lowercase, INR, USD
+
+6) Services =>services are used to develop business logic(api calls)
+
+
+lect 20:
+=======
+
+=====================================
+Spring Boot with angular integration
+=====================================
+
+ Full Stack = spring boot (backend) + angular(frontend)
+refer app:23
+-------------
+public class MsgController {
+
+	@GetMapping("/greet")
+	public ModelAndView getMsg2() {
+
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("msg2", "Good Morning...!!");
+		mav.setViewName("index");
+
+		return mav;
+	}
+
+	@GetMapping("/welcome")
+	public ModelAndView getMsg1() {
+
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("msg1", "Welcome to Ashok IT");
+		mav.setViewName("index");
+		return mav;
+	}
+}
+
+==============Angular App development=================
+
+C:\Users\tejas\Desktop\springboot repo\project\NGWorkspace\app2
+
+#Step 1:
+-Create Angular application
+  $ ng new app2
+
+#step2:
+
+- go app directory
+  $ ng cd app2
+
+
+-run app 
+ $ ng serve --open
+
+#step-3: configure httpclient details in "app.config.ts" file
+--------------------------------------------------------------
+
+export const appConfig = {
+	providers:[provideRouter(routes), provideHttpClient()]
+}; 
+--------------------------------------------------------------
+
+#step4:Create Service class and invoke 
+	ng generate service app
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AppService {
+
+  private welcomeApiUrl: string;
+  constructor(private http: HttpClient) {
+    this.welcomeApiUrl ='http://localhost:8081/welcome';
+  }
+
+  public getWelcomeMsg(){
+    this.http.get(this.welcomeApiUrl,{responseType:'text'});
+  }
+}
+--------------------------------------------------------------
+#step 5: Inject service class in app-component
+
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { AppService } from './app.service';
+
+@Component({
+  selector: 'app-root',
+  imports: [RouterOutlet],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css'
+})
+export class AppComponent {
+[x: string]: any;
+  title = 'app2';
+  msg:string=""; 
+  constructor(private appService: AppService){}
+
+  handleWelcomeBtn(){
+    this.appService.getWelcomeMsg().subscribe(resp=> {
+      this.msg = resp;
+    })
+  }
+
+  handleGreetBtn(){
+    this.appService.getGreetMsg().subscribe(resp => {
+      this.msg = resp;
+    })
+  }
+}
+
+#step 6:write presentation logic in app-template
+------------------------------------------------
+{{msg}}
+
+<hr/>
+
+<button (click)="handleWelcomeBtn()">Get Welcome Msg</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
