@@ -1,0 +1,131 @@
+Methods and there use in DSA:
+=============================
+
+try to implement code for has-a ,is-a
+ 
+Arrays: https://leetcode.com/problems/reverse-pairs/description/
+======
+
+return new int [] {i,j};
+
+Arrays.sort(nums);
+
+Arrays.equals(arr1,arr2)
+
+int [] copy = Arrays.copyOf(original,original.length)   ///instead of length we can give our size
+
+to print array : sysout(Arrays.toString(myArray)));
+
+
+System.arraycopy(src,0,dest,0,src.length)
+
+List:
+=====
+
+Arrays.asList(nums[i],nums[j],nums[k])
+
+List<List<Object>> listOfLists = Arrays.asList( Arrays.asList(1, "two"), Arrays.asList("three", "four") );
+[[1, two], [three, four]]
+
+
+List<String> lst = new ArrayList<>(Arrays.asList(arr));
+
+String:
+=======
+
+que:
+        // Test cases
+        System.out.println(isConsecutive("1234"));     // true (1,2,3,4)
+        System.out.println(isConsecutive("99100101")); // true (99,100,101)
+
+
+1)  StringBuilder s = new StringBuilder();  => s.toString();
+2) char [] ch = s.toCharArray();
+3) new String(ch).substring(0, left);
+4) int idx = s.indexOf('a');  
+5) int idx = s.lastIndexOf('a');   // 5
+6) s.contains("code"); 
+7) String s = "a,b,c";    String[] arr = s.split(",");
+8) String s = "  hello  ";  s = s.trim(); 
+9) 
+
+
+
+Stack:
+======
+ Stack<Integer> stk = new Stack<>();
+
+
+
+
+
+Queues:
+=======
+Queue<Pair<Integer,Integer>> que = new LinkedList<>();
+
+
+
+
+LinkedList:
+===========
+
+
+
+
+
+
+Trees:
+======
+
+
+
+
+
+
+
+Streams:
+========
+
+copy one array to other 
+========================
+
+int[] unique = {0, 1, 2, 3, 4};
+int[] nums   = {0, 0, 1, 1, 1, 2, 2, 3, 3, 4};
+
+System.arraycopy(unique, 0, nums, 0, unique.length);
+
+System.arraycopy(
+    unique,        // source array
+    0,             // start index in source
+    nums,          // destination array
+    0,             // start index in destination
+    unique.length  // number of elements to copy
+);
+
+
+
+Map:
+====
+	Map<Integer, String> map = Map.of(
+    1, "Apple",
+    2, "Banana",
+    3, "Mango"
+);
+
+      map.containsKey(sum-k))
+      map.get(sum-k)
+      map.put(sum,map.getOrDefault(sum,0)+1);
+      map.getOrDefault(s.charAt(left))
+      map.remove(key);
+
+      for (Integer key : ans.keySet()){
+          if(ans.get(key) > a){
+              aba.add(key);
+           }
+        }
+     for (String value : map.values()) {
+      System.out.println(value);
+}
+
+
+

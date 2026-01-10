@@ -1,0 +1,11 @@
+1.	Suppose we update the code which is related to table ,now we want to delete all the data and 
+	want to create table from scratch:
+	-> just change the property in properties file  
+
+	   spring.jpa.hibernate.ddl-auto=update   to spring.jpa.hibernate.ddl-auto=create
+
+2.  Error running 'in. ashokit in 06-Autowiring' No junit. jar  
+-> this type of problem came then just reload maven 
+
+3. when you are not getting option to run in IntelijIdea for maven project  
+-> just go on pom.xml and right click-> Add maven

@@ -1,0 +1,497 @@
+
+lect 17:
+========
+project that are unit tested
+============================
+
+C:\Users\tejas\Desktop\springboot repo\SBMS-39-main\35_SB_REST_API        [IMP]
+C:\Users\tejas\Desktop\springboot repo\SBMS-39-main\13-SB-Autowiring
+C:\Users\tejas\Desktop\springboot repo\workspace-spring-tool-suite-4-4.27.0.RELEASE\14-DataJPAApp1
+
+
+
+What is Junit:
+==============
+
+- free and open source java based framework
+- it is used for unit testing
+
+Note: It is only used for java project unit testing
+
+what is unit testing:
+=====================
+- Testing individual components of the application is called as unit testing.
+- Unit testing is used to identify weather code is working as expected or not.
+- unit testing is used to identify bugs in the code.
+- with the help of unit testing we can identify bugs at early stage
+ (before giving to testing team) 
+- By performing unit testing we can provide quality code(bug free code) to 
+ higher environments.
+
+What is isolated unit testing?
+==============================
+
+=> Controller methods are depends on service method and service methods depends on dao/repo methods.
+=> when we are testing controller method that time only controller method should be executed (service method shouldn't be called)
+=> to perform isolated unit testing we will use mocking
+
+
+what is mocking ?
+================
+=> The process of creating substitute object for real-object is called as mocking
+=> to perform mocking we have several mocking frameworks
+
+a) Mockito
+b) Easy Mock
+c) Power Mock
+d) JMock
+
+
+What is code coverage?
+======================
+
+=> The process of identifying which lines of code is unit tested and which lines of code is missed in unit testing.
+=> Industry standard is minimum 80% code coverage for the project.
+=> To get code coverage report we can use 'jacocco' plugin.
+=> we can check code coverage by running application as maven test. And check for target -> sites -> index.html 
+=> If we want to exclude some classes then inside plugin do below configuration
+
+		<configuration>
+			<excludes>
+				<exclude>in/ashokit/dto/**</exclude>
+			</excludes>
+		</configuration>
+
+
+Unit Testing for boot application
+=================================
+
+best practise :
+===============
+Test your business logic, not framework code.
+Keep one test focused on one behavior only.
+Follow Arrange–Act–Assert consistently
+Use meaningful and descriptive test method names.
+Prefer assertions on results or state over interaction verification.
+Use interaction verification only when methods return void.
+Avoid using times(1) unless call count actually matters.
+Mock external dependencies, not your own classes.
+Do not mock value objects, entities, or DTOs.
+Write tests that are independent of execution order.
+Avoid shared or static test data across tests.
+Test both positive and negative scenarios.
+Always test edge cases like null, empty, and invalid inputs.
+Use assertThrows to verify exception behavior.
+Keep unit tests fast and lightweight.
+Do not load Spring context for unit tests.
+Use constructor injection in production code to improve testability.
+Avoid testing System.out.println or logging output.
+Prefer returning values over void methods for better test assertions.
+Use ArgumentCaptor when verifying transformed data.
+Verify only what matters; avoid over-verification.
+Ensure tests are readable without comments.
+Avoid hard-coding unnecessary values.
+Write tests that survive refactoring.
+Code coverage is a metric, not a quality guarantee.
+Remove redundant or duplicate tests.
+Fail fast and fail clearly.
+Keep assertions clear and specific.
+Do not test private methods directly.
+Treat unit tests as production-quality code.
+
+***************************************************
+=> spring boot provided 'spring-boot-starter test' test dependency to perform unit testing.
+Note : This dependency will be added by default when we create boot application.
+
+
+=> first add jacoco plugin ,then run app ass maven test, then go to project directory 
+
+C:\Users\tejas\Desktop\springboot repo\SBMS-39-main\58_SB_Junit_App\target\site\jacoco
+
+SpringBoot Rest API + Junit + Mocking + Jacoco
+==============================================
+
+https : //GitHub.com/ashokitschool/sb_rest_api_junit_app.git
+ 
+IMP:
+===
+=> first add jacoco plugin ,then run app ass maven test, then go to project directory 
+=> C:\Users\tejas\Desktop\springboot repo\SBMS-39-main\58_SB_Junit_App\target\site\jacoco
+=> JaCoCo is a code coverage tool.
+=> That’s it.
+=> It answers only one question:
+=> Which lines / branches / methods were executed during tests?
+=> how we do unit testing for post method?
+=> unit testing vs integration  testing
+=> Integration testing calls real methods, real beans, and can use a real or test database.
+No mocks by default.
+=> JUnit test order is not guaranteed
+=> @SpringBootTest vs @ExtendWith(value = { MockitoExtension.class })
+=> Jacoco lets you exclude classes/packages you don’t want to count for test coverage. This is normal, practical, and often necessary.
+Below is exactly how it works, no fluff.
+=> JaCoCo measures execution of bytecode instructions — which exist in methods and constructors, not in fields.
+
+Why exclusions exist (reality check)
+
+You should exclude:
+
+DTOs / POJOs
+Config classes
+Constants
+Generated code
+Main application class
+Exception classes
+
+You should NOT exclude:
+
+Business logic
+Services
+Controllers (unless justified)
+
+Jacoco measures coverage, not code quality. Excluding noise keeps reports honest.
+
+Maven – Jacoco exclusions (MOST COMMON)
+1️⃣ Add exclusions in jacoco-maven-plugin
+<plugin>
+    <groupId>org.jacoco</groupId>
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <version>0.8.11</version>
+
+    <configuration>
+        <excludes>
+            <exclude>**/dto/**</exclude>
+            <exclude>**/config/**</exclude>
+            <exclude>**/*Application.class</exclude>
+            <exclude>**/exception/**</exclude>
+        </excludes>
+    </configuration>
+
+    <executions>
+        <execution>
+            <goals>
+                <goal>prepare-agent</goal>
+            </goals>
+        </execution>
+        <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+                <goal>report</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+
+How exclusions work (important)
+
+Uses compiled class paths, not Java package names
+
+Wildcards ** are allowed
+
+.class is required when excluding specific classes
+
+Common exclusion patterns (copy-paste safe)
+<exclude>**/model/**</exclude>
+<exclude>**/dto/**</exclude>
+<exclude>**/entity/**</exclude>
+<exclude>**/config/**</exclude>
+<exclude>**/constants/**</exclude>
+<exclude>**/*Exception.class</exclude>
+<exclude>**/*Application.class</exclude>
+
+Interview Question:
+------------------
+
+Q. how to do unit testing for private method ??
+
+-@Test
+
+Explanation: This annotation tells JUnit (a Java testing framework) that the method below is a test method.
+It indicates that this method should be run as a test when using a test runner.
+You must import it from org.junit.Test.
+
+-assertEquals(expectedRes, actualRes);
+
+Explanation: This is an assertion provided by JUnit.
+It compares the expectedRes and actualRes. If they are equal, the test passes.
+If they are not equal, the test fails, indicating a potential bug in the mul() method.
+
+-@SpringBootTest
+
+Explanation: This annotation tells Spring Boot to start the full application context for testing.
+It’s useful when you want to test how different components work together, not just in isolation.
+It loads all the beans like in a real application, so the test class behaves as if it's running inside the Spring Boot app.
+
+-@ExtendWith(value = { MockitoExtension.class })
+
+Explanation: This is a JUnit 5 annotation that tells the test to use Mockito’s features, like mock injections.
+It's typically used in pure Mockito tests, but when you're using @SpringBootTest, this annotation may not be necessary unless you're doing hybrid mocking (can be omitted here).
+However, it's not harmful and works for enabling Mockito annotations.
+
+-@MockBean
+
+@MockBean tells Spring to create a mock object of UserDao and inject it into the application context.
+So when Spring initializes UserService (which depends on UserDao), it injects this mock instead of a real DAO implementation.
+This is useful for unit testing the service layer without hitting the database.
+
+
+-@InjectMocks
+
+This tells Mockito to inject the mock dependencies (like userDao) into this UserService instance.
+Since @SpringBootTest is also in use, Spring will usually handle this automatically, but it can act as a safeguard for manual setup.
+This makes sure you're testing a UserService instance with a mocked UserDao.
+
+
+-two ways :
+-----------
+
+@SpringBootTest
+public class MsgServiceTest {
+	
+	@Autowired
+	private MsgService service;
+	
+//	private MsgService service = new MsgService(); // No Autowiring no SpringBootTest required
+	
+}
+
+
+-@WebMvcTest(controllers = MsgRestController.class)
+
+Loads only the web layer (Spring MVC components like @Controller, @RestController, @ControllerAdvice)
+It does not load full Spring context.
+It scans and initializes only MsgRestController.
+Other beans like MsgService must be provided as mocks.
+
+-@Autowired
+ private MockMvc mockMvc;
+
+Purpose: Injects a MockMvc object.
+MockMvc is a Spring utility to simulate HTTP requests (GET, POST, etc.) to controller endpoints without starting a server.
+Used to simulate real client requests.
+
+for below table follow 58 app
+
+| Annotation / Line                      | Purpose                                       |
+| -------------------------------------- | --------------------------------------------- |
+| `@WebMvcTest(MsgRestController.class)` | Loads only the web layer (controller)         |
+| `@MockBean MsgService`                 | Mocks the service and injects into controller |
+| `@Autowired MockMvc`                   | Used to send fake HTTP requests to controller |
+| `when(...).thenReturn(...)`            | Defines mock behavior                         |
+| `MockMvcRequestBuilders.get("/path")`  | Builds a mock GET request                     |
+| `mockMvc.perform(...)`                 | Sends the request and returns the response    |
+| `assertEquals(...)`                    | Validates expected vs actual result           |
+
+
+
+
+PostRequest:
+------------
+
+| **Item**                               | **Explanation**                                                             |
+| -------------------------------------- | --------------------------------------------------------------------------- |
+| `@WebMvcTest`                          | Loads **only the controller layer**. Doesn't load services or full context. |
+| `MockMvc`                              | Utility to simulate HTTP requests and test Spring controllers.              |
+| `@Autowired`                           | Injects Spring-managed beans like `MockMvc` into the test class.            |
+| `@Test`                                | Marks a method as a JUnit test case.                                        |
+| `MockMvcRequestBuilders.post("/url")`  | Creates a mock **POST** request to the specified URL.                       |
+| `.contentType("application/json")`     | Specifies the **Content-Type** of the request.                              |
+| `.content(...)`                        | Sets the **request body** for the HTTP call.                                |
+| `ObjectMapper.writeValueAsString(obj)` | Converts a Java object to its JSON string equivalent.                       |
+| `MvcResult`                            | Holds the result of the HTTP request.                                       |
+| `MockHttpServletResponse`              | Represents the HTTP response; used to extract status, headers, body.        |
+| `assertEquals(expected, actual)`       | Verifies that the actual result matches the expected one.                   |
+
+
+Junit 5:(you tube)(previous notes in office laptop) 
+---------------------------------------------------
+
+
+- two give multiple inputs we need to give @ParameterizedTest and below that give "@ValueSource" and inside () after this annotation put multiple input.
+- if we want to take input from csv i.e excel then write "@CsvFileSource" and inside () mention csv file {we kept that csv inside test/resource }.
+- assertThrows we will use when we are expecting exception from method.
+
+
+
+What is Mocking ?
+----------------
+
+class UserService{
+	private UserDao dao;
+
+public string getUserEmail(Integer  uid){
+	String email = dao.findEmailByid(uid);
+	Stringh format = email.toLowerCase();
+	return format;
+}
+
+}
+
+
+
+class UserDao{
+	String findByEmailById(Integer uid){
+		return email;	
+	}
+}
+
+
+
+-> Mocking is a process used in unit testing when the unit being tested has external dependencies.(above experience)
+-> The purpose of mocking is to isolate and focus on the code being tested and not on the behavior or state of external dependencies.
+-> In mocking, the dependencies are replaced by closely controlled replacement objects that simulate the behavior of real once.
+-> There are three main possible types of replacement objects- fakes, stubs and mocks.
+
+There are two types of Mocking Frameworks are available
+
+	- stubs based mock frameworks(ex : Easy Mock)
+	- ByteCode Manipulation Based Mock Frameworks(ex : Power Mock){add power mock dependencies  }
+
+
+
+-> by using spy object we perform unit testing for private method.
+
+
+IMP: 
+
+1) Notes for testing with mockmvc json object :
+----------------------------------------
+
+In MockMvc testing, the HTTP response JSON is parsed into a tree structure, 
+and we can access its data using jsonPath() starting from the root symbol $, as long as we know the field names or indexes.
+
+JSON Response
+{
+  "id": 1,
+  "name": "John",
+  "email": "john@gmail.com"
+}
+
+Access using jsonPath
+
+$ → root object
+$.id → value of id
+$.name → value of name
+$.email → value of email
+
+Example 2: JSON Array response
+JSON Response
+[
+  { "id": 1, "name": "John" },
+  { "id": 2, "name": "Smith" }
+]
+
+Access using jsonPath
+
+$ → root array
+$[0].id → id of first object
+$[1].name → name of second object
+
+2) testing xml:
+------------
+In MockMvc XML testing, responses are parsed into a DOM tree, and 
+XPath is used to navigate and assert values starting from the root element using /.
+
+| JSON Testing | XML Testing   |
+| ------------ | ------------- |
+| `jsonPath()` | `xpath()`     |
+| `$` root     | `/` root      |
+| Arrays       | Repeated tags |
+| Key lookup   | Tag lookup    |
+
+=> Conceptually:
+
+JSON → parsed into JSON tree
+XML → parsed into DOM tree
+XPath navigates the XML tree
+
+=> What is the CORRECT approach?
+Write two test methods for the SAME endpoint
+
+Test Method	Accept Header	Assertion
+testGetCustomer_JSON()	application/json	jsonPath()
+testGetCustomer_XML()	application/xml	xpath()
+
+Same HTTP method, same URL, different tests.
+
+
+3)Why integration tests do NOT appear in JaCoCo HTML report
+
+Short answer => JaCoCo by default tracks only UNIT tests, not INTEGRATION tests.
+
+
+4) Integration testing 
+=> “Integration tests use SpringBootTest with real beans and DB, are executed by 
+Maven Failsafe during the verify phase, and their coverage is visible in JaCoCo only 
+when the report is generated after verify.”
+
+Steps to Create Integration Tests (Spring Boot)
+1️⃣ Create test class
+
+Location: src/test/java
+Naming must be:
+*IT.java or
+*IntegrationTest.java
+Example:
+CustomerControllerIT.java
+
+2️⃣ Use correct annotations
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+class CustomerControllerIT {
+}
+
+Why:
+@SpringBootTest → loads full context
+@AutoConfigureMockMvc → real HTTP calls
+@Transactional → auto rollback after test
+
+3️⃣ Do NOT mock internal layers
+❌ No @MockBean for services/repos
+Use real:
+Controller
+Service
+Repository
+DB (H2 / Testcontainers)
+
+4️⃣ Use real DB (important)
+Choose one:
+H2 (quick)
+Testcontainers (preferred in real projects)
+Steps to Run Integration Tests
+5️⃣ Add Failsafe plugin (mandatory)
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-failsafe-plugin</artifactId>
+  <executions>
+    <execution>
+      <goals>
+        <goal>integration-test</goal>
+        <goal>verify</goal>
+      </goals>
+    </execution>
+  </executions>
+</plugin>
+
+6️⃣ Run correct Maven command
+
+From IDE or terminal:
+mvn clean verify
+❌ mvn test → won’t run integration tests
+Steps to See JaCoCo Integration Test Report
+7️⃣ Add JaCoCo plugin (bound to verify)
+Ensure report runs in verify phase
+Ensure integration tests are included
+(Without this → integration tests won’t appear)
+8️⃣ Open correct report
+After mvn verify, open:
+target/site/jacoco/index.html
+
+9️⃣ Verify execution
+In console you must see:
+Running CustomerControllerIT
+
+If not seen → test never ran → no report.
+
+

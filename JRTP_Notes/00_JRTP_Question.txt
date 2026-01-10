@@ -1,0 +1,123 @@
+Questions:
+===========
+
+1) Singleton Design Pattern
+2) how HashMap works internally 
+3) fail safe  and fail fast collections
+4) what is constructor chaining
+5) how many ways we can create object for a class in java
+6) what is cloning and why we need
+7) what are the methods available in object class
+8) String vs String Buffer vs StringBuilder
+9) what is exception hierarchy in java
+10) what is serialization and de serialization 
+11) what is transient keyword in java
+12) Diff between comparable and comparator
+13) how many ways we can create thread in java
+14) runnable vs callable in java
+15) what is executer framework in java
+16) what is  the  contract between hashCode() and equals() methods
+17) Checked vs unchecked exception
+18) what is try-with-resources in java
+19) what are concurrent collection in java
+20) difference between interfaces and abstract classes
+21) what is shallow cloning and deep cloning 
+22) what is the difference between filter() and map() method in Stream api?
+23) what is the purpose of User Defined Exception ?
+24) What is diff between concurrent HashMap and HashMap?
+25) what is Weak hash Map in java?
+26) what is factory design pattern
+27) how to read file data using java 8
+28) program to generate random text using java
+29) program to generate OTP using java
+30) program to check String contains only alphabets
+31) what are the rules for method overloading
+32) what are variable arguments in java
+33) how to increase heap size while running java program
+34) what are generics in java
+35) what is auto boxing auto unboxing 
+36) how to catch multiple exceptions using single catch block
+37) what is StringJoiner class
+38) what is  SplIterator
+39) can we declare method as abstract and final 
+40) how to  create user defined immutable class in java
+41) what are the class loaders available in java?
+42) what is thread local class?
+43) can we overload main() method in java class?
+44) can we run java program without main method?
+45) what is polymorphism with example
+46) what are SOLID oops principles?
+47) what is encapsulation with example?
+48) how to filter employees based on given salary using stream api
+49 ) diff lambda expression and method references
+50) what is the use of default and static methods in interface
+51) what is optional class in java 8?
+52) what is completable feature in java?
+
+
+
+Interview que:
+==============
+
+
+1) Diff betwn constructor and method
+2) What is serialization 
+3) How to handle exceptions in java
+4) List vs set 
+5) What is synchronization
+6) try-catch with throws keyword in single method 
+7)  difference between throw and throws
+8) Serializable interface is part of which package 
+9) oops
+10) what is IOC container in spring 
+11) what is loosely coupling and tightly coupling
+12) what are access modifiers in java
+13) what is the use of postman 
+14) program to write toggle a string (uppercase to lowercase and vice  versa)_
+15) what is dependency Injection and how many ways  we can do that?
+16)  write a java program to find smallest elements which right side for each element 
+		
+	 String arr[] = {"11","2","5","10","4"} 
+
+17) write a java program to find third highest value in the given array 
+	int [] arr = {1,6,1,7,6,9,8}
+
+18) freq of digits in given number 
+
+	ip: 65734252
+
+
+19) which annotations you are using in spring boot ?
+
+20) how to implement serialization with code?
+21) REST api annotations
+22) Array vs ArrayList 
+23) what is multi threading 
+24) how to achieve Syncronization
+25) List out some unchecked exception 
+26) How Lombok will generate setters and getters 
+27) collections freameworks vs collection (I) vs collections(C)
+28) what is rest api?
+29) diff between access specifiers and access modifiers 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

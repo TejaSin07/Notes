@@ -1,0 +1,575 @@
+lect 3: (26 may 25)
+-------
+question:
+---------
+1) when to use war and when to jar?
+
+| Criteria                | **JAR**                                          | **WAR**                                                     |
+| ----------------------- | ------------------------------------------------ | ----------------------------------------------------------- |
+| **Deployment style**    | Runs standalone using `java -jar`                | Needs external app server (Tomcat, JBoss, WebLogic, etc.)   |
+| **Server type**         | Embedded server inside the JAR                   | Server provided by the container                            |
+| **Used in**             | Modern microservices, cloud-native apps          | Legacy enterprise systems, monoliths                        |
+| **DevOps suitability**  | Excellent (Docker/K8s friendly)                  | Poor/average (depends on external server setup)             |
+| **Spring Boot default** | Yes                                              | No (requires customization)                                 |
+| **Maintenance**         | Easier — one self-contained app                  | Harder — depends on app server configuration                |
+| **Startup time**        | Faster (embedded server optimized)               | Slower (container-managed startup)                          |
+| **When to choose**      | When you control the runtime and want simplicity | When infra forces you to deploy on an enterprise app server |
+| **Example command**     | `java -jar app.jar`                              | Deploy `app.war` into Tomcat `webapps/` folder              |
+
+
+======
+Maven
+======
+
+=> Maven is a build tool developed by Apache Organisation.
+=> Maven developed using java language.
+=> maven is free software 
+=> IMP: maven is used to automate build process of the project
+
+what is Build process?
+=====================
+
+1) create project folder structure
+2) Download Required Dependencies(Ex: Hibernate, Spring etc..) 
+3) Add Dependencies to project build path
+4) compile project source code
+5) Execute unit test cases of project(Junits)
+6) Package our project as jar or war
+
+Environment setup
+=================
+1) Download and install java software
+2) Set JAVA_HOME => C:\Program Files\Java\jdk-22
+3) Set path for java => C:\Program Files\Java\jdk-22\bin
+4) Download Maven software from Apache website as zip file :https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.zip
+5) Extract that maven zip file
+6) Set MAVEN_HOME in environment variable :C:\apache-maven-3.9.9
+7) Set path for maven : C:\apache-maven-3.9.9\bin
+8) verify maven installation using cmd
+ 	$ mvn -v
+
+Note : If you are not able to create Maven project in IDE then close your IDE and delete .m2 folder and
+open your IDE.
+
+
+
+lect 4:(26 may 25)
+------
+
+Maven Terminology:
+------------------
+
+Archetype: it represent type of project we want to create
+	QuickStart : Standalone application
+	webapp     : web application
+
+groupId: It represent org name(who developed project)
+	ex: com.tcs
+	    com.ibm
+
+artifactId : It represent project name
+	ex: flipkart_app
+	    amazon_app
+
+version : It represent project version
+		SNAPSHOT : under development
+		RELEASE : development completed
+		note :: we can change version in pom.xml directly
+
+packaging : how you want to package your app(jar/war)
+
+	QuickStart : standalone application ==> jar
+	webapp : web application ==> war
+
+
+Maven Goals: Goals are used to perform maven build process
+cmd :
+$ mvn compile --> create .class file (Creates target/ and compiles source code into .class files.)
+$ mvn clean  --> delete .class file (delete target folder)
+$ mvn test   --> executes junit
+$ mvn package--> create jar/war file
+$ mvn install--> store artifact into artifact repo (Note: it will execute compile test package all and upload project jar file to local or remote repository)
+
+in IDE:
+right click on project :- run as :- select goal
+
+$ mvn clean package --> execute clean first then package
+
+
+Maven plugins: every maven goal is having plugin to perform operation .
+
+
+Note :cmd $ cls :  we clear all data and commands from cmd. 
+
+
+
+creating maven Standalone project from cmd:
+==========================================
+mvn archetype:generate -DgroupId=com.tejas.app -DartifactId=my-app -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.5 -DinteractiveMode=false
+
+my-app
+	src/main/java     -> source code
+	src/main/resouces -> config file
+	src/test/java	  -> junit classes
+	src/test/resources-> config files for unit testing
+	pom.xml           -> project object model 
+				maven config file
+
+creating maven web project from cmd:
+==========================================
+mvn archetype:generate -DgroupId=com.tejas.app -DartifactId=web-app -DarchetypeArtifactId=maven-archetype-webapp -DarchetypeVersion=1.5 -DinteractiveMode=false
+
+Note: for every maven project pom.xml file will be created.
+POM: Project Object model
+
+=> Maven dependencies we will configure in pom.xml file
+
+Note : we need to execute maven goals from project directory.
+
+
+=> we can find maven dependencies in www.mvnrepository.com
+
+<!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-context</artifactId>
+    <version>6.2.3</version>
+</dependency>
+
+
+=================================
+Transitive Dependency management:
+==================================
+
+
+=> when we add above dependency maven downloading spring-core, spring-bean and spring-aop also. 
+this is also called as Transitive Dependency management
+
+Maven repository:
+================
+
+=> maven repository means a place where all jars will be stored
+=> In maven we have three type of repository 
+
+1) central repository 
+2) remote repository(we need to configure it in pom.xml file)(Nexus/JFro)
+3) local repository
+
+Note: when we add dependency maven first check jar in local repository that is in m2 folder if not there then 
+it will download jar from central (i.e mvn.repository site) and it require internet for first time. If we configure 
+remote repo in pom.xml then it will download form there instead of central repo.
+
+=> central repository maintained by apache organization
+=> Remote Repository maintained by company.(shared libs)
+=> Local repository will be created in our system(.m2) (you can see path inf front of jar in maven dependencies)
+
+lect 5:(26 may 25)  
+
+How to connect to remote repository
+===================================
+-> configure remote repository in settings.xml
+-> setting.xml file will be there in apache-maven/conf directory
+
+
+What is maven multi module project ?
+===================================
+
+=> creating projects with Parent and child relationship is called as 
+Multi module Project.
+
+Note : Parent Project package should be pom format.
+
+how to delete exclude extra dependencies:
+-----------------------------------------
+
+prob : suppose we add context dependency now along with that dependency 5 more dependency are installed automatically
+now we need to exclude one of that suppose aop dependency then add exclusions 
+	<dependency>
+	    <groupId>org.springframework</groupId>
+	    <artifactId>spring-context</artifactId>
+	    <version>6.2.3</version>
+	    
+	    <exclusions>
+	    	<exclusion>
+	    		<groupId>org.springframework</groupId>
+	    		<artifactId>spring-aop</artifactId>
+	    	</exclusion>
+	    </exclusions>
+ 
+Maven dependency scope
+======================
+
+inside dependencies we can add scope tag and inside scope tag you can write scope ,.. i.e when we need dependencies while test or runtime or while xyz function perform.
+
+
+
+lect 6(27 may 25):
+==================
+
+Version Control Software:
+========================
+1) code integration at place
+2) Monitoring code changes
+
+
+Software:
+---------
+1) SVN (outdated
+2) Git Hub -- Microsoft
+3) BitBucket -- Atalasian
+
+
+Git repository :
+----------------
+It is a place which is used to store project source code at one place
+
+1) Public repository (everybody can see, we choose who can commit)
+2) private repository (nobody can see , we choose who can see & commit)
+
+Note: for every repository, repo URL will be generated.
+	URL : https://github.com/TejaSin07/Infy_Loan_APP.git
+
+Environment Setup:
+-----------------
+
+1) Create Git hub account
+
+2) Generate GIT Token to perform operations in GitHub repo
+	Token : <GITHUB_PERSONAL_ACCESS_TOKEN>
+
+3) Download and install git client software
+
+4) Open git bash & Configure our details in git client
+	$ git config --global user.name "tejas"
+	$ git config --global user.email "tejassinkar10@gmail.com"
+
+
+$ git help : give info about all frequently used commands in gib bash
+$ git help commit : give documentation about commit in browser, same for other command
+
+
+						git status 					github
+ ________________________   ________________________   _____________________                _______________________
+|	Working tree    |-|         staging area   |-|  local repo         |    _________\ |     remote repo       |
+	$  git init    [git add]                 [git commit]                            /				>___
+|________________________| |________________________| |_____________________|  git push    |_______________________|	    |
+     |															    |
+     ^				Machine											    |
+     |_____________________________<__________________git clone< url >____________________________________________________<_|
+
+
+Pushing Maven project to git repo:
+==================================
+1) Create Git Remote repo 
+2) Open git bash from maven project folder
+3) Execute below commands
+
+Note : CLS to clear
+ 
+$ git init  
+    - initialize an empty git repository in the current folder
+
+$ git add <file|.|folder>  
+    - add file(s) to the staging area
+
+$ git status  
+    - check current status (staged / unstaged / untracked files)
+
+$ git commit -m "initial commit"  
+    - move staged files into the local repository as a commit
+
+$ git branch -M main  
+    - rename current branch to 'main' (force override if exists)
+
+$ git remote add origin <repo-url>  
+    - add remote repository URL and name it 'origin'
+
+$ git push -u origin main  
+    - push local commits to the remote repo and set upstream branch
+
+$ git clone <repository-url>  
+    - download a remote repository to local system (creates a new folder)
+
+$ git restore <file>  
+    - discard local changes in the working directory for that file  
+      (to unstage: use 'git restore --staged <file>')
+
+$ git log  
+    - view commit history
+
+$ git rm <file>  
+    - remove file from working directory and stage the deletion  
+      (must commit and push to reflect on remote)
+
+$ git revert <commit-id>  
+    - undo a commit by creating a new reverse commit  
+      (must commit & push after revert)
+
+$ git pull  
+    - download changes from remote and merge into the current branch
+
+IMP: $ git rebase 
+
+NOTE:
+
+Problem: When Git opens Vim for a commit message, you might get stuck in read-only mode and can’t type or exit normally. This happens if a swap file is left or the file opens read-only.
+
+Solution: Press Esc, type(it may not visible) :q! and press Enter to force quit Vim without saving.
+ If that fails, close and reopen the terminal. To avoid this, set Git’s editor to Notepad or VS Code.
+
+common prob:
+
+GIT MERGE CONFLICT(same line/same file different code):
+------------------
+1. person A pull 
+2. person b pull
+3. person A push 
+4. now b try to push, but he updated older version. Alert msg given by git while push
+5. he need to pull first, then he will informed by marking changes in code.  
+
+=================================================================================
+
+Q. I created a new folder from scratch. How do I push my files to a remote repo?
+--------------------------------------------------------------------------------
+
+Step 1: Go inside your project folder
+cd /path/to/your-folder
+
+Step 2: Initialize Git
+Since this folder is brand new and not cloned:
+git init
+
+This creates a .git/ directory — now it’s a git repo.
+
+Step 3: Add all files to staging
+git add .
+
+Step 4: Commit the files
+git commit -m "Initial project commit"
+
+Step 5: Add the remote repository URL
+Replace <repo-url> with your GitHub/GitLab/Bitbucket repo URL:
+
+git remote add origin <repo-url>
+
+
+Example:
+
+git remote add origin https://github.com/yourname/myrepo.git
+
+Step 6: Push the files to the remote
+If the remote branch is main:
+
+git push -u origin main
+If the remote uses master:
+
+git push -u origin master
+After this, future pushes are simple:
+
+git push
+✅ You’re done! Your scratch folder is now uploaded to the remote repo.
+🔥 Why this works
+
+Because you used:
+
+git init → make the folder a git repo
+
+git add → stage files
+
+git commit → save snapshot
+
+git remote add origin → connect to remote
+
+git push → upload
+
+lect 7:(28 may 25)
+========
+Git Branches:
+=============
+- In project ,multiple development teams will be involved 
+	- cr team
+	- enhanced team
+	- R & D Team
+	- prod team
+
+-> when multiple teams are working parallelly code integrations will become difficult
+-> Every team should have separate code base for easy maintenance
+	note : Under one repository multiple branches will be created
+-> using branches multiple teams can work parallelly.
+
+=> we can create branches from git repository directly
+=> In every repo below branches will be available
+	1) main/master
+	2) develop
+	3) feature
+	4) research
+	5) staging
+	6) release
+
+git clone <repo url>  		-> clone main repo branch
+
+-> using git bash we can switch from one branch to another branch
+	$ git checkout <branch-name> 
+	ex git clone https://github.com/tejas/myproject.git
+
+git clone -b <brach-name> <repo url> - 
+
+-> we can check working tree pointing to which branch
+	$ git branch
+	git clone -b feature-login https://github.com/tejas/myproject.git
+
+-> we can merge changes from one branch to another branch using pull request.
+
+Git Hub Lab Task
+=================
+
+1. Create Maven Web Application
+2. Add 'Spring-Core' dependency in project pom.xml file (www.mvrepository.com)
+3. Package maven project as war file using maven goal
+4. Create Git repository in github / bitbucket (public repo)
+5. Push maven project into github repo using gitbash
+(target folder shouldn't be committed, add this in .gitignore file)
+6. Make changes in pom.xml and push changes to github repo using git bash
+7. Create 'feature' branch in git repo from main branch
+8. Switch to feature branch from git bash
+9. Make changes in 'feature' branch pom.xml file
+10. Push changes to feature branch
+11. Create pull request and merge 'feature' branch changes to 'main' branch
+
+.gitignore
+==========
+
+- this .gitignore is used to configure the files or folders which we want to ignore from our commits
+- the files and folders which are not requires to commit to central repository those things we can configure in .gitignore file
+ex . in maven project ,'target' folder will be available which is not required to commit to central repository. This we can configure in .gitignore filw 
+ 
+-To ignore the target/ folder (commonly used in Java/Maven projects), add the following line to your .gitignore file:
+
+target/
+
+lect 8:(28 may)
+---------
+Interview que:
+-------------
+
+1) git clone vs git pull
+| Feature                 | `git clone`                 | `git pull`             |
+| ----------------------- | --------------------------- | ---------------------- |
+| Purpose                 | Get repo for the first time | Update existing repo   |
+| Creates new folder?     | ✔ Yes                       | ❌ No                   |
+| Downloads full history? | ✔ Yes                       | ✔ Only new changes     |
+| Initializes `.git/`?    | ✔ Yes                       | ❌ Already exists       |
+| Used once or repeated?  | Usually once                | Repeated many times    |
+| Typical command         | `git clone <url>`           | `git pull origin main` |
+
+2) git push vs git pull
+| Feature                 | `git push`          | `git pull`               |
+| ----------------------- | ------------------- | ------------------------ |
+| Direction               | Local → Remote      | Remote → Local           |
+| Purpose                 | Upload your commits | Download others’ commits |
+| Requires local commits? | ✔ Yes               | ❌ No                     |
+| Affects remote repo?    | ✔ Yes               | ❌ No                     |
+| Affects local repo?     | ❌ No                | ✔ Yes                    |
+| Typical use             | Share code          | Get latest code          |
+
+
+3) git stash
+	-> Suppose you pulled the latest code and started working on a specific file to fix Bug A. While you're partway through fixing Bug A (i.e., 
+	your changes are not yet complete or committed), you're suddenly asked to prioritize and fix another bug (Bug B).
+
+	To avoid losing your work on Bug A or committing incomplete code, you can use git stash to temporarily save your current changes.
+
+	When you run git stash, Git stores all your uncommitted changes (staged and unstaged) in a temporary memory area (called a "stash") 
+	and restores your working directory to a clean state, just like it was right after your last pull.
+
+	This allows you to switch context and fix Bug B without mixing it with incomplete changes from Bug A.
+
+	Once Bug B is fixed and committed, you can return to your previous work by running git stash pop, which re-applies the saved changes from 
+	Bug A so you can continue where you left off.
+
+
+
+4) git fetch vs git pull
+	fetch -> download changes from remote to local not to working tree
+	pull -> directly download form remote to working tree
+ 
+5) git merge vs git rebase
+merge will maintain commit history
+rebase will not maintain commit history
+
+git rebase is used to move or replay your branch commits on top of another branch. It creates a clean, linear commit history by rewriting commit history.
+
+✅ Common Rebase Command
+
+$ git checkout feature
+$ git rebase main
+
+This moves all commits from the feature branch to the top of the main branch.
+
+lect 9:(29 may)
+======
+
+what is tagging in git hub:
+===========================
+$ git diff - shows unstaged changes: differences between the working directory and the staging area.
+
+	It helps you see what changes you made since the last git add.
+ 
+
+
+
+
+
+Full Workflow Example
+=====================
+
+For main branch
+----------------
+git checkout main
+git pull origin main
+# make changes
+git add .
+git commit -m "Updated main branch code"
+git push origin main
+
+For develop branch
+------------------
+git checkout develop
+git pull origin develop
+# make changes
+git add .
+git commit -m "Updated develop branch features"
+git push origin develop
+
+For a feature branch
+--------------------
+git checkout feature-login
+git pull origin feature-login
+# make changes
+git add .
+git commit -m "Bug fixed in login page"
+git push origin feature-login
+
+
+
+What git checkout main does
+=============================
+
+1) Switches your working directory to the main branch
+
+All files in your working folder update to match the latest commit of main.
+Git sets the currently active branch to main.
+
+2) Makes HEAD point to the main branch
+
+HEAD = your current working position.
+After the command:
+HEAD → main
+
+3) Allows you to pull, push, commit on main
+
+Once you switch:
+git pull will pull main
+git push will push main
+git commit will commit on main
+

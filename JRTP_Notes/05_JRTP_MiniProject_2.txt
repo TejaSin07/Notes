@@ -1,0 +1,482 @@
+
+Lect 22:(20 June  )
+========
+
+
+requirement :
+===========
+
+Develop front office team portal to manage student enquries
+
+Mock Up Screens: http: 
+
+
+Functionalities
+---------------
+1) Home page with caurosel
+2) Sign Up
+3) Unlock accaount
+4) sign in	 (only unlocked account users can login)
+5) Dashboard 	 (logged in user performance report)
+6) Add Enquiry
+7) View Enquiry  (with Dynamic Filter)
+8) Edit and updtae enquiry status
+9) Filter Enquiries
+10) Logout
+
+Note -1:when user logged, only that logged in user performance report should display in dashboard and only that user added enqries should 
+display in View Enquiries screen.
+
+Technology Stack
+================
+
+Database : MySql
+
+Backend : Java + SpringBoot + Data JPA + web Mvc + Thymeleaf
+
+Frontend : html + CSS + JQuery + BootStrap + Ajax 
+
+
+Front Ofc team login/registration /unlock/dashboard/forgot Pwd
+student enquiries: Add Enquiry /view Enquiries / Edit and update
+
+
+lect 23: (23 June)
+========
+
+Execution Flow:
+===============
+1) User will open website home page
+	-> Logo display with nav bar
+	-> Carousel(banners sliding )
+	-> course Images Display
+	-> Login button 
+
+2) User Registration
+	-> Unique Email validation
+	-> temporary password generation
+	-> send registration email with temp pwd and unlock link
+
+3) Unlock account
+	-> Temporary Pwd validation
+	-> Set new password
+	-> unlock account
+
+Note : user should unlock account only one time .If user try to unlock account second time application should display message as
+"your account already unlocked "
+
+
+4) Login fuctionality:
+	-> unlocked account users only can login
+	-> Invalid Credentials Check (error : Invalid Credentials)
+	-> Account Status Check (error : your account locked)
+	-> LOGIN SUCCESS : Display Dashboard with logged in user performance report
+
+5) Forgot Pwd:
+	-> Invalid Email : No account found with given mail
+	-> Valid Email : get pwd from DB and send users Pwd to user email
+
+
+6) Dashboard :
+	-> Display logged in user performance report 
+
+7) Add Enquiry :
+	-> Add new Enquiry with status as 'New'
+
+8)View Enquiries :
+	-> Display enquiries which are added by logged in user
+	-> Edit Enquiry to updtae Enquiry Status
+	-> Filter Enquiries based on given criteria
+
+9) Logout :
+	-> when user click on logout display home page
+	
+
+DB_TABLES:
+==========
+
+1: AIT_USER_DTLS
+
+	User_id		INTEGER	   PK   AUTO_INCREMENT
+	NAME		VARCHAR
+	email		VARCHAR		UNIQUE
+	PHNO		INTEGER
+	PWD		VARCHAR
+	ACC_STATUS	VARCHAR
+			
+2: AIT_STUDENT_ENQUIRIES
+
+	ENQUIEY_ID	INTEGER		PK	AUTO_INCREMENT
+	STUDENT_NAME	VARCHAR		
+	PHNO		INTEGER
+	CLASS_MODE	VARCHAR
+	COURCE_NAME	VARCHAR
+	ENQUERY_STATUS	DATE		(DEFAULT : NEW)
+	UPDATED_DATE	DATE
+	USER_ID 	INTEGER 	FK	REF: ALT_USER_DTLS
+
+3: AIT_COURSES
+	COURSE_ID 	INTEGER		PK	AUTO INCREMENT
+	COURSE_NAME	VARCHAR
+
+4: AIT_ENQUIRIRY_STATUS
+	STATUS_ID	INTEGER		PK	AUTO_INCREMENT
+	STATUS_NAME	VARCHAR			
+
+
+
+---------------------------------------------------------------
+
+lect 24:
+=======
+Entities:
+---------
+
+UserDtlsEntity.java
+StudentEnqEntity.java
+CourseEntity.java
+EnqStatusEntity.java
+
+Binding Classes:
+--------------
+
+LoginForm.Java
+SignUpForm.java
+UnlockForm.java
+EnqStatusEntity.java
+
+
+DashBoardResponse.Java
+EnquiryForm.java
+EnquirySearchFilter.java
+
+
+Repository
+------------
+UserDtlsRepo.java
+StudentEnqRepo.java
+CourseRepo.java
+EnqStatusRepo.java
+
+
+Service classes:
+----------------
+
+userService.java
+enquiryService.java & enquiryServiceImpl.java
+
+Helper Classes(Utility):
+----------------------
+PwdUtils.java
+EmailsUtils.java
+AppExceptionHandler.ajab
+
+Controller:
+----------
+
+IndexController.java
+UserController.java
+EnquiryController.java
+
+
+Pages:
+-----
+
+index.html
+login.html
+signup.html
+unlock.html
+forgotPwd.html
+dashboard.html
+addEnquiry.html
+viewEnquiry.html
+errorPage.html
+
+
+
+Types of DB table:
+------------------
+
+1) Transactional Table (INSERT/UPDATE/DELETE/RETRIVE)
+2) Non-Transactional /Static table(retrieve)
+
+Note: We can insert data into static tables using insert queries directly (we can use runner also)
+
+
+Project Setup:
+==============
+
+1)Create Project with required dependencies
+	a) web-starter
+	b) data-jpa-started
+	c) mysql-starter
+	d) mail-starter
+	e) tymeleaf-starter
+	g) oproject Lombok
+	h) devtools
+
+2) configure data-source and SMTP properties in application.properties file
+3) create entity classes and repository 
+4) create form binding classes
+5) create helper classes( utility classes)
+6) create service interfaces with IMPL classes
+7) create controller classes with required methods
+8) create view pages with presentation logic
+9) run the application and test
+
+
+
+lect 25 (24 june)
+----------------
+
+for images go ashok it site ,click on any logo or banner hold it and
+place it into new tab now save image.
+
+
+lect 26:
+----------
+
+lect 27(26 june)
+-----------------
+
+use below temporary password to unlock your account
+
+Temp pwd : jfsdf7s979
+
+<a href=""<a href=\"http://localhost:8080/unlock?email = "+to+"\">Click here to unlock your account</a>"Click here to unlock your account</a>
+
+
+
+lect 28(29 June):
+
+if we want to create new table each time project run just update below property
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.hibernate.ddl-auto=create
+
+
+
+lect29:(3 june)
+------
+Module 1 :user management:
+-------------------------
+1) Index page
+2) Sign up with unique email validation
+3) Unlock account
+4) Login
+5) Recover password
+
+
+Module 2: Enquiry Management:
+-----------------------------
+-enquiry management functionality it depends of logged in user
+-as it is user specific functionality, our application should remember logged in user details
+-to remember logged in user details we will use session in our application
+
+Note: When user logged in session should be created, when user log out session should be destroyed
+
+1) Dashboard
+2) Add Enquiry
+3) View Enquiry
+4) Enquiry Filter
+5) Logout 
+
+-session management is required for module two only
+
+Most Imp session management:
+----------------------------
+
+ 
+
+lect 31
+=======
+
+E:\JRTP\workspace\03_SB_AJAX_POC
+
+=====
+AJAX (asynchronous java script and xml )
+=====
+2 type of request
+
+1) synchronous request (whole web page will be reloaded)
+2) Asynchronous request (portion DOM will be updated without reloading page)
+
+benefits:
+- we can reaload only data without loading whole web page
+- we can send the data to the server in async mode
+- seemless experience for end user
+
+
+
+ 1) add jquery dependency in pom.xml
+
+ 	<dependency>
+		    <groupId>org.webjars.bower</groupId>
+		    <artifactId>jquery</artifactId>
+		    <version>3.5.1</version>
+	</dependency>
+		
+ 2) Include jquery.min.js file in our html page in head tag
+	
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> 
+
+ 3) write ajax logic to send async request to serve
+	<script >
+		
+		$(document).ready(function() {
+		
+			$("#countryName").on("change",function(e) {
+				$.ajax({
+					type: "GET",
+					url:"/cmsg",
+					data:{ 
+						countryName: $("#countryName").val()
+					},
+					success : function(data){
+						$("#dropDownDiv").html(data);
+					}
+					
+				
+				});
+			});
+			
+			$("#submitBtn").click(function(e) {
+				var name = $("#name").val();
+				$.ajax({
+					 type: "GET",
+				      url: "/msg",
+				      data: {
+				        name : $("#userName").val(),
+				      },
+				      success: function(result) {
+				        $("#msgDiv").html(result)
+				      },
+				      error: function(result) {
+				        alert('error');
+				      }
+				});
+			});
+		});
+	</script>
+
+ 4) update response in web page : below is html page
+ 
+<!DOCTYPE html>
+<html xmlns:th="www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>  <!-- ✅ Use this only -->
+
+
+	<script >
+		
+		$(document).ready(function() {
+		
+			$("#countryName").on("change",function(e) {
+				$.ajax({
+					type: "GET",
+					url:"/cmsg",
+					data:{ 
+						countryName: $("#countryName").val()
+					},
+					success : function(data){
+						$("#dropDownDiv").html(data);
+					}
+					
+				
+				});
+			});
+			
+			$("#submitBtn").click(function(e) {
+				var name = $("#name").val();
+				$.ajax({
+					 type: "GET",
+				      url: "/msg",
+				      data: {
+				        name : $("#userName").val(),
+				      },
+				      success: function(result) {
+				        $("#msgDiv").html(result)
+				      },
+				      error: function(result) {
+				        alert('error');
+				      }
+				});
+			});
+		});
+	</script>
+<body>
+
+
+		Enter Name:<input type = "text" name = "name" id="userName"/>
+		<input type = "button" value = "submit" id="submitBtn"/>
+	
+	<div id ="msgDiv"></div>
+	<hr/>
+	
+	<select id = "countryName">
+		<option>-select- </option>
+		<option>India </option>
+		<option>USA</option>
+		<option>China</option>
+		<option>Canada</option>
+	</select>
+	<div id = "dropDownDiv"></div>
+	
+</body>
+</html>
+
+
+
+lect 32
+=======
+12.36
+
+
+Application properties:
+=======================
+spring.datasource.username=root
+spring.datasource.password=Ned$tark07
+spring.datasource.url=jdbc:mysql://localhost/jrtp
+
+spring.jpa.hibernate.ddl-auto=update
+
+spring.jpa.show-sql=true
+
+
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=tejassinkar10@gmail.com
+spring.mail.password=leeoasissjzedeub
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+# Add these extra properties
+spring.mail.properties.mail.smtp.starttls.required=true
+spring.mail.properties.mail.smtp.ssl.trust=smtp.gmail.com
+
+
+NOTE: Instead of using string everywhere to give string output, create one class containing variable that store 
+string literal.Then use that variable instead of string literal.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 

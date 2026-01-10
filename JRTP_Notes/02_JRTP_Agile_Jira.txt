@@ -1,0 +1,135 @@
+lect 10:
+=========
+-------------------------------------
+Software development Life Cycle(SDLC)
+-------------------------------------
+
+=> From start to end is called as life Cycle.
+=> SDLC -> Development + Testing + Deployment + Delivery
+=> From Project Start to till Project end is called as SDLC.
+
+=> we have server phases in SDLC
+
+  1)Requirement Gathering
+  2)Requirement Analysis
+  3)Design(FDD / BRD / SRS) 
+  4)Development
+  5)Testing
+  6)Deployment
+  7)Delivery
+  8)Support (SLA - Service Line Agreement) - 6 months
+
+-------------------
+SDLC Methodologies :-
+-------------------
+
+1) Waterfall(Outdated)
+2) Agile(Most Trending)
+
+======================
+Waterfall Methodology  :-
+---------------------
+
+-> Linear Methodology
+-> It is a step by step process.
+-> After one step is Completed then only we will move to next step
+-> Forward Direction
+-> Client involvement is very less
+-> Client will see project at the end
+-> requirements fixed & budget fixed.
+ 
+==============
+Agile Method :-
+--------------
+
+-> Iterative approach  
+-> Development + Testing + Delivery - is a cyclic process 
+-> Project will be delivered in multiple phases (Sprint)
+-> Client Involvement will be there in every phase of the project  
+-> Requirements are not fixed & Budget is not fixed
+
+Note : Client Satisfaction is most Important in this Model  
+
+====================
+Agile Terminology :-
+--------------------
+
+Product Owner : Responsible to deliver project to client (Delivery Head)
+Scrum Master  : Responsible to Manage Agile team Work (Daily Tracking)
+Tech Lead     : Senior Resource in Team For Technical Help
+Team Members  : Developers + Testers + DB Team + Ops Team 
+
+===================================
+Some meetings in Agile methodology  
+-----------------------------------
+
+Scrum Meeting     : Daily status call (scrum / status / standup) - 30 mins
+
+Backlog Grooming 
+Meeting          : Meeting to identify pending works in the project
+
+Backlog Stories  : Pending Stories we have created in JIRA
+
+   Story  : A task
+
+Story Points : Represents duration to complete a story
+      3 points  - 1 day
+      5 Points  - 2 days
+      8 Points  - 3 days
+
+Sprint Planning Meeting : To identify priority stories to complete
+
+Sprint : Set of stories planned to complete in given duration (2 weeks)
+
+Retrospective meeting : Review meeting 
+ 
+                       1) What went well  
+                       2) What went wrong  
+                       3) Improvements  
+                       4) Lessons Learnt  
+                       5) Ideas Board
+
+ 
+Lect 11:
+=======
+JIRA(close premium before 27 June)
+====
+-> Jira software developed by Atlassian company.
+-> Jira is used for project management.
+-> Jira is  also used for Bug reporting.
+-> Project task assignment will happen in JIRA S/W only .
+
+1) What is SDLC
+2) what are SDLC phases
+3) waterfall methodology
+4) Agile methodology
+5) what is Jira
+7) what is  backlog
+8) who will create story in backlog
+9) what is story point
+10) how to create sprint
+11) task assignment in Jira
+12) task status in Jira
+13) how to create bug in Jira (tester will create)
+
+
+
+which ticketing tool you are using in your project?
+==================================================
+->  "Service Now" we are using as ticketing tool.
+->  To send software installations request to it team we will create tickets using ticketing tool.
+
+
+JIRA: Used for sprint planning, backlog management, tracking tasks/bugs, and team collaboration in Agile projects.
+ServiceNow: Used for managing incidents, service requests, change requests, and IT workflows in enterprise environments.
+ 
+
+
+
+
+
+
+
+
+
+

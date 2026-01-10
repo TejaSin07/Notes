@@ -1,0 +1,71 @@
+1) Encoding and Decoding: java.util.Base64
+
+Encoding : Converting data to compatible character 
+Decoding : Converting encoded to original data
+
+
+public class Demo {
+	public static void main(String[] args) {
+		String str = "abss@123";
+		
+		Encoder encoder = Base64.getEncoder();
+		String encodeStr = encoder.encodeToString(str.getBytes());
+		System.out.println(encodeStr);
+		
+		Decoder decoder = Base64.getDecoder();
+		byte[] decode = decoder.decode(encodeStr.getBytes());
+		System.out.println(new String(decode));
+	}
+}
+
+2) Encryption and Decryption 
+
+Encryption : It is used to convert data from readable format to un-readable format
+
+Decryption : It is used to convert encrypted data original format 
+
+
+Encryption with salt:  In real time we never store password directly we store password with salt
+=====================
+
+1) BCrypt
+2) AES with Crypto
+3) Jasypt
+4) MessageDigest(Not recommended)
+
+Dealing with Password in our application:
+=========================================
+
+user given psswd : abc@123
+
+String userPwdWithSalt = user-given-pwd+"ait"
+
+String encrypteduserPwdWithSalt = Encrypt(userPwdWithSalt.getBytes());
+
+String encodePwd = Base64.getEncoder().encodeToString(encryptedUserPwdWithSalt.getBytes());
+
+//store encodedPwd in database
+
+public class Demo {
+	public static void main(String[] args) throws Exception {
+		String str = "abss@123";
+		MessageDigest msgdigest = MessageDigest.getInstance("SHA-256");
+		msgdigest.reset();
+		msgdigest.update(str.getBytes());
+		
+		//encryption
+		byte[] encryptedTxt = msgdigest.digest();
+		System.out.println(new String(encryptedTxt ));
+		
+		String encodedStr = Base64.getEncoder().encodeToString(encryptedTxt);
+		
+		System.out.println(encodedStr);
+		
+	}
+}
+
+
+
+
+
+

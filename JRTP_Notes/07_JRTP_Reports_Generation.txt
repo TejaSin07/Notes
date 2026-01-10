@@ -1,0 +1,116 @@
+
+01: Reports Generation (Dynamic Search + excel + pdf)
+02: Employee Portal (Login + Register + Email + unlock+ forgot pwd + ajax)
+03: Blog application (view Blog + add blog + comments + ckeditor)
+=======================================================================
+
+Code Review :
+=============
+
+-> The  process of reviewing the code to identify developers mistakes 
+-> code review will happen in 2 ways 
+	1) using tool
+	2) peer review 
+
+-> sonarQube support 29 programing language 
+-> SonarQube will identify below issues in the code
+
+1)Bugs 
+2)vulnerabilities (security issues) 
+3)code smells
+4)Duplicate code blocks
+
+Note : 1) SonarQube will not check our logic is correct or not 
+       2) Junior developer code checking will done by senior developer in the team.
+	This is called as peer review. Peer Review is a manual process. In peer review,
+	logic checking will be done
+ 
+-> download SonarQube after that  go to the file 
+C:\Users\tejas\Downloads\sonarqube-25.7.0.110598\sonarqube-25.7.0.110598\bin\windows-x86-64 
+run cmd 
+-> StartSonar.bat
+-> http://localhost:9000
+first use username -> admin
+pwd -> admin 
+
+then set
+username - admin  ( change it also)
+ pwd  -Gangdq@866939
+
+
+mail-> tejassinkar24
+
+Note:go to  http://localhost:9000 and create new token 
+ 
+
+step A:try this first is it is not working then try step B by Skipping step  A
+======
+
+Boot App ->      sonar server ==> Report
+-> to add project to sonar ,go to project directory -> cmd -> mvn clean package
+-> mvn sonar:sonar
+
+step B: go to project folder open cmd there and execute below command
+=======
+mvn clean verify sonar:sonar ^
+  -Dsonar.projectKey=02_MiniProject_App-1 ^
+  -Dsonar.host.url=http://localhost:9000 ^
+  -Dsonar.login=sqa_2d7c093120bb004ba383575ad609ef1df6fb63e6   //paste your token 
+
+
+fix issues available in sonar issues
+JUnits implementation
+
+
+Notes To write Good code:
+
+===============================
+1) if(user.getGender().equals("Male")){
+	//logic
+}else{
+	//logic
+}
+
+#above code give null pointer exception as user.getGender() can give null value 
+
+
+if("Male".equals(user.getGender()){
+}
+else{
+}
+#this above code will not give null pointer exception else condition will execute
+
+2)Either log or rethrow the exception i.e  instead of printtracktrace use logger
+
+3) Instead of Math.random() use java.util.Random.nextInt() method to generate random number 
+
+4) Don't  use "password"  or "pwd" in our code directory .It will be considered as vulnerable.
+Use pazzword or pzzwd for variable names
+  
+5) Declare variable before constructor
+
+6) Replace stingBuffer with StingBuilder to improve performance
+StringBuffer -> is Syncronized (only one thread access at a time)
+StringBuilder -> is not synchronized( multiple  thread access at a time)
+
+8) remove un-necessary curly braces from lambda when we have single line
+
+9) follow camel case for variable names declaration.
+
+10) Declare private constructor for class if it is not getting instantiated anywhere.
+
+
+HW: DO code review for all project
+
+
+
+
+
+
+
+
+
+
+
+
+

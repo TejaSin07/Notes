@@ -1,0 +1,440 @@
+lect 56:
+========
+
+https://github.com/ashokitschool/DevOps-Documents
+
+1) On-prem infrastructure
+2) Cloud Infrastructure
+
+
+=> "cloud computing" is the process of delivering IT resources over the internet on demand
+basis with pay as you go model
+
+=> below are the advantages with cloud computing
+
+1) Low cost
+2) Pay As you go 
+3) scalability
+4) availability 
+5) unlimited storage
+6) Reliability 
+7) security 
+8) backup
+
+cloud provider 
+==============
+1) AWS
+2) Azure
+3) GCP
+4) SALESFORCE
+
+Cloud service model
+===================
+
+1) IaaS  (Infrastructure as service)
+	ex : 
+2) PaaS  (platform as a service)
+	ex : 
+3) SaaS  (software as a service)
+	ex : Drive, zoom, dropbox, salesforce
+
+
+lect 57:
+==========
+
+Cloud Providers:
+================
+
+1) Amazon -> AWS Cloud (if you create acc ,bill money will not auto deduct  )
+2) Google -> GCP
+3) Microsoft -> Azure
+4) Salesforce ->  
+
+
+
+Q.What is operating system?
+---------------------------
+
+=> OS is a mediator between user and computer
+=> os is mandatory to use any computer 
+=> using os we can run our applications in the computer 
+=> we have below 3 types of Operating System 
+
+1) Windows OS
+2) Linux OS
+3) MAC OS
+
+Windos OS
+==========
+=> developed by Microsoft 
+=> Single User Os
+=> It is GUI(graphical user interface) based 
+=> It is used for personal purpose (games. movies, personal works)
+=> Less security
+=> Windows License is commercial 
+
+
+Linux OS
+========
+
+=> It is free and open source OS 
+=> very secured
+=> Multi user operating system
+=> Linux Multi user operating system 
+=> Linus is highly recommend OS to run severs and database
+=> Linux is recommended for business purpose
+=> Linus is CLI based
+
+
+Linux History
+-------------
+-> Initially we had UNIX OS
+-> Linux Torvals identified some issues in UNIX OS and informed to UNIX Team
+-> Unix team did not accept Linux Torvals suggestions
+-> Linus Torvals developed his own OS that is Linux OS. He used Minux OS to develop .
+
+	(Li) nus + Mi(nux) ==> Linux OS
+
+-> Linus Torvals released Linux OS into market with free of cost 
+-> So many companies taken Linux OS Source code and modifies according to their requirement and released into market 
+with different names those are called as Linux Distributions.
+
+	1) Ubuntu Linux
+	2) Red Hat Linux
+	3) Debian Linux
+	4) Fedora Linux
+	5) SUSE Linux
+	6) Kali Linux
+	7) Cent Os Linux
+	8) Amazon Linux 
+
+Note : we have 200+mLinux Distributions
+
+
+Linux Environment Setup
+========================
+
+1) Install Linux OS in computer 
+2) Virtual machine
+
+
+What is EC2 in AWS ?
+--------------------
+=> Elastic Compute login 
+=> EC2 will provide virtual machine 
+
+	t2.micro  is free for 1st year
+
+Instance ID : i-029791ed39f976a27
+
+
+1) Create aws account ( free tier)
+2) Create EC2 instance with amazon Linux
+3) Download MobaXterm Software 'or' we can use putty 
+4) Connect to EC2 Linux VM using Mobaxterm
+
+
+Mobaxterm connection:
+--------------------
+
+1) Open mobaxterm go to session 
+2) click on ssh
+3) add your aws machine public ip address to remote host and also paste the user name (most likely ec2-user) in specify username block
+4) select advanced SSH setting ,then click on use private key -> and select the file which we download for key-value pair  :"C:\Users\tejas\Downloads\tejasSIn.pem"   <-- pem file
+
+Linux Commands
+==============
+
+whoami : Displays logged in user calender 
+date : prints todays date
+cal : print current month calendar
+mkdir : create new directory 
+pwd : display present working directory 
+rmdir : remove empty directory 
+cd: change directory 
+ls: list files 
+touch : to  create empty file
+cat : create file with content and display file content 
+
+	[ec2-user@ip-172-31-38-130 ~]$ cat > m1.txt
+	hi this is m1 file        : ctrl+d
+	[ec2-user@ip-172-31-38-130 ~]$ cat m1.txt
+	hi this is m1 file
+
+	cat > filename : create file with data( we will loose old data)
+	cat >> filename : append the data at the bottom
+	cat filename  : display file content
+
+rm : it is used to remove file 
+mv : To rename file / directory 
+cp : to copy data from one file to another file 
+wc : word count (lines, words, characters)
+head : gives first 10 lines of file
+	$ head -n 20 <filename> (gives first 20 lines)
+	$ tail -f <filename>  (on-growing data)
+
+tail : give last 10 lines of file
+	$ tail -n 20 <filename> (gives last 20 lines)
+
+
+
+lect 58:
+========
+
+grep : global regular expression printer (it is for  data finding ) 
+	$ grep -i 'linux' <filename>
+
+
+vi : visual editor(to modify file content )
+	$ vi <filename>
+
+	insert mode : i <-- {Insert}
+	save and quit => esc and :wq
+	quit without saving ==> esc and : q!
+
+
+chmod : to change file permissions
+chown : to change file ownership 
+
+
+lect 59:
+========
+
+How to install softwares in Linux os
+====================================
+
+-> Linux os provided manager to install any software 
+
+Amazon Linux / red hat : yum 
+	$ sudo yum install java 
+
+Ubuntu / Debiun : apt 
+	$ sudo apt install java
+
+==============================================
+How to run Spring -boot application in Linux :
+==============================================
+
+1) install git : $ sudo yum install git 
+2) install maven : $ sudo yum install maven 
+ 
+Note : when we install maven java install automatically because maven require java(mostly java 17 )
+
+1) clone git repo (try with dailyPractiseSBMS/23-WebMVC-App1/)
+
+2) navigate into project directory and package application using maven (first try with project having web page and not having any  DB)
+	$ mvn clean package 
+
+	note : if we get error while executing above command then use 
+	=> $ mvn clean package -DskipTests (it ignore test class is present or not )
+
+3) then go to target folder 
+	$ cd target 
+	note : verify jar file creation in target directory 
+	$ ls -l  
+4) Run jar file using below command
+	$ java -jar target/jar-file-name
+
+note : check port number of embedded server (default : 8080)   {we use 8081 in project}
+
+5) go to EC2 VM security group -> edit inbound rules -> enables 8081 port number 
+
+6) Access our REST API in browser
+
+	url http ://ec2-public-ip:8080/
+
+Types of IP's in AWS :
+======================
+
+1) private IP -> fixed ip for internal communication, we can't use outside   
+2) public IP  -> dynamic IP (change if you restart the server )  and it is used to access resources outside 
+3) Elastic IP -> it is fixed public ip - it is commercial (charges applicable )
+
+NOTE : To use  elastic IPs first we need allocated elastic ip then we have to associate elastic ip to ec2 in instance.
+
+
+1) EC2 service is used to create virtual machine 
+2) AMI (Amazon machine Image - configuration required for instance )
+3) Instance Type ( t3.micro - free tier eligible -1 year - monthly 750 hr)
+4) Key pair (public and private keys)
+5) VPC (isolated network ) - default vpc
+6) security group (inbound rules and outbound rules)
+7) EBS volume (Elastic block storage - 8 GB for Linux)
+
+Note : One key-pair we can use for multiple EC2 instances
+Note : One security group we can use for multiple Ec2 instances
+
+8) Types of IP's (public ip , private ip , elastic ip )
+
+
+========
+AWS RDS 
+========
+=> RDS stands for Relational Database service 
+=> It is used to create relational database in AWS cloud
+=> RDS is fully managed service in AWS
+=> If we create database using RDS then we can directly use that database and we can perform operations with
+database
+
+Note: maintenance , management ,security  and backup will be taken care by AWS 
+Note: RDS is paid service 
+=> AWS supports for several relational database 
+	ex : oracle, MySql , PostGres, SQL Server, Aurora 
+
+db connection :
+---------------
+
+EndPoint : iesddbev.c9a4oqiy09pj.eu-north-1.rds.amazonaws.com
+port : 3306
+userName : admin
+pwd :      Tejas8669
+
+step 1: create one free tier database in AWS account 
+step 2: check in connectivity section :=> publicly accissible : yes  
+step 3: go to MySql workbench - click on "+" option
+step 4: add host name => that is endPoint name, username,and password under store in vault 
+step 5: Now click on test connection 
+step 6: change the properties file as metion below 
+	spring.datasource.username=admin
+	spring.datasource.password=Tejas8669
+	spring.datasource.url=jdbc:mysql://iesddbev.c9a4oqiy09pj.eu-north-1.rds.amazonaws.com/sbms39
+
+
+lect 60 :
+=========
+
+Dev Env ==> DEV DB (endpoint)
+SIT Env ==> SIT DB (endpoint)
+
+=====
+ IAM 
+=====
+	Note : devOps people are responsible for creation of IAM account .
+
+-> Identity and access management 
+-> It is used to create users, user groups and policies
+-> when we sign up in AWS, by default we will get root account.
+-> root account is very powerful account, we can access everything in aws using root account.
+
+	Note: for team members, root account credentials will not be shared 
+-> for every team member, IAM account will be created.
+-> for daily activities in AWS cloud, we will use IAM accounts only.
+-> as root account is powerful account, we need to provide high security for root account.
+-> to provide high security for root account we can use MFA(multi factor authentication )
+
+	Note: we can use google authenticator app to provide MFA for root account. 
+
+
+access key : <access key>
+secrete access key : <secrte acess key>
+
+
+============================
+S3 (Simple storage service)
+===========================
+
+-> s3 stands for simple storage service
+-> we can store unlimited data using s3 service in AWS cloud
+-> s3 will store data in the form objects
+	Object ==> file 
+
+===============================
+Hosting Static website using s3
+===============================
+
+https://github.com/ashokitschool/s3_static_website_hosting.git 
+-> add above project to your s3 bucket 
+
+lect 61:
+=======
+
+
+==========
+Route 53
+==========
+
+
+		   DNS
+domain name   -------------> app-url
+
+www.ies.com  -----------> app-url
+
+
+steps: (pay and use)
+-------
+1) search rout 53 
+2) Registered domains -> register domains
+
+=> DNS mapping 
+=> we can map application url to domain name using Route 53
+
+	ex : www.gamil.com, www.facebook.com, www.ies.com
+
+lect 62:
+========
+
+domain mapping 
+==============
+
+1) check domain availability 
+2) register domain   (min : 1 year and max:10 year )
+3) pay bill amount to activate domain 
+Note : After payment, it will take 2 to 3 hours to get activated 
+4) create record to map domain to application url
+
+
+
+
+
+
+que:
+1) what is os?
+2) what is windows os?
+3) what is linux os?
+4) history of linux ?
+5) distributions of linux
+6) setup linux vm
+7) connect with mobaxterm
+8) connect with putty 
+9) Linux commands
+10) commands practise
+11) file permissions
+12) install softwares
+13) ownership
+14) host website 
+15) what is cloud computing 
+16) cloud advantages
+17) launching virtual machinne in AWS
+18) connecting with vm using mobaxterm 
+19) what is key pair
+20) what is security group 
+21) s3 bucket 
+22) static website hosting
+23) domain mapping using route 53
+24) create MySql using RDS
+25) spring boot with  AWS RDS DB
+26) IAM service 
+27) console access and programmatic access
+28) how to make bill as zero :-> talk to aws support 
+
+
+
+
+
+-------------
+assignment 
+------------
+
+Develop spring boot application to upload PDF document into aws s3 bucket and
+update pdf document s3 object url in MySQL database
+
+
+
+
+
+
+
+
+
+
+

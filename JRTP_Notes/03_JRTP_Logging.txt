@@ -1,0 +1,184 @@
+lect  12: (29 may 25)
+=====================
+
+Logging
+=======
+
+we implemented logic at :
+
+->  the process of storing application execution details to a file is called as logging.
+->  with log message we can understand execution flow of the application.
+->  we can understand exceptions occurring in the project by seeing log messages.
+
+=> we need to implement logging in the project 
+=> to implement logging we have several logging framework.
+	-> Log4J
+	-> Log4J2
+	-> LogBack
+
+=> when exception occurred in the project, we need to monitor log message and we need to troubleshoot the problem the fix the problem.
+=> To monitor log message we will use several tools
+	- putty
+	- WinSCP
+	- ELK
+	- Splunk (Licenced)
+
+=> when exception occurred in the project by seeing log we can understand.
+
+Logging Architecture:
+=====================
+
+1) Logger	: This class providing method to generate log message
+2) Layout	: It represent log message structure (format of log msg)
+3) Appender	: It is used to write log message to destination 
+4) Destination	: It can be console/file/database
+
+Note: we will use files to store our log messages.
+
+we implemented logic at :
+C:\Users\tejas\Desktop\springboot repo\PractiseSpring\12_SB_LoggingApp
+
+1) check how we added logger object 
+2) how we added msg in method
+3) in properties file we add file
+
+Logging Levels:
+===============
+1) Trace
+2) Debug
+3) Info (it is default log level in boot application)
+4) Warn
+5) Error
+6) Fatal
+
+Log Level Hierarchy
+===================
+
+TRACE > DEBUG > INFO > WARN > ERROR > FATAL	 (FATAL level removed and added to error now) 
+
+If we set level as INFO then all to its right will going to print
+
+=> when we set one log level, application will print log message from that level to all higher level message.
+=> In spring boot by default it will use level as INFO
+=> IN spring Boot by default it will use ConsoleAppender
+=> To generate log msgs in log file we have set below property in application.properties file
+
+logging.level.root = DEBUG
+logging.file.name = app.log
+
+
+Rolling Appenders:
+==================
+1) Sized based rolling : new file generate based on size limit 
+2) Time based rolling  : new file generate based on time period
+
+
+=> we can customize springboot application log configuration by creating
+logback.xml file under src/main/resources folder.
+
+1) what is logging?
+2) what is log Monitoring?
+=> It is the process of checking logs of application to understand problem occurring the application
+=> we have several tools to perform log operation
+
+3) Logging Architecture
+	-Logger
+	-Layout
+	- Appender
+
+4) Log Levels
+5) Log Level Hierarch
+6) How to set Log Level (log.level.root = DEBUG)
+7) How to implement logging in java class
+8) what is rolling in logging ?
+
+lect 13:( 30 may 25)
+===================
+
+Putty:
+=====
+
+=> putty is CLI based software
+=> it is used to connect from windows machine to Linux machine
+=> To connect to Linux machine we need machine details
+	IP: 192.168.1.2
+	username : loguser
+	pwd	 : log@123
+
+puuty commands:
+================
+
+cat filename : get file data from top to bottom
+head filename  : to get first 10 lines of file
+tail filename : to get last 10 line of file
+grep 'Exceptiom' filename : It will print the line which contains Exception
+
+WinScp:
+======
+=> It is GUI based software
+=> It is used to connect from windows to linux maashine
+=> Using this WinSCP we can upload and download files from windows to linux and vice versa
+
+Splunk:
+=======
+=> it is commercial log monitoring software.
+
+ELK
+=====
+
+E - Elastic search
+L - log stash
+K - kibana
+=> The above 3 open source products are used for log monitoring.
+
+
+^Down::Send, ?  ; Ctrl + Down Arrow → "?"
+^Up::Send, /   ; Ctrl + Up Arrow → "/"
+!z::Send, ^/  ; Alt + Z will send Ctrl + /
+!c::Run https://chat.openai.com/  ; Alt + C opens ChatGPT
+!l::         
+    DetectHiddenWindows, On
+    SetTitleMatchMode, 2  ; Allows partial matching of window titles
+    If WinExist("localhost - Google Chrome")  ; Adjust if needed    <-- ALT+ L search local host in crome .
+    {
+        WinActivate  ; Bring existing localhost tab to front          
+    }
+    Else
+    {
+        Run http://localhost:8080/
+    }
+return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

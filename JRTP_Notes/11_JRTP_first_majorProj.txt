@@ -1,0 +1,182 @@
+lect 45:
+========
+
+
+==============
+Major Project:(project developed in deloitte )
+==============
+ 
+Types of projects
+
+1) Internet Based Project
+	ex : Gmail, Facebook, IRCTC, LinkedIn etc...
+
+2) Intranet based project(portal)
+	ex: Aadhar, SBI Money Transfer
+
+Note : In interview prefer Intranet project coz it only works in laptops having access
+
+------------------------------------------------------------------------------------------
+
+Rhode Island(State Govt)
+
+IES - Integrated Eligibility system
+
+------------------------------------------------------------------------------------------
+- It is used to provide fully integrated eligibility system for RI plans for RI state citizen
+-> by using this application ,RI is providing below health and insurance plans for RI state citizens.
+
+1) SNAP (supplemental Nutrition Assistance program)
+2) CCAP (Child Care Assistance Program)
+3) Medicaid 
+4) Medicare (Senior Citizen, above 60 years)
+5) QHP  (Qualified health plan)
+6) RIW (Rhode Island works)
+
+
+lect 47:
+=======
+
+=> DHS -> Department of health services
+
+=> DHS Employees -> case workers 
+
+=> IES application will be accessible only in DHS offices 
+
+=> Caseworkers will use IES application to provide benefits for Citizens.
+
+=> Citizens should visit nearest DHS office to apply for plans. Citizen should talk to case worker to apply for plan.
+
+
+==============================================================================================================
+
+In IES project we have  below modules
+
+1) Admin
+2) User management  (UR)
+3) AR (Application Registration)
+4) DC (Data collection)
+5) ED (Eligibility determination )
+6) CO ( correspondence module)
+7) BI (benefits Issuance)
+8) Reports
+
+lect 48
+=======
+
+1) Admin
+=========
+-> admin is responsible to create accounts for case workers to access IES system 
+-> admin is responsible to create plans
+
+1) Case worker accounts management (create /update/delete/retrieve)
+2) Plans management (create /update /delete/retrieve)
+
+
+2) CW Module
+============
+-> CW is responsible to apply plans for citizen 
+
+1) Login 
+2) Dashboard 
+3) Edit profile
+4) Forgot Pwd
+
+3) AR Module 
+============
+
+=> AR module stands for application registration
+=> AR api will collect citizen basic information and it will verify citizen belongs to RI state or 
+based on SSN (It will communicate with SSA-WEB api ,which is federal gov project)
+
+=> if citizen belongs to RI state then application will be created for citizen to apply for the plan
+
+=> if citizen not belongs to RI state then application will not be created. Citizen cant apply for the plan.
+
+DC module
+==========
+
+=> DC module for data collection
+=> DC api is responsible to collect citizen data which is required to apply for the plan
+
+1) Citizen details
+2) Family details
+3) Education details
+4) Employment Details
+5) Income details
+6) Kids Details etc..
+
+ED Module
+==========
+
+=> ED stands for Eligibility determination
+=> Ed is responsible to verify citizen eligibility for the plan
+=> ed will execute plan condition with citizen data
+=> If citizen data matches with plan conditions then citizen will be approved foe the plan otherwise citizen will
+denied for the plan
+
+Note: Approved citizen will get benefit amount from govt
+
+
+CO module
+=========
+
+=> co stands for correspondence 
+=> This is responsible to send Notices to citizen regarding their plan eligibility 
+
+1) Approved Notice
+2) Denied Notice
+3) Termination notice
+4) Plan renewal  reminder 
+5) Missing documents
+
+BI module
+=========
+
+=> bi stands for benefit Issuance
+=> It is responsible to send benefit amount to approved citizens
+
+Reports Module
+===============
+
+-> It is used to generate reports in excel/pdf format with application data
+1) Report based on plan name
+2) report based on plan status
+3) report based on duration(start date and end date)
+4) report based on citizen gender 
+
+
+que : explain your project 
+
+1) What is IES c
+2) why IES 
+3) IES Client 
+4) IES plans and Conditions
+5) IES Modules 
+6) Purpose of each module in IES 
+7) How to access IES
+
+
+lect 50 to lect 55 {you tube} (follow lect and complete the project)  or we can follow from recording lect 60
+===================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

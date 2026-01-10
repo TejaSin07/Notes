@@ -1,0 +1,23 @@
+PROJECT 1:
+=========
+
+- salesforce migrate -> java, angular
+- server live module available
+- some product they have
+- customer come on company portal , they got information about company product
+- they want to customize ,so they quote about their requirement and tell there price.
+- quote uploaded to backend ,& backend team read quote and take action.
+- based on customer quote ,customer lie in some section/category, each section having some perks/benefits
+-  these benefits tell by backend team via template.
+	(benefits == map)
+- customer can reject and accept by viewing map.
+
+----//----
+
+--> deployed in aws
+- we will use rest template to asynchronies communication
+- single data base for all microservice
+- since client want complete project in small period of time
+- version control by git
+- Jupiter use for document
+- SonarQube - to improve code quality 

@@ -1,0 +1,171 @@
+
+SOLID:
+======
+
+S – Single Responsibility Principle (SRP)
+
+Definition:
+A class should have only one reason to change.
+
+Key points
+
+One class → one responsibility      {IMP point }
+
+Business logic ≠ infrastructure logic
+
+Easier testing and debugging
+
+Changes don’t ripple across code
+
+Note
+
+SRP doesn’t mean one method.
+It means one responsibility. Violation leads to god classes.
+
+O – Open / Closed Principle (OCP)
+
+Definition:
+Classes should be open for extension but closed for modification.
+
+Key points
+
+Use interfaces and inheritance          {IMP point}
+
+Avoid if-else / switch for behavior changes
+
+Add new features without touching existing code {Imp point}
+
+Reduces regression bugs
+
+Note
+
+OCP is usually achieved using polymorphism + strategy pattern.
+
+L – Liskov Substitution Principle (LSP)
+
+Definition:
+Objects of a subclass should be replaceable for parent class objects.
+
+Key points
+
+Child must not break parent behavior
+
+No unexpected exceptions
+
+Follow method contracts
+
+Correct inheritance hierarchy
+
+Note
+
+If instanceof is needed frequently → LSP is broken.
+
+I – Interface Segregation Principle (ISP)
+
+Definition:
+Clients should not be forced to depend on methods they don’t use.
+
+Key points
+
+Small, focused interfaces
+
+Avoid “fat” interfaces
+
+Better readability
+
+Prevents empty method implementations
+
+Note
+
+ISP reduces unnecessary coupling and improves flexibility.
+
+D – Dependency Inversion Principle (DIP)
+
+Definition:
+High-level modules should not depend on low-level modules.
+Both should depend on abstractions.
+
+Key points
+
+Use interfaces instead of concrete classes
+
+Enables dependency injection
+
+Improves testability
+
+Loose coupling
+
+Note
+
+Spring Boot follows DIP by default using IoC container.
+
+
+
+
+
+
+
+
+
+
+Factory design pattern ::  code with interfaces ,loosly coupling
+Builder pattern :: give only neccesory field in constructor ,use setter to set others field
+Sigle ton design pattern :: single object
+Strategy Pattern
+Intent: Change behavior at runtime
+Use when: Multiple algorithms, same interface
+
+1️⃣ Singleton
+
+Design: Ensure only one instance of a class with global access.
+Implementation & Use: Private constructor + static instance; used for config, cache, connection managers.
+
+2️⃣ Factory
+
+Design: Create objects without exposing instantiation logic.
+Implementation & Use: Return interface type based on input; used for service selection, notification systems.
+
+3️⃣ Builder
+
+Design: Construct complex objects step-by-step with required and optional fields.
+Implementation & Use: Required fields in builder constructor, optional via chained methods; used for immutable DTOs.
+
+4️⃣ Strategy
+
+Design: Define a family of algorithms and switch them at runtime.
+Implementation & Use: Common interface with multiple implementations; used in rule engines, payment logic.
+
+5️⃣ Observer
+
+Design: Notify multiple objects automatically when state changes.
+Implementation & Use: Subject maintains observer list and notifies; used in events, Kafka consumers, listeners.
+
+6️⃣ Adapter
+
+Design: Convert one interface into another expected by the client.
+Implementation & Use: Wrapper class translates calls; used for legacy or third-party API integration.
+
+7️⃣ Proxy
+
+Design: Control access to an object by placing a surrogate in front of it.
+Implementation & Use: Proxy implements same interface and delegates; used in security, logging, Spring AOP.
+
+8️⃣ Decorator
+
+Design: Add responsibilities dynamically without modifying existing class.
+Implementation & Use: Wrap object and extend behavior; used for feature extension, pricing add-ons.
+
+9️⃣ Template Method
+
+Design: Define algorithm structure, let subclasses customize steps.
+Implementation & Use: Abstract class with final workflow method; used in batch processing and workflows.
+
+🔟 Facade
+
+Design: Provide a simplified interface over a complex subsystem.
+Implementation & Use: Single entry class calling multiple services; used in controllers and service layers.
+
+1️⃣1️⃣ Chain of Responsibility
+
+Design: Pass request through a chain until one handler processes it.
+Implementation & Use: Handlers linked with next reference; used in validation, filters, security checks.

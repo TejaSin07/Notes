@@ -1,0 +1,114 @@
+BIT MANIPULATION:(18 june)
+
+page: 1
+
+AND  ->  all true -> true
+         1 false -> false
+
+OR   ->  1 time  -> true
+         all false -> false
+
+XOR -> no of 1s -> odd -> 1
+                    even -> 0
+
+1) swap two number :
+x = 6, b=5
+x = x^b;   -> 6^6 = 0;
+b = x^b;   -> (a^b)^b -> a
+a = a^b;   -> (a^b)^a = b -> (a^b)^b = a ("value of b is changed to a in second step")  -> b;
+
+2) check if i'th bit is set or not:
+   int N = 13;
+   int i = 2;
+
+   a) apprch 1: by using left shift operator -> (N & (1<<i)) != 0
+        13: if abovedition is true then i'th bit is set bit
+
+we are shifting 1 by i'th times to the left: 100
+        13: 1 1 0 1
+         8 : 1 0 0 0   <- this is 1 left shifted by 2.
+--------------------
+        0 1 0 0   <- as we can see solution is not 0 so ans is i'th bit is set bit.
+
+   b) approch 2: by using right shift -> ((N>>i) & 1 == 0)
+        if condition is true then not a set bit
+
+3) set the i'th bit: (N | (1<< i))
+
+4) clear the i'th bit:(N & ~(1<< i))
+
+13 :     1 1 0 1
+     & ~(1 0 0 )   (suppose we require this type of number ,how we will get that)
+                  -> by shifting 1 to the left by i'th times and taking nor of that
+     1 0 0 0
+------------------------
+   => N & ~(1<<i)
+Page 2:
+
+5) toggle the i'th bit(reverse bit at i'th position )
+
+-> N xor (1<<i)
+
+6) Remove the last set bit (RightMost)
+-> 16: 1 0 0 0 0
+-> 15: 0 1 1 1 1
+=> 16 & 15 = 0 0 0 0 0
+
+->from above example we can say that last set bit is changed to 0 by just subtracting 1 from orginal number ->16 -1 = 15
+
+observe below ex :
+40 = 1 0 1 0 0 0
+39 = 1 0 0 1 1 1
+
+-> now we can say that from except last set bit all the bit at right are converted to 1(which are previously 0)
+if we take "&" of both number we get the number where we converted last set bit to 0
+
+40 = 1 0 1 0 0 0
+&39 = 1 0 0 1 1 1
+------------------
+      1 0 0 0 0 0
+
+7) check if the number is power of 2:
+-> for power of two number should contain only one set bit
+if (N & (N -1) == 0) then number is power of 2.
+
+40 = 1 0 1 0 0 0
+&39 = 1 0 0 1 1 1
+------------------
+     1 0 0 0 0 0 =>
+
+after performin & still one set bit is there so 40 is not power of 2;
+
+
+page 3:
+
+8) Count the number of set bits
+-> Brute force
+int countSetBits(int n){
+      cnt = 0;
+      while(n>1){
+         if(n%2 == 1) cnt += 1;
+         n = n/2;
+      }
+      if(n == 1) cnt+=1;
+      return cnt;
+}
+
+or
+
+int countSetBits(int n){
+     cnt = 0;
+     while(n>1){
+         cnt += n&1;
+         n = n>>1;       --> i.e n/2
+     }
+     if(n == 1) cnt +=1;
+     return cnt;
+}
+
+
+cnt = 0;
+while(N != 0){
+   N = N & (N -1)  <- this will cancel each set bit in each iteration.
+   cnt+=1;
+}

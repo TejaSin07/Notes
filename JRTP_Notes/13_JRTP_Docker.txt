@@ -1,0 +1,273 @@
+lect 63:
+--------
+https://github.com/ashokitschool/DevOps-Documents
+
+========
+Docker :
+========
+
+-> Docker is containerization software 
+-> docker is used to simplify our application deployment 
+-> using docker we can run our application in any platform
+
+1) Docker file
+2) Docker Image
+3) Docker Hub (Docker registry)
+4) Docker Container 
+
+=> Docker file contains instructions to build docker image
+=> using docker file we can create docker image 
+=> docker image contains application code + required dependencies 
+=> docker images we can store in docker hub (docker registry)
+Note : In real-time, we will use AWS ECR to store docker images
+	(ECR -> Elastic container registry )
+
+=> Docker Images are used to create Docker containers
+=> Our application will execute inside Docker container
+
+Note : To work with Docker we need to install Docker Software (Docker Engine)
+
+============
+Docker Setup 
+=============
+
+# install docker 
+$ curl -fsSL get.docker.com |/bin/bash
+
+# Verify docker installation 
+$ sudo docker version 
+
+https://hub.docker.com/    :-> mail id : tejassinkar10@gmail.com ,user name: tejassinkar09 
+
+#pullling image from ashokit
+$ sudo docker pull ashokit/spring-boot-rest-api
+
+#Display Docker image we have in our machine
+$ sudo docker image 
+
+$ sudo docker run ashokit/spring-boot-rest-api   : to stop ctrl+c
+
+#Run docker image
+
+sudo docker run -p 9090:9090  ashokit/spring-boot-rest-api
+
+Note : Enable 9090 port number in security group 
+
+Access application using url like below
+
+http://56.228.80.110:9090/welcome/Ashok
+
+Dockerizing Springboot application 
+-------------------------------------
+https://www.youtube.com/watch?v=iGz0cFwt5vI&pp=ygUqZG9ja2VyaXplIHNwcmluZyBib290IGFwcGxpY2F0aW9uIGFzaG9rIGl0
+
+lect 64:(6 aug)32 min
+================
+
+# display docker images available in our machine
+$ sudo docker image
+
+#remove docker image
+$ sudo docker rmi<image-name/image-id>
+
+# Display running docker containers
+$ sudo docker ps
+
+# Remove container
+$ sudo docker rm <container-id>
+
+# download docker image 
+sudo docker pull <image-name>
+
+# It is used to clean up docker content
+$ sudo docker ps -a
+
+# to run the container in detached mode 
+$ sudo docker run -d -p 9090:9090  ashokit/spring-boot-rest-api
+
+
+Dockerfile:
+===========
+-> Dockerfile contains set of instructions to build docker image
+-> In DockerFile we will use DSL keywords
+
+FROM  -> 
+MAINTAINER -> 
+COPY ->
+ADD ->
+RUN ->
+CMD ->
+EXPOSE  ->
+ENTRYPOINT  ->
+VOLUME ->
+ARG ->
+
+
+=> From is used to specify base image to create our image 
+	From open-jdk:11
+	From python:3:3
+	From tomcat: 9.5
+	From node:15.1 
+
+
+=> MAINTAINER is used to specify Dockerfile Author 
+	MAINTAINER Aahok<ashok@gmail.com>
+
+=> COPY is used to copy the files from source to destination
+	COPY target/sb-api.jar	/usr/app/sb-api.jar
+	COPY target/app.war     /usr/tomcat/webapps/app.war
+
+=> ADD is used to copy the files from source to destination 
+	COPY <url> /usr/tomcat/webapps/app.war
+
+
+=> RUN is used to execute instruction while creating docker image
+	RUN  apt install git 
+	RUN apt install maven
+	RUN git clone<repo>
+
+=> CMD is used to execute instructions while container creation 
+	CMD java -jar jarfile
+
+=> WORKDIR is used to specify working directory 
+
+=> ENTRYPOINT is used to execute instructions while creating container 
+	ENTRYPOINT ["java" "-jar" "sb-rest-api.jar"]
+
+=> RXPOSE is used to specify container running port number 
+	EX : EXPOSE 9090
+
+=> Create Dockerfile with below content 
+	file name : Dockerfile
+
+FROM ubuntu 
+ 
+RUN echo 'hi'
+RUN echo 'hello'
+CMD echo 'how are you'
+
+=> Create Docker image using above docker file
+
+# create Docker image  
+$ sudo docker build -t firstimage .
+
+# tag docker image 
+$ sudo docker build tag <image-name> <tag-name>
+ex : $ sudo docker build -t firstimage -f <docker-file>
+
+# Login into Docker Hub account 
+$ sudo docker login 
+
+# push Docker Image to Docker Hub 
+$ sudo docker push <tag-name>
+
+lect 65: 8 aug 
+--------
+====================================
+How to dockerize Java web application 
+=====================================
+
+-> Java web application will be packaged as war file
+-> war file we will deploy in tomcat server webapps folder
+-> below is the Dockerfile to dockerize java web application
+
+-> GIT repo :https://github.com/ashokitschool/maven-web-app.git
+
+
+FROM tomcat 
+
+COPY target/warfile   /usr/tomcat/webapps/warfiles
+
+EXPOSE 8080
+
+
+
+
+How to dockerize spring boot application 
+========================================
+-> Spring boot application will be packaged as jar file
+-> to run spring boot application we need to run jar file
+-> spring boot provides embedded server for web application
+
+-> below is a docker file for spring boot application 
+
+FROM open-jdk:11
+
+COPY target/app.jar /usr/app/app.jar
+
+WORKDIR /usr/app/
+
+EXPOSE 8080
+
+ENTRYPOPINT ["JAVA" "-JAR" "APP.JAR" ]
+
+git repo : https://github.com/ashokitschool/spring-boot-docker-app.git
+
+
+===============
+Docker Compose
+===============
+
+=> Docker compose is a tool which is used to manage multi container based application 
+=> we can create multiple containers at a time by using Docker Compose 
+=> Using Docker compose we can define dependencies among the containers
+	EX: App container Depends on DB container 
+=> we will provide containers information to docker compose tool using docker-compose.yml
+=> Docker compose yml file contains below elements
+
+version:  it represent version number 
+services: it represent containers information
+volumes:  it represent storage
+network:  it represent connectivity
+
+
+# create docker container using docker compose 
+ $ docker-compose up       (create container )
+ $ docker-compose down	   (delete container)
+ $ docker-compose stop
+ $ docker-compose ps        (show container)
+
+lect 66 :(12 aug)
+======================
+Docker Compose setup
+======================
+1. Download Docker Compose
+
+sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" \
+  -o /usr/local/bin/docker-compose
+2. Give execute permissions
+
+sudo chmod +x /usr/local/bin/docker-compose
+3. Verify installation
+
+docker-compose --version
+
+Execute Spring Boot App with MySQL using Docker compose
+=========================================================
+
+#clone git repo 
+https://github.com/ashokitschool/spring-boot-mysql-docker-compose.git
+
+#package application :
+mvn clean package
+
+
+# create Docker image for spring boot application 
+sudo docker build -t spring-boot-mysql-app .
+
+# Create containers using docker compose in detached mode
+sudo docker-compose up -d
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,1114 @@
+Topics to cover:
+----------------
+
+1) Association mapping
+2) pagination 
+3) Data Jpa Specification C:\Users\tejas\Desktop\springboot repo\SBMS-39-main\22-DataJpa_Specification_App
+4) QBE
+5) how data assignment happen for binding  class and entity class
+6) where we need default constructor and why in entity or binding class?
+
+
+Git Repo :: https://github.com/ashokitschool/SBMS-39.git
+
+persistence :=> refers to the mechanism of storing, retrieving, and managing data in a database. 
+
+ 
+================
+Spring Data JPA
+================
+1) What is ORM & why
+2) What is Data JPA & Why ?
+3) Data JPA Repositories
+		- CrudRepository
+		- JpaRepository
+4) What is Entity
+5) Data JPA Application
+6) Crud Operations
+7) Pagination & Sorting
+8) Query By Example (QBE)
+9) findByXXX methods
+10) Custom Queries (@Query)
+11) Native SQL vs HQL
+12) Primary Keys & Generators
+13) Composite Primary Key
+		- @Embeddable
+		- @EmbeddedId
+14) Timestamping
+		- @CreationTimestamp
+		- @UpdateTimestamp
+15) Transactions
+		- @Transactional
+16) Connection Pooling
+17) Association Mapping 
+18) Conclusion
+
+
+=============================
+What is persistence layer ?
+=============================
+
+=> It contains set of classes & interfaces to communicate with database.   
+=> In java, we have several options to develop persistence layer
+
+			1) JDBC
+			2) Hibernate ORM
+			3) Spring JDBC
+			4) Spring ORM
+			5) Spring Data JPA
+
+Note: Spring Data JPA is the latest trend in the market to developer Persistence layer in java based applications.			
+
+===============================
+Why to use Spring Data JPA ?
+===============================
+
+=> No need to write boilerplate code (duplicate)
+
+=> No need to write queries 
+
+=> Ready made methods support is available
+
+				- save () - 	insert record into db table
+				- findById ()
+				- findAll ()
+				- count ()
+				- deleteAll () 
+
+=> Reducing development time
+
+==============
+What is ORM ?
+==============
+
+=> ORM stands for Object relational mapping
+
+=> It is a "technique" to map java objects with database tables.
+
+=> Using ORM we can deal with objects to perform DB operations.
+
+=> When we are using ORM frameworks we need to map java classes with database tables.
+
+			User.java     ============>  USER_TBL
+
+			Product.java  ============>  PRODUCT_TBL
+
+Note: The java class which is mapped with database table is called as Entity class.		<--
+								      =============		
+
+
+			Entity class           ---------> db table
+
+			Entity class variables ---------> db tbl columns
+
+			Entity class obj       ---------> db tbl row
+
+
+=> We will use below annotations to create Entity classes
+				
+
+@Entity : Represent java class as an Entity class    
+Imp Note: write getter and setter for all field except which are auto generated like if we generate id automatically then just write getter.
+
+@Table : To map java class name with table name (Optional).
+	coz table name automatically become same as class name(exact same). 
+	
+	-> @Table(name = "practEmp_tbl")
+         write just below entity annotation
+
+@Id  : Represents entity variable mapped with PK column in table
+
+@Column	: To map java class variables with table column names 
+			(optional)
+
+==========================
+What is Jpa Repository ?
+==========================
+
+=> Data JPA provided repository interfaces to simplify Persistence layer development.
+
+			a) CrudRepository
+			b) JpaRepository (more features)
+
+Note: To perform DB operations we will create interface by extending from JpaRepository.   
+
+
+===========
+Assignment
+===========
+
+Data JPA App with Oracle : https://www.youtube.com/watch?v=ZGKHCJsp4hg
+
+          +----------------------+
+          |   Spring Boot App    |
+          |  (@Entity classes,   |
+          |   @Repository, etc) |
+          +----------------------+
+                     |
+                     v
+       +--------------------------+
+       | spring-boot-starter-data-jpa |
+       | - Provides JPA API           |
+       | - Provides Spring Data Repo  |
+       | - Integrates Hibernate (ORM) |
+       +--------------------------+
+                     |
+                     v
+          +------------------+
+          |   Hibernate ORM  |
+          | - Maps objects   |
+          |   to tables      |
+          | - Generates SQL  |
+          +------------------+
+                     |
+                     v
+          +------------------+
+          | JDBC Driver      |
+          | (mysql-connector-java) |
+          | - Executes SQL   |
+          |   in MySQL DB    |
+          +------------------+
+                     |
+                     v
+           +----------------+
+           |   MySQL DB     |
+           +----------------+
+
+=======================================
+Developing First Data JPA Application 
+========================================
+
+1) DB Setup (MysQL DB Server + MySQL Workbench)
+
+ @@ Reference Video : youtube.com/watch?v=EsAIXPIsyQg
+
+show databases;
+create database sbms39;
+use sbms39;
+show tables;
+
+2) Create Spring Boot application with below dependencies
+
+		a) data-jpa-starter  - Provides ORM, JPA support, repositories, Hibernate integration
+		b) mysql-driver      - Provides JDBC driver to connect Spring Boot to MySQL database
+
+3) Configure Datasource properties in application.properties
+
+spring.datasource.username=root
+spring.datasource.password=Ned$tark07
+spring.datasource.url=jdbc:mysql://localhost/sbms39
+spring.jpa.hibernate.ddl-auto=update		    
+spring.jpa.show-sql=true 			:-> Tells Hibernate to print SQL statements in the console.
+
+4) Create Entity class (class to table mapping)
+
+5) Create Repository interface (CrudRepository/JpaRepository)
+
+@Repository <-- optional  to write  
+public interface EmpRepository extends CrudRepository<Employee, Integer>{
+
+}
+
+Q. why @Repository optional  to write ? 
+
+This is because Spring automatically detects repository interfaces that extend
+ CrudRepository, JpaRepository, or other Spring Data repository interfaces
+ 
+✅ When Should You Use @Repository?
+🔹 You Can Skip It If:
+	You are using Spring Boot with Spring Data JPA.
+	Your repository interface extends CrudRepository, JpaRepository, etc.
+
+🔹 You Should Add It If:
+	You have a custom implementation of the repository.	
+	You want exception translation (but this is already handled in SimpleJpaRepository).
+
+Q. EmpRepository and CrudRepository both are interfaces then definitely both have abstract methods .i.e no body method then how tasks are working?
+
+================================================================================================================================================
+
+✅ CrudRepository is an interface with no method bodies, but Spring dynamically implements it at runtime.
+✅ Spring creates a PROXY class that IMPLEMENTS EmpRepository and interacts with the database.
+✅ The proxy delegates queries to JPA’s EntityManager or JDBC behind the scenes.
+✅ You don’t need to write SQL or DAO logic manually—Spring does it for you!
+➡️ You don’t write this code manually—Spring generates it dynamically! 
+
+link: https://chatgpt.com/share/67b066ab-e9ec-8006-a9bf-92b026cac3ad
+
+6) Create Service class and inject Repository interface
+
+7) Test service class methods from start class.
+
+		@@ save ( ) = insert + update ==> upsert   <--- one method perform both action(polymorphic method)    <-------polymorphism ,it change it form on user input 
+
+		first it will check for object ,is it already present in table as row. For this save method/hibernate always use select to check. 
+
+  
+spring.application.name=14-DataJPAApp1
+
+spring.datasource.username=root
+spring.datasource.password=Ned$tark07
+spring.datasource.url=jdbc:mysql://localhost/sbms39
+
+spring.jpa.hibernate.ddl-auto=update   
+^ 
+✅ update CREATES new tables and columns but doesn’t remove old ones.
+✅ Best for development (not for production).
+✅ Does NOT delete existing data, only modifies schema.
+✅ For production, use "validate" to ensure correctness without modifying the schema.   <-- imp
+
+spring.jpa.show-sql=true    --> it will show queries that executed on console
+
+Q. what if we only change id and all data is same ,then which query is executed?
+
+Q. why we are not directly implementing service class by CRUD OR JPA interface?
+==> if we do that then we need to write all abstract methods by ourself
+
+Q. What's the need of proxy class?
+==> if we write our class by extending repo we need to write all implement all abstract method by own. 
+
+lect23:
+======
+C:\Users\tejas\Desktop\springboot repo\workspace-spring-tool-suite-4-4.27.0.RELEASE\15-DtaJpa-JpaRepo
+
+==============================
+Crud Repository Methods (12)   <-- it provide 12 method
+==============================
+
+=> CrudRepository is a spring data jpa repositry interface
+
+=> CrudRepository providing methods to perform crud operation
+
+@@ Note: To use crud repo methods we need to extend properties
+
+save(T) : one object for Upsert
+
+saveAll(Iterable T) : Collection of objects for upsert
+
+findById(ID id) : To retrieve record based on given pk value
+
+findAllById(Iterable ids) : Retrieve records based on given pks
+
+findAll( ) : Retrieve all records from table
+
+existsById(ID id) : To check record presence in table
+
+count () : To get total no.of records
+
+deleteById(ID id) : To delete record based on given PK.
+
+deleteAllById(Iterable ids) : Delete multiple records based on pks
+
+delete(T entity) : Delete record based on given entity obj
+
+deleteAll(Iterable entities) : delete records based on entities
+
+deleteAll ( ) : To delete all records from table
+
+
+Use of optional object and iterable objects ?:
+--> to avoid null pointer exception
+--> used to handle the presence or absence of a value in a safer way, avoiding NullPointerException
+--> if value is present then we use ref.isPresent(); 
+
+@entity INFORMATION:
+===================
+JPA/Hibernate uses reflection to create entity objects. A no-arg constructor is required so that the framework can instantiate your class when loading data from the database.
+
+✔️ Needed for proxy class creation during lazy loading.
+✔️ Best practice: Always include a no-arg constructor in your entity.    <-- IMP 
+
+-> if you write parameterised constructor then their must add default constructor
+-> get more info about how hibernate using reflection
+
+
+🚀 Why Can't We Use getBean(Employee.class)? (employee is used for entity) 
+-----------------------------------------------------------------------------
+Spring Beans vs JPA Entities
+
+Spring only manages beans that are annotated with @Component, @Service, @Repository, or explicitly defined in a configuration class.
+
+JPA Entities (@Entity classes) are not Spring Beans. They are plain POJOs (Plain Old Java Objects) and managed by Hibernate's Persistence Context instead.
+
+How Employee Objects are Managed?
+
+Employee objects are created manually using new Employee(...) inside your service or repository.
+
+They are not injected or managed by Spring like service/repository beans.
+
+===================
+findByXXX methods	
+===================
+
+=> findBy... methods can be used on any field/column (primary key OR non-primary key)
+=> we can perform only select method, "cant" do insert update delete by using findBy
+=> we will generating this abstract method, so we have too write in repository interface.
+=> we have to write findBy and ctr+space (it will give suggestion)
+=>To write below heavy Spring Data JPA derived queries just use ctrl+space after each meaning full word it give suggestion 
+EX public List<Worker> findByEsalaryGreaterThanEqual(Double esalary);
+
+
+NOTE: Only for the field annotated with @Id (your entity’s primary key), Spring Data JPA gives you
+built-in methods (findById, deleteById, existsById, etc.). For all other fields, you must declare your own findByXxx.
+
+Note : findBy methods are used for select operations only
+
+	// select * from employee where ename=:ename <== jpa will take care of these
+	->public List<Employee> findByEname(String ename);
+	
+	// select * from employee where esalary=:esalary
+	->public List<Employee> findByEsalary(Double salary);
+
+	//select * from employee where esalary >= :salary
+	->public List<Employee> findByEsalaryGreaterThanEqual(Double salary);
+
+Note: let suppose :-> If you write "findFor" instead of "findBy", it will not work because Spring Data JPA recognizes only 
+specific query derivation keywords, such as findBy, existsBy, countBy, etc.
+
+✔️ Use findBy when you need actual records.
+✔️ Use existsBy when you only need to check if a record exists (more efficient).
+✔️ Use countBy when you just need the count (faster than fetching full objects).
+
+✅ Spring Data JPA automatically generates queries based on method names.
+✅ findBy + FieldName + Operator is the standard convention.
+✅ Spring converts method names into SQL queries dynamically.
+✅ You cannot use arbitrary names—only valid entity field names.
+✅ Use @Query when method names cannot express complex queries.
+
+🔹 Example for findBy + FieldName + Operator Naming Convention
+1️⃣ Find records where the name matches exactly:
+
+Method Name: findByEname(String ename)
+Generated SQL: SELECT * FROM worker WHERE ename = ?;
+2️⃣ Find records where the salary is greater than or equal to a value:
+
+Method Name: findByEsalaryGreaterThanEqual(Double esalary)
+Generated SQL: SELECT * FROM worker WHERE esalary >= ?;
+3️⃣ Find records where the name contains a specific keyword:
+
+Method Name: findByEnameLike(String ename)
+Generated SQL: SELECT * FROM worker WHERE ename LIKE ?;
+4️⃣ Find records where the salary is between two values:
+
+Method Name: findByEsalaryBetween(Double min, Double max)
+Generated SQL: SELECT * FROM worker WHERE esalary BETWEEN ? AND ?;
+5️⃣ Find records where the salary is null:
+
+Method Name: findByEsalaryIsNull()
+Generated SQL: SELECT * FROM worker WHERE esalary IS NULL;
+6️⃣ Find records where the name is in a given list:
+
+
+================
+Custom Queries	
+================
+
+=> Executing our own queries using data JPA.
+
+=> To work with custom queries, we will use @Query annotation   <== IMP
+
+=> Custom Queries we can write in 2 ways
+
+			1) Native SQL (plain sql)
+			2) HQL 
+
+
+lect 24:
+=========
+
+
+============
+SQL Queries
+============
+
+=> SQL Queries are DB dependent queries. 
+
+=> In SQL query we will use table names and column names directly <-- 
+
+	Ex: select * from emp_tbl where emp_sal <= 10000.00
+
+Note: If we want to change from one DB to another DB then we have to modify SQL queries and we have to re-test entire application.
+
+=> To make our application loosely coupled with database we can use HQL queries.
+
+============
+HQL Queries
+============
+
+=> HQL stands for hibernate query language. 
+=> HQL queries are database "independent".
+=> HQL queries will make our app loosely coupled with database.
+
+=> In HQL queries we will use entity class name and entity variable names.   <--
+
+		Ex: From Employee where esal=1000.00
+
+Note: Database can't understand HQL directly
+
+=> HQL should be converted to SQL for execution.	
+
+=> Dialect classes are used to convert HQL to SQL.   <--
+
+=> Every DB will have its own dialect class
+
+		Ex: OracleDialect, MySQLDialect......	
+=> In modern Spring Boot apps, we usually don’t configure the Hibernate dialect manually. 
+   Spring Boot auto-detects the database from the data source URL and sets the correct dialect.
+   We only configure it manually if we want a specific version or if auto-detection fails
+
+
+SQL : select * from  emp_tbl
+HQL : From Employee
+
+SQL : select * from emp_tbl where emp_id=101
+HQL : From Employee where eid=101 	
+
+SQL : select emp_id, emp_name from emp_tbl	
+HQL : select eid, ename from Employee
+
+Spring Data JPA lets you write normal SQL queries explicitly in your repository interface by using:
+
+@Query(value = "SELECT * FROM table_name WHERE column_name = :param", nativeQuery = true)
+								     
+======================================================================================
+
+public interface EmpRepository extends CrudRepository<Employee, Integer> {
+
+	@Query("from Employee")
+	public List<Employee> getAllEmpsHQL();
+
+	@Query("from Employee where eid=:id")     <-- :id is a positional parameter <-- method parameter needs to pass here dynamically.
+	public Employee getEmpById(Integer id);
+	
+	@Query(value = "select * from employee", nativeQuery = true)   <-- we use nativeQuery = true for differentiate that it is native query no need of dialect 
+	public List<Employee> getAllEmpsSQL();
+
+	// select * from employee where ename=:ename
+	public List<Employee> findByEname(String ename);
+
+	// select * from employee where esalary=:esalary
+	public List<Employee> findByEsalary(Double salary);
+
+	// select * from employee where esalary >= :esalary
+	public List<Employee> findByEsalaryGreaterThanEqual(Double salary);
+}
+
+==================================================================
+
+=======
+lect25
+=======
+=================================
+Q) Which is better SQL or HQL ?
+=================================
+
+=> Performance wise SQL is better
+
+=> Flexibility wise HQL is better
+
+===============
+JpaRepository
+===============
+
+=> This is predefined data jpa interface
+
+=> It is providing several methods to perform DB ops
+
+	JpaRepo = CrudRepo + Pagination + Sorting + QBE   <--
+
+
+=====================
+What is Pagination ?
+=====================
+
+=> Divide total records into multiple pages for display.	
+
+	- decide page size (how many records should display)
+
+	- calculate no.of pages required
+
+NOTE::  pageNumber start from 0.
+
+Scenario-1 : 
+	
+		- Total records in db tbl : 50
+		- page size : 10		
+		- total pages = total-records/page-size	 => 5 pages
+
+Scenario-2 : 
+	
+		- Total records in db tbl : 500
+		- page size : 24		
+		- total pages = total-records/page-size	 => = 500/24 = 20.80 => 21 pages
+
+ex => 	public void getAllEmpsPagination () {
+		int pageSize = 3; //fixed value
+		int PageNumber =  4;//will come from ui,start from 0//currently we acceesing 5th page.
+		PageRequest pg = PageRequest.of(PageNumber, pageSize);
+		Page<Employee> page = empRepo.findAll(pg);
+		List<Employee> emps = page.getContent();
+		emps.forEach(e-> System.out.println(e));
+	}
+
+===================		
+What is Sorting ?	
+===================
+
+=> Sorting the records in ascending or descending order
+
+Ex: display mobile based on price high to low
+
+	display emps based on salary low to high	
+
+
+	public void getAllSortEmps() {
+		Sort sort = Sort.by("esalary","ename").descending();
+		List<Employee> emps =  empRepo.findAll(sort);
+		emps.forEach(e-> System.out.println(e));
+	}
+Note: we are importing all classes from org.springframework.data.domain
+for example: Sort,Page,Example,PageRequest
+
+===============
+What is QBE ?	
+===============
+
+=> QBE means Query By Example
+
+=> It is used to construct query dynamically
+
+=> It is used to implement dynamic search functionalities
+
+=> it will only accept "and" operator and "==" operator, for greater than and less than we use specification concept.
+
+
+
+ex:
+public void getAllEmpsWIthFilter() {
+		
+		Employee entity= new Employee();
+		//if emp name come form ui -> below query execute
+		//select e1_0.eid,e1_0.ename,e1_0.esalary from employee e1_0 where e1_0.ename=? 
+		entity.setEname("Jack");
+		entity.setEsalary(2830.00);
+		
+		Example<Employee> example = Example.of(entity);//it will directly used == operator
+		//specification need for greater than or less than .
+		
+		List<Employee> emps = empRepo.findAll(example);
+		emps.forEach(e->System.out.println(e));
+	}
+
+Note: => for specification C:\Users\tejas\Desktop\springboot repo\workspace-spring-tool-suite-4-4.27.0.RELEASE\14-
+
+
+Q. toString method implementation?
+Q. use of varArgs in sort method ,ex, In sortBy we can set one ,two or any number of parameter  ?   refer 15 application
+
+Q. What problem will occur if use primitive type instead of wrapper class in entity class?   
+ 
+=> suppose if we use int instead of integer for eid, then when we run query without passing any value for eid, it will consider 0
+as int default value is 0 and it search for obj having 0 eid, and if we use integer i.e wrapper its default value is null,so all data will come.  
+
+
+ASSIGNMENT 1 : 
+*************
+
+
+1) Develop DATA JPA application ,to insert person data into db table including person photo and person resume (pdf format).
+
+2)Develop data jpa application to call store.
+
+3) Develop  data jpa application to retrieve only emp_name and emp_salary details from employee_tbl using custom query.
+
+
+
+lect 27:
+========
+
+=====================
+What is Timestamping
+=====================
+
+=> It is  used to populate record creation date and record updated date.
+=> We will use below annotations in entity class to enable timestamping
+
+		@CreationTimestamp
+		@UpdateTimestamp
+
+----------------------------------------------------------
+
+@Entity
+public class Product {
+
+	@Id
+	private Integer pid;
+	private String name;
+	private Double price;
+	
+	@Column(updatable = false)   <== only once executed when data inserted
+	@CreationTimestamp
+	private LocalDate createdDate;
+	
+	@Column(insertable = false)    <== executed every time other than creation .
+	@UpdateTimestamp
+	private LocalDate updatedDate;
+
+	//setters & getters
+
+}
+
+-----------------------------------
+
+@Entity
+@Table
+@Id
+@Column
+@CreationTimestamp
+@UpdateTimestamp
+
+============
+Generators  (problem statement : user not going write its own primary key so we need to generate )
+============
+
+=> Generators are used to set the value for primary key columns=
+		@@ Primary Key = Not null + unique constrains
+
+=> Primary key is used to maintain unique records in table
+=> For every table at least one primary key is required.
+=> no need of setter for primary key , but getter should be there if we want to access the  primary key 
+
+	public Employee( String name, Double salary) {  
+		this.name = name;
+		this.salary = salary;
+	}
+	//we use above constructor is we not create id manually. we are not passing id as parameter
+
+lect28:
+=======
+
+======================
+Generator Strategies
+======================
+
+==> @GeneratedValue(strategy = GenerationType.TABLE) (Creates a Table!)    <-- focus on table, others not create separate table 
+  	Creates a separate table to manage primary key values.
+	Stores and increments primary key values manually instead of using an auto-increment field or a sequence
+
+Strategy	Creates Separate Table?			How ID is Generated?
+IDENTITY	❌ No					Database auto-increment
+SEQUENCE	❌ No (but creates a DB sequence)	Database sequence
+TABLE		✅ Yes					Uses a table for ID tracking
+AUTO		🔄 Depends				JPA picks IDENTITY, SEQUENCE, or TABLE
+
+identity generator : it supports auto_increment (mysql)
+
+sequence generator : it supports db sequences (oracle)
+
+@GeneratedValue(strategy = GenerationType.IDENTITY)  <-- used for integer maintaining from 1 id'  
+
+universal unique identifier(uuid):
+---------------------------
+uuid generator : alpha-numeric value for pk (datatype string)
+
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private String pid;
+
+
+ASSIGNMENT 2 : create custom generator ex.crate TS001,TS002 like id.
+************
+
+Q. What if we inserted 5 record manually and then now want to create id by auto generation ?? 
+
+--> if we are inserted data by using constructor then first we need to modify it by removing id parameter.
+--> then execute below query to modify table
+
+Modify the Column Without Redefining PRIMARY KEY
+Since the id column is already a primary key, just add AUTO_INCREMENT without redefining it:
+
+-->ALTER TABLE pract_emp_tbl MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT;
+✅ This will enable auto-increment without trying to redefine the primary key.
+
+Set the Next Auto-Increment Value (If Needed)
+Since you have 5 manually inserted records, ensure the next id starts from 6:
+
+->ALTER TABLE pract_emp_tbl AUTO_INCREMENT = 6;
+✅ This ensures that new records start from id=6 instead of conflicting with existing ones.
+
+==========================
+Composite Primary keys
+==========================
+
+=> If table is having more than one primary key then it is called as composite primary key
+
+=> generators will not support composite primary key. you need to set data manually 
+
+create table person(
+	pid   int(10),
+	name  varchar(100),
+	email varchar(100),
+	passport varchar(100),
+	primary key(pid, passport)
+)
+
+ : we are creating entity class that not contain variable that include in pk. We only create variable having type class that contain  
+ : create new class containing variable that needs to combine for pk.(this class is not entity, give @Embeddable annotation their)
+ : create object of this class in service 
+
+Q. When to Use @Embeddable?
+	it represent class that contains all primary keys variable 
+
+Q. When to Use @EmbeddedId?
+     it represent variable having type of class containing primary variable.
+
+
+Note: Identity generation isn't supported for composite ids
+
+
+ Key Takeaways
+✅ @Embeddable is used to define a composite key class.
+✅ @EmbeddedId is used in an entity to embed the composite key.
+✅ JPA requires equals() and hashCode() for composite keys.
+✅ JpaRepository<OrderItem, OrderItemId> must match the primary key type.
+
+================================================================
+
+@@ Custom Generator : https://www.youtube.com/watch?v=IijGVtT9ZPk
+
+=======================
+Database Relationships
+=======================
+
+
+Atomicity : either both successful or both failed(here in terms of query)
+transaction commit : if both query true then only make changes in table
+
+Transaction Rollback:
+=====================
+
+- Method level annotation
+- @Transactional(rollbackOn = Exception.class) this annotation makes sure that all  lines/total method executed then only add data to table.
+till method completion its storing data to temporary lets say spring memory.  
+
+---Imp to Note -> above line
+
+
+transaction rollback :if any one of the query not executed then don't make any changes in table.
+
+=> @Transactional(rollbackOn = Exception.class) annotation in Spring is used at the method level to manage transactions.
+ It ensures that if any exception of type Exception (or its subclasses) occurs within the annotated method, the transaction will be rolled back.
+
+lect 29:
+========
+
+Association Mapping:
+=> When DB tables having relationships then we have to represent those relationships in Entity classes which is called as Association Mapping.	
+
+
+=> We can see below relationship with db tables
+
+1) One To One (Ex: Person with Passport):
+	Note: One record in parent table will have relationship with one record in child table.
+	Ex: One person will have one passport.
+
+2) One To Many (Ex: Employee with Address):
+	Note: One record in parent table will have relationship with multiple records in child table. 
+	Ex: One Employee can have multiple addresses.
+
+	-> we put employee id in each address
+	
+
+	ex: @OneToMany(mappedBy = "emp") → Links this list to Adrss.emp.
+
+	cascade = CascadeType.ALL → Ensures that if an Emp is deleted, related addresses are also deleted.
+
+	fetch = FetchType.EAGER → Fetches all addresses whenever an Emp is loaded.
+
+3) Many To One (Ex: Books with Author):
+	Note : Many records in one table will have relationship with one record.
+	Ex: Multiple Books belongs to one Author
+
+4) Many To Many (Ex : Users with Roles):
+	Note:  Multiple Users will have multiple roles.
+	To represent Many To Many relationship we need 3 tables.	
+	Ex : users, roles, user_roles (join table)
+
+
+=> To establish association mapping in entity classes we will use below annotations...
+
+			- @OneToOne
+			- @OneToMany
+			- @ManyToOne
+			- @ManyToMany
+			- @JoinColumn
+			- @JoinTable
+
+==================
+What is Cascade ?
+==================
+
+=> Parent table Operations should reflect on child table or not will be represented by CASCADE.	   <---
+
+======================
+What is Fetch Type ?
+======================
+
+=> Fetch Type represents child records should be loaded along with parent record or not
+=> We have below 2 fetch types
+			- Lazy (default)
+			- Eager
+
+=> Lazy means child records will be retrieved on demand basis.	
+=> Eager means child records will be retrieved along with parent record in single query.
+
+Q. what if we put address id into employee table? refer 18 application
+Q. how to print data on console while using findBy method?  refer 19 application
+
+
+========================
+One To One Relationship
+========================
+
+@Entity
+@Table(name = "passport_tbl")
+public class Passport {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer passportId;
+	private String passportNum;
+	private LocalDate issuedDate;
+	private LocalDate expDate;
+
+	@OneToOne
+	@JoinColumn(name = "person_id")
+	private Person person;
+
+
+}
+
+@Entity
+@Table(name = "person_tbl")
+public class Person {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer personId;
+
+	private String name;
+
+	private String gender;
+
+	@OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
+	private Passport passport;
+
+	}
+
+
+
+--> @JoinColumn(name = "person_id")  //<---join column meaning it is adding extra column to paassport 
+	
+=======
+lect 31:
+=======
+
+fetch type : lazy: it will retrieve only parent record (in general)
+	     eager: retrieve both parent and child
+=========================
+One To Many Relationship
+=========================		
+
+@Entity
+@Table(name = "emp_tbl")
+public class Emp {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer eid;
+
+	private String ename;
+
+	private Double esal;
+
+	@OneToMany(
+			mappedBy = "emp", 
+			cascade = CascadeType.ALL
+	)
+
+
+}
+
+@Entity
+@Table(name = "addr_tbl")
+public class Address {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer addrId;
+
+	private String city;
+
+	private String state;
+
+	private String country;
+
+	private String type;
+
+	@ManyToOne
+	@JoinColumn(name = "eid")
+	private Emp emp;
+
+}	
+
+
+Q.why not to write toString() while we create relation between table ?why stack overflow? -->  
+
+===========================
+MANY TO MANY RELATIONSHIP
+============================
+
+Three table required(parent + child + TABLE FOR MANAGE)
+
+table - 1 : users_tbl   (users will be stored)
+
+table - 2 : roles_tbl   (roles will be stored)
+
+table - 3 : user_roles  (users & roles mapping will be stored here)
+
+https://github.com/ashokitschool/springboot_jpa_many_to_many_app:  Many to many app
+
+lect 33;
+-------
+
+========================
+Data JPA Specification
+=======================
+
+=> Data JPA Specification is used to build dynamic queries based on certain conditions.
+=> Specifications will use CriteriaBuilder to construct dynamic query.
+
+@Entity
+public class Product {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	private String name;
+
+	private Double price;
+
+	private String category;
+
+	// setters & getters
+}
+
+public class ProductSpecifications {
+	
+	public static Specification<Product> nameLike(String name) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("name"), "%" + name + "%");
+    }
+
+    public static Specification<Product> priceLessThan(double price) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.lessThan(root.get("price"), price);
+    }
+
+    public static Specification<Product> priceGreaterThan(double price) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThan(root.get("price"), price);
+    }
+}
+
+public interface ProductRepo extends JpaRepository<Product, Long> {
+	List<Product> findAll(Specification<Product> spec);
+}
+
+
+@Service
+public class ProductService {
+
+	@Autowired
+	private ProductRepo productRepo;
+
+	public List<Product> findProducts(String name, Double minPrice, Double maxPrice) {
+
+		Specification<Product> spec = Specification.where(null);
+
+		if (name != null) {
+			spec = spec.and(ProductSpecifications.nameLike(name));
+		}
+
+		if (minPrice != null) {
+			spec = spec.and(ProductSpecifications.priceGreaterThan(minPrice));
+		}
+
+		if (maxPrice != null) {
+			spec = spec.and(ProductSpecifications.priceLessThan(maxPrice));
+		}
+
+		return productRepo.findAll(spec);
+	}
+}
+
+
+Spring Data JPA: Query by Example (QBE) vs. Specification:
+=========================================================
+
+Query by Example (QBE):
+-----------------------
+Best for simple queries with exact matches.
+Works with a single entity, does not support joins.
+Cannot handle complex conditions like AND, OR, greater than, etc.
+Easy to use but limited in flexibility.
+
+Specification;
+---------------
+
+Supports dynamic and complex queries with AND, OR, and nested conditions.
+Allows joining multiple tables and filtering by related entities.
+Can handle comparisons (>, <, BETWEEN) and custom predicates.
+More powerful but requires more code.
+When to Use?
+Use QBE for simple filtering by example values.
+Use Specification for complex, dynamic, or multi-table queries.
+
+Example: Finding users older than 30
+QBE ❌: Not possible
+Specification ✅: cb.greaterThan(root.get("age"), 30)
+
+
+============
+Assignments
+=============
+
+1) Develop Data JPA application to insert person data into db table.
+
+			person_id
+			person_name
+			person_gender
+			person_dob
+			person_photo
+			person_resume
+
+2) Develop data jpa application to call stored procedure
+
+3) Develop data jpa application to retrieve only emp_name and emp_salary details from employee_tbl	using custom query.		
+
+4) Insert employee records into table using custom generator..
+
+	(Ex: AIT1, AIT2, AIT3......)
+
+5) Develop data jpa application to retrieve emp data along with address using custom query.	
+
+6) Write SQL queries to create  PERSON_TBL & PASSPORT_TBL with one to one relationship.
+
+7) Write SQL queries to create EMPLOYEE_TBL & ADDRESS_TBL with One to Many Relationship.
+
+8) Implement Many To Many Relationship Example
+
+		Git Repo : https://github.com/ashokitschool/springboot_jpa_many_to_many_app.git
+
+
+9) Develop Spring Boot application to export database table data into excel file.		
+
+10) Develop Spring Boot application to export database table data into pdf file.

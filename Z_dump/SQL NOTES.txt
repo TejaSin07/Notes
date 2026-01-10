@@ -1,0 +1,1 @@
+1)truncate product;  => to delete all data from column 

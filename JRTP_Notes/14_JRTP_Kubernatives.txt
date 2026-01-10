@@ -1,0 +1,253 @@
+
+lect 67 : Include Architecture of Kubernetes
+---------------------------------------------
+
+E:\JRTP\JRTP_NOTES\Notes ::side by side also check this notes
+
+===========
+Kubernetes   (25 oct) 
+===========
+
+Docker : Containerization
+=> containerization means packaging our application + dependencies as single unit  for execution.
+
+
+Kubernetes : Orchestration
+=> Orchestration means managing containers (create / delete / stop / update / scale up /scale down /monitor)
+
+=> Kubernetes is also called as K8S
+=> Kubernetes is developed by google using GO language
+=> using K8S we can orchestrate (manage) Docker container.
+
+
+                   -------------worker Node
+		   |	
+Master Node--------|------------worker node
+(cp)control plane  |
+		   |_ _ _ _ _ _ worker node
+
+
+	Cluster Architecture
+	=-=-=-=-=-=-=-=-=-=-=
+
+=> k8s will follow cluster architecture
+
+=> Cluster -> group of server we called it replicas
+
+=> Master Node: Which will control worker node and will assign task to worker nodes
+
+Note :In k8s cluster, Master Node is also called as control plane
+
+worker Node : They will listen to master node and will perform task given by master node.
+
+Node: Containers creation will happen on worker nodes.
+
+# read below points after opening below image:
+ 
+Architecture : https://www.cncf.io/wp-content/uploads/2020/08/Kubernetes-architecture-diagram-1-1.png
+
+
+Kubernetes Architecture Components
+==================================
+
+1) Control plane
+	1.1) API server
+	1.2) Schedular
+	1.3) Controller Manager
+	1.4) ETCD
+
+
+2) Worker Node
+	2.1) Kubelet
+	2.2) Kuby proxy
+	2.3) POD
+	2.4) Container
+	2.5) Docker Engine
+
+Note : to deploy applications in k8s cluster we will use 'kubectl'. (CLI)
+
+=> Api Server will receive request from 'kubectl' and will store in 'etcd'
+
+=> 'etcd' is k8s database which is used to store request details
+
+=> Scheduler will check pending requests in 'etcd' and will talk to 'kubelet' to schedule pod creation
+
+=> 'controller-manager' will manage tasks in k8s cluster.
+
+=> 'kubelet' is worker node agent which will maintain worker node information.
+
+=> 'Kube-proxy' will provide network that is required for cluster communication
+
+=> POD is a smallest building block that we can deploy in k8s cluster
+
+=> In k8s, docker containers will be created inside POD
+
+Note: POD is also called as Runtime Instance in k8s cluster
+
+k8s cluster setup
+=================
+
+=> we have several ways to setup k8s cluster
+
+1) Mini Kube : Single Node Cluster (Only for practise) 
+2) self managed cluster ( Kubeadm ) : Multi Node cluster
+3) Provider managed cluster : AWS EKS, AZURE AKE, GCP GKE
+
+
+
+find setup documentation on below link:
+https://github.com/ashokitschool/DevOps-Documents/blob/main/05-EKS-Setup.md
+
+Step - 1 : Create EKS Management Host in AWS
+Launch new Ubuntu VM using AWS Ec2 ( t2.micro )
+Connect to machine and install kubectl using below commands
+curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin
+kubectl version --short --client
+Install AWS CLI latest version using below commands
+
+sudo yum install									<-- missing in documentation
+sudo apt install unzip
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+aws --version
+Install eksctl using below commands
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+eksctl version
+Step - 2 : Create IAM role & attach to EKS Management Host
+Create New Role using IAM service ( Select Usecase - ec2 )
+
+Add below permissions for the role
+
+Administrator - acces
+Enter Role Name (eksroleec2)
+
+Attach created role to EKS Management Host (Select EC2 => Click on Security => Modify IAM Role => attach IAM role we have created)
+
+Step - 3 : Create EKS Cluster using eksctl
+Syntax:
+
+eksctl create cluster --name cluster-name
+--region region-name
+--node-type instance-type
+--nodes-min 2
+--nodes-max 2 \ --zones ,
+
+N. Virgina:
+eksctl create cluster --name ashokit-cluster4 --region us-east-1 --node-type t2.medium  --zones us-east-1a,us-east-1b
+Mumbai:
+eksctl create cluster --name ashokit-cluster4 --region ap-south-1 --node-type t2.medium  --zones ap-south-1a,ap-south-1b
+Note: Cluster creation will take 5 to 10 mins of time (we have to wait). After cluster created we can check nodes using below command.
+ kubectl get nodes  
+Note: We should be able to see EKS cluster nodes here.
+We are done with our Setup
+Step - 4 : After your practise, delete Cluster and other resources we have used in AWS Cloud to avoid billing
+eksctl delete cluster --name ashokit-cluster4 --region ap-south-1
+
+
+
+Kubernetes Components
+=====================
+
+1) POD
+2) Deployment
+3) Service :It is used to expose our pods
+	1) Cluster IP
+	2) Node port
+	3) Load balancer
+
+
+================================
+Deploment manifest yml  https://github.com/ashokitschool/kubernetes_manifest_yml_files/tree/main/00-PODS-Service 
+===============================
+
+$ vi javadeployment.yml
+
+
+---
+ 
+find yml file in GitHub 
+
+kubectl apply -f <yml>
+
+kubectl get pods
+
+kubect get service
+
+kubect get deployement
+
+kubectl logs<pod-name>
+
+we can access our application using load balancer URL
+
+URL : lbr-url/java-web-app
+
+kubectl delete deployment <deployment-name> 
+
+
+lect 69: (26 oct)
+=======
+
+-----------------------------------------------------------------------------------------------------------------------------
+Logs Monitoring by using EFK: https://www.youtube.com/watch?v=8MLcbbfEL1U&pp=ygUcTG9ncyBNb25pdG9yaW5nIGJ5IHVzaW5nIEVGSw%3D%3D
+-----------------------------------------------------------------------------------------------------------------------------
+
+==========
+EFK Stack
+=========
+
+E - Elastic Search
+F - Fluent D
+K - Kibana
+
+-> Fluent D is responsible to collect logs from pods and store into Elastic Search.
+-> Elastic search is a log lake in which logs will be stored and it will index for faster retrieval.
+-> Kibana is web application which provide user interface to fetch logs from elastic search.
+
+
+
+
+
+1) Docker benefits
+	containerization (code + dependencies)
+
+2) Orchestration(Management)
+	1) self healing
+	2) Load balancing
+	3) Auto Scaling(HPA)
+
+
+
+
+Delete EKS cluster 
+=================
+
+eksctl delete cluster --name ashokit-cluster4 --region ap-south-1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+

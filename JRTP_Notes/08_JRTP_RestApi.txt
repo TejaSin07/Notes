@@ -1,0 +1,72 @@
+lect 41:
+========
+
+
+Value annotation :
+==================
+=> if you are having only 1 or 2 properties then it is recommended to store values
+=> if we use value annotation then on changes we just need to restart the server 
+
+RestController
+---------------
+@RestController
+public class MsgRestController {
+	
+	@Value("${welcomeMsg}")
+	private String wmsg;
+	
+	@Value("${greetMsg}")
+	private String gmsg;
+	
+	
+	@GetMapping("/welcome")
+	private String  getWelcomeMsg() {
+//		String msg = "welcome to ashok  it";//if you save value like this then at each time  while changes you need to compile,package and deploy
+		return wmsg;
+	}
+	
+	@GetMapping("/greet")
+	public String getGreetMsg() {
+//		String msg = "Good morning";
+		return gmsg;
+	}
+
+}
+
+properties file:
+----------------
+welcomeMsg = Welcome to ashok it..from propertty!!
+greetMsg = Good morning from pro
+ 
+
+
+Application.yml
+===============
+05_SB_RestApi-1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

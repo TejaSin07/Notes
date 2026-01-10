@@ -1,0 +1,69 @@
+CI/CD Pipeline - Lecture 44
+
+1. Code Repository
+   - Source code is stored in GitHub.
+   - Developers push code changes to GitHub.
+
+2. Code Freeze
+   - Code is frozen to prevent changes during release cycle.
+   - No new features or changes allowed until release is done.
+   - Note: This can become a bottleneck or failure point if not managed well.
+
+3. Dev Job (CI/CD Pipeline)
+   - Pulls code from GitHub.
+   - Deploys to: Dev Environment (DIT) : Development integration testing 
+   - Dev Environment connects to: Dev DB
+
+4. QA Job
+   - Takes the build from Dev Job.
+   - Deploys to: QA Environment (SIT) : System integration testing 
+   - Used for integration and regression testing.
+   - QA Environment connects to: QA DB
+
+5. UAT Job
+   - Takes the build from QA.
+   - Deploys to: UAT Environment
+   - Used for user acceptance testing by business users.
+   - UAT Environment connects to: UAT DB
+
+6. Pilot Environment
+   - Build is deployed to: Pilot Environment
+   - Used for limited real-user testing.
+   - Pilot Environment connects to: Pilot DB
+
+7. Production Environment
+   - Final deployment after successful testing.
+   - Build is deployed to: Production Environment
+   - Prod Environment connects to: Live DB
+
+Note:
+- Each environment has its own separate database.
+- All stages are part of the CI/CD pipeline.
+- Bottlenecks or failures at any stage can delay the release.
+
+Web App Architecture with Load Balancer
+--------------------------------------
+
+1. Domain Name
+   - User accesses: www.ashokit.in
+
+2. DNS (Domain Name System)
+   - Translates domain name "www.ashokit.in" into IP address (e.g., 198.168.1.30)
+   - DNS tells browser where the actual server is located
+
+3. LBR (Load Balancer)
+   - Acts as a gateway to distribute incoming traffic
+   - IP Address: 198.168.1.30
+   - Type: Cloud Load Balancer
+   - Balances traffic across multiple application servers
+
+4. Application Servers
+   - App Server 1 (S-1): Handles some user requests
+   - App Server 2 (S-2): Handles some user requests
+   - App Server 3 (S-3): Handles some user requests
+   - All servers run the same application (for scalability and redundancy)
+
+Note:
+- Load balancer ensures no single app server is overloaded
+- If one server fails, traffic is routed to the healthy ones
+- Improves availability, performance, and fault tolerance

@@ -1,0 +1,246 @@
+lect 14: (30 may 25)
+====================
+
+Mini Project:
+=============
+
+=> 3 to 4 mini projects
+=> 1 mini project (spring boot + jsp)
+=> 3 projects (spring boot + REST API)
+
+
+Step 1: requirement
+Step 2: need to understand that requirement and come up with questions(Query log)
+step 3: clarification for your questions
+step 4: DB analysis(tables, columns)
+step 5: java components analysis(interfaces ,classes, methods)
+step 6: analysis explanation
+step 7: compare both analysis 
+step 8: start coding to complete requirement
+step 9: coding explanation in live class(Live coding) 
+step 10: note down learnings
+
+====================================
+01 Mini project : Report Application
+=====================================
+
+Application Name : Insurance Report Generation 
+
+| plane name - [dropdown] |   plan status :[dropdown] | Gender  :[dropdown] 
+|
+| start date :  [dropdown]|  end date : [dropdown]    | [search button]
+
+ ------------------------------------------------------------------------
+	        <search results will display here>
+ ------------------------------------------------------------------------
+		 export : excel | pdf
+
+: when you click on any option excel or pdf file should go to email as attachment
+: use spring boot runner to insert around 30 data at a time
+
+plane name : cash/food/medical/employment
+plan status: approved/denied/terminated
+Gender : Male/Fe-male
+start - end date have calendar
+
+1) plan name dropdown values should come from database table
+
+2) plan status drop down values should come from database table 
+
+3) it is dynamic search functionality .Based on search criteria we need to fetch records from database
+
+4) When user click on 'Search' without selecting any filter then we need to fetch all records from db table .
+
+5) when user click on 'Excel' then complete database table data should be exported top excel file and send that excel file as an attachment to
+your mail id
+
+6)  when user click on 'pdf' then complete database table data should be exported top excel file and send that excel file as an attachment to
+your mail id
+
+lect 15: (11 June 25)
+========
+
+DB tables : citizen_plans_info
+
+CITIZEN_ID 	NUMBER  	 PRIMARY KEY
+CITIZEN_NAME    VARCHAR		
+GENDER 		VARCHAR
+PLAN_NAME	VARCHAR
+PLAN_STATUS	VARCHAR
+PLAN_START_DATE DATE
+PLAN_END_DATE   DATE
+BENEFIT_AMOUNT 	NUMBER
+DENIAL_REASON	VARCHAR
+TERMINATED_DATE		DATE
+TERMINATION_REASON	VARCHAR
+
+
+Architecture
+--------------
+				    ENTITY
+=> UI => CONTROLLER => SERVICE =>  		=> MySQL DB
+				    REPO  
+
+<-------classes creation always start from end (here it is DB) <----
+
+Java Component:
+---------------
+
+1) CitizenPlan.java (Entity)
+2) CitizenPlamRepository.java (Interface)
+3) ReportService.java (interface)
+4) ReportServiceImpl.java (class)
+	-> method to get plan-name drop down data
+	-> method to get plan-status drop down data
+	-> method to handle search functionality
+	-> method to export data to excel file
+	-> method to export data to pdf file
+
+5) pdfGenerator.java (class)
+6) ExcelGenerator.java (class)
+7) EmailUtils.java (class)
+8) ReportController.java (class)   -- controller
+9) SearchRequest.java (class)      - form binding/command/dto
+10) DataLoader.java (runner class)
+11) index.jsp
+
+
+lect 16: (12 June)
+------------------
+
+->To install jsp app click on finish then wait and select boxes 
+
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+  </head>
+  <body>
+    <h1>Hello, world!</h1>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+  </body>
+</html>
+
+
+Project setup:
+==============
+
+1) Create starter project with required dependencies
+2) configure data source & view resolver properties
+3) create entity class & repository interface
+4) create runner to load data into db table
+6) create service interface with abstract method
+7) create serviceImpl class(no logic currently)
+8) create controller class
+9) create view page & add bootstrap css & js
+10) Run the application and access welcome page
+
+lect 17(13 June)
+----------------
+
+let 18(15 June)
+---------------
+
+1) To create MVC form we need to add form tag library :-> below <!DOCTTYPE html>
+	-> ctrl + double space
+
+2) to iterate through table add jstl :-> below <!DOCTTYPE html>
+	-> ctrl + double space
+	-> select directive
+	-> SELECT jstl corew 
+
+ -
+1.43 min 18 lect
+
+lect 20:
+
+-> Excel conversion is not directly support in java
+-> we need Apache Poi (third part) to read and write data in java.
+ 
+-> for pdf -> itext pdf/open pdf/aspose  
+
+
+workbook
+Sheets
+Rows (index start from 0)
+Cols(index start from 0)
+
+Header Row
+Multiple Data rows
+
+lect 20 :
+
+lect 21: (19 june)
+
+Sending Mail using Spring Boot
+=============================
+
+=> Add mail starter dependency in pom.xml
+=> login into gmail account enable 2-step verification and copy that(save it)
+NOTE : GO to this site to generate app password -> https://myaccount.google.com/apppasswords
+
+=> We need to configure SMTP properties
+
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=<Login User to SMTP server>
+spring.mail.password=<Login password to SMTP server>
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+=> create email utility class to send email form our app by using javaMailSender
+
+Note: In JavaMailSender we have send() method...
+ : if you don't want to attach any file then go for simple message
+ : if you want to send attachment go for MimeMessage
+
+Note : In GitHub properties file not uploaded as they have email credential 
+
+refer below file 
+spring.datasource.username=root
+spring.datasource.password=Ned$tark07
+spring.datasource.url=jdbc:mysql://localhost/jrtp
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=tejassinkar10@gmail.com
+spring.mail.password=leeoasissjzedeub
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+# Add these extra properties
+spring.mail.properties.mail.smtp.starttls.required=true
+spring.mail.properties.mail.smtp.ssl.trust=smtp.gmail.com
+
+
+
+TASK:
+
+1) WE are not getting filtered data by email in excel or pdf, So add configuration for that.
+ 
+Click Excel → JSP sends hidden filter values → Controller gets SearchRequest → Service filters data → Excel generated → Downloaded.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

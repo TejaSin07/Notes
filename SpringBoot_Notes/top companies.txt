@@ -1,0 +1,27 @@
+top companies :
+
+
+
+Service based:
+
+1
+1	Tata Consultancy 	Services (TCS)	India	IT consulting, application development, BPO
+2	Infosys	India		Digital transformation, IT services, consulting
+3	Wipro	India		IT services, cloud, cybersecurity
+4	HCLTech	India		Engineering, cloud, software services
+5	Tech Mahindra		India	Telecom IT services, consulting
+6	Capgemini		France	IT services, outsourcing, consulting
+7	Cognizant		USA (with major ops in India)	Digital solutions, consulting
+8	Accenture		Ireland (global)	IT services, consulting, cloud, AI
+9	IBM Services		USA	IT consulting, AI, cloud, blockchain
+10	DXC Technology		USA	IT outsourcing, cloud, analytics
+11	LTI Mindtree		India	IT services, cloud, data analytics
+12	Persistent Systems	India	Digital engineering, cloud services
+13	Mphasis			India		Cloud & cognitive services
+14	Zensar Technologies	India	Digital solutions, IT infrastructure
+15	Birlasoft		India	Enterprise IT, digital transformation
+16	UST Global		USA (with large India presence)	Digital tech, product engineering
+17	Hexaware Technologies	India	IT consulting, automation, BPO
+18	NIIT Technologies (Coforge)	India	Digital services, aviation, BFSI sector
+19	Sonata Software	India	IT services, software solutions
+20	Virtusa	USA/Sri Lanka	Digital transformation, IT services
