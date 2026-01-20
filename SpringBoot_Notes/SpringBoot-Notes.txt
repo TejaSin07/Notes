@@ -813,7 +813,6 @@ FI --> target class variable
 => IOC violating oops principles.
 => It is giving chance to violate Single Responsibility principle.  
 
-Note: constructor can have 7 parameter.so we can not add more parameter to it.
 
 
 
