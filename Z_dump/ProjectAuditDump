@@ -1,0 +1,1835 @@
+package com.tys.AuditPro.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import java.util.concurrent.Executor;
+
+@Configuration
+public class AsyncConfig {
+
+    @Bean("ruleExecutor")
+    public Executor ruleExecutor() {
+
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(5);
+        executor.setQueueCapacity(50);
+        executor.setThreadNamePrefix("rule-engine-");
+        executor.initialize();
+
+        return executor;
+    }
+}
+package com.tys.AuditPro.config;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+
+        SecurityScheme bearerAuth = new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT");
+
+        return new OpenAPI()
+                .info(new Info()
+                        .title("AuditPro API")
+                        .version("1.0")
+                        .description("Audit Management System APIs"))
+                .addSecurityItem(
+                        new SecurityRequirement().addList("bearerAuth"))
+                .schemaRequirement("bearerAuth", bearerAuth);
+    }
+}
+package com.tys.AuditPro.controller;
+
+import com.tys.AuditPro.domain.audit.Audit;
+import com.tys.AuditPro.domain.audit.AuditStatus;
+import com.tys.AuditPro.domain.history.AuditHistoryType;
+import com.tys.AuditPro.dto.CreateAuditRequest;
+import com.tys.AuditPro.repository.AuditRepository;
+import com.tys.AuditPro.service.AuditAuthorizationService;
+import com.tys.AuditPro.service.AuditHistoryService;
+import com.tys.AuditPro.service.AuditValidationService;
+import jakarta.validation.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+@RestController
+@RequestMapping("/audit")
+@RequiredArgsConstructor
+public class AuditController {
+
+    private final AuditRepository auditRepository;
+    private final AuditValidationService auditValidationService;
+    private final AuditHistoryService auditHistoryService;
+    private final AuditAuthorizationService auditAuthorizationService;
+
+    @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
+    public Audit createAudit(
+            @Valid @RequestBody CreateAuditRequest request) {
+
+        String manager =
+                SecurityContextHolder.getContext()
+                        .getAuthentication().getName();
+
+        Audit audit = new Audit();
+        audit.setAuditName(request.getName());
+        audit.setStatus(AuditStatus.CREATED);
+        audit.setCreatedBy(manager);
+        audit.setCreatedAt(LocalDateTime.now());
+
+        Audit saved = auditRepository.save(audit);
+
+        auditHistoryService.log(
+                saved.getId(),
+                "AUDIT",
+                AuditHistoryType.AUDIT_CREATED,
+                "Audit created"
+        );
+
+        return saved;
+    }
+    @PutMapping("/{id}/assign/{username}")
+    @PreAuthorize("hasRole('MANAGER')")
+    public Audit assignAudit(@PathVariable Long id, @PathVariable String username) {
+
+        Audit audit = auditRepository.findById(id).orElseThrow();
+
+        auditValidationService.validateTransition(
+                audit.getStatus(),
+                AuditStatus.ASSIGNED
+        );
+
+        audit.setAssignedTo(username);
+        audit.setStatus(AuditStatus.ASSIGNED);
+        audit.setUpdatedAt(LocalDateTime.now());
+
+        Audit saved = auditRepository.save(audit);
+
+        auditHistoryService.log(
+                saved.getId(),
+                "AUDIT",
+                AuditHistoryType.AUDIT_ASSIGNED,
+                "Assigned to " + username
+        );
+
+        return saved;
+    }
+
+    @PutMapping("/{id}/start")
+    @PreAuthorize("hasRole('USER')")
+    public Audit startAudit(@PathVariable Long id) {
+
+        Audit audit = auditRepository.findById(id).orElseThrow();
+
+        auditAuthorizationService.checkUserAccess(audit);
+
+        auditValidationService.validateTransition(
+                audit.getStatus(),
+                AuditStatus.IN_PROGRESS
+        );
+
+        audit.setStatus(AuditStatus.IN_PROGRESS);
+        audit.setUpdatedAt(LocalDateTime.now());
+
+        return auditRepository.save(audit);
+    }
+
+
+    @PutMapping("/{id}/submit")
+    @PreAuthorize("hasRole('USER')")
+    public Audit submitAudit(@PathVariable Long id) {
+
+        Audit audit = auditRepository.findById(id).orElseThrow();
+
+        auditAuthorizationService.checkUserAccess(audit);
+
+        auditValidationService.validateTransition(
+                audit.getStatus(),
+                AuditStatus.UNDER_REVIEW
+        );
+
+        audit.setStatus(AuditStatus.UNDER_REVIEW);
+        audit.setUpdatedAt(LocalDateTime.now());
+
+        return auditRepository.save(audit);
+    }
+
+    @PutMapping("/{id}/approve")
+    @PreAuthorize("hasRole('MANAGER')")
+    public Audit approveAudit(@PathVariable Long id) {
+
+        Audit audit = auditRepository.findById(id).orElseThrow();
+
+        auditValidationService.validateTransition(
+                audit.getStatus(),
+                AuditStatus.APPROVED
+        );
+
+        audit.setStatus(AuditStatus.APPROVED);
+        audit.setUpdatedAt(LocalDateTime.now());
+
+        Audit saved = auditRepository.save(audit);
+
+        auditHistoryService.log(
+                saved.getId(),
+                "AUDIT",
+                AuditHistoryType.AUDIT_APPROVED,
+                "Audit approved"
+        );
+
+        return saved;
+    }
+
+    @PutMapping("/{id}/close")
+    @PreAuthorize("hasRole('MANAGER')")
+    public Audit closeAudit(@PathVariable Long id) {
+
+        Audit audit = auditRepository.findById(id).orElseThrow();
+
+        auditValidationService.validateTransition(
+                audit.getStatus(),
+                AuditStatus.CLOSED
+        );
+
+        audit.setStatus(AuditStatus.CLOSED);
+        audit.setUpdatedAt(LocalDateTime.now());
+
+        Audit saved = auditRepository.save(audit);
+
+        auditHistoryService.log(
+                saved.getId(),
+                "AUDIT",
+                AuditHistoryType.AUDIT_CLOSED,
+                "Audit closed"
+        );
+
+        return saved;
+    }
+    // ❗ Remaining methods stay SAME (no request body)
+}
+
+package com.tys.AuditPro.controller;
+
+import com.tys.AuditPro.domain.audit.*;
+import com.tys.AuditPro.dto.*;
+import com.tys.AuditPro.service.AuditFormService;
+import com.tys.AuditPro.service.AuditHistoryService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/manager/forms")
+@RequiredArgsConstructor
+public class AuditFormController {
+
+    private final AuditFormService service;
+
+    @PostMapping
+    public AuditForm createForm(@RequestBody AuditFormRequest request) {
+        return service.createForm(request);
+    }
+
+    @PostMapping("/{formId}/fields")
+    public AuditField addField(
+            @PathVariable Long formId,
+            @RequestBody AuditFieldRequest request) {
+        return service.addField(formId, request);
+    }
+
+    @PostMapping("/{formId}/activate")
+    public AuditForm activateForm(@PathVariable Long formId) {
+        return service.activateForm(formId);
+    }
+}
+package com.tys.AuditPro.controller;
+
+import com.tys.AuditPro.domain.history.AuditHistory;
+import com.tys.AuditPro.repository.AuditHistoryRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/history")
+@RequiredArgsConstructor
+public class AuditHistoryController {
+
+    private final AuditHistoryRepository repository;
+
+    /**
+     * View history for a specific reference
+     * referenceType: AUDIT | FINDING | RULE
+     * referenceId  : auditId / findingId
+     */
+    @GetMapping("/{referenceType}/{referenceId}")
+    @PreAuthorize("hasRole('MANAGER')")   // 🔒 tightened
+    public List<AuditHistory> getHistory(
+            @PathVariable String referenceType,
+            @PathVariable Long referenceId) {
+
+        return repository
+                .findByReferenceIdAndReferenceTypeOrderByPerformedAtAsc(
+                        referenceId,
+                        referenceType.toUpperCase()
+                );
+    }
+}
+package com.tys.AuditPro.controller;
+
+import com.tys.AuditPro.domain.user.User;
+import com.tys.AuditPro.dto.JwtResponse;
+import com.tys.AuditPro.dto.LoginRequest;
+import com.tys.AuditPro.repository.UserRepository;
+import com.tys.AuditPro.security.JwtUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/auth")
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+
+    @PostMapping("/login")
+    public ResponseEntity<JwtResponse> login(
+            @RequestBody LoginRequest request) {
+
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(
+                request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        String token = jwtUtil.generateToken(
+                user.getUsername(),
+                user.getRole().getName()
+        );
+
+        return ResponseEntity.ok(new JwtResponse(token));
+    }
+}package com.tys.AuditPro.controller;
+
+import com.tys.AuditPro.domain.audit.Audit;
+import com.tys.AuditPro.domain.finding.*;
+import com.tys.AuditPro.domain.history.AuditHistoryType;
+import com.tys.AuditPro.dto.CreateFindingRequest;
+import com.tys.AuditPro.repository.AuditRepository;
+import com.tys.AuditPro.repository.FindingRepository;
+import com.tys.AuditPro.rules.RuleContext;
+import com.tys.AuditPro.rules.RuleEngine;
+import com.tys.AuditPro.rules.RuleEvent;
+import com.tys.AuditPro.service.AuditAuthorizationService;
+import com.tys.AuditPro.service.AuditHistoryService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/findings")
+@RequiredArgsConstructor
+public class FindingController {
+
+    private final FindingRepository findingRepository;
+    private final AuditHistoryService auditHistoryService;
+    private final RuleEngine ruleEngine;
+    private final AuditRepository auditRepository;
+    private final AuditAuthorizationService auditAuthorizationService;
+
+
+    /**
+     * 1️⃣ Create finding (USER)
+     */
+    @PostMapping("/audit/{auditId}")
+    @PreAuthorize("hasRole('USER')")
+    public Finding createFinding(
+            @PathVariable Long auditId,
+            @Valid @RequestBody CreateFindingRequest request) {
+
+        Audit audit = auditRepository.findById(auditId).orElseThrow();
+
+        auditAuthorizationService.checkUserAccess(audit);
+
+        String auditor =
+                SecurityContextHolder.getContext()
+                        .getAuthentication().getName();
+
+        Finding finding = Finding.builder()
+                .auditId(auditId)
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .severity(request.getSeverity())
+                .status(FindingStatus.OPEN)
+                .createdBy(auditor)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        // 1️⃣ Save finding
+        Finding saved = findingRepository.save(finding);
+
+        // 2️⃣ Audit history (business action)
+        auditHistoryService.log(
+                saved.getId(),
+                "FINDING",
+                AuditHistoryType.FINDING_CREATED,
+                "Finding created"
+        );
+
+        // 3️⃣ ASYNC RULE ENGINE TRIGGER ✅
+        ruleEngine.fireAsync(
+                RuleContext.builder()
+                        .event(RuleEvent.FINDING_CREATED)
+                        .data(Map.of(
+                                "auditId", saved.getAuditId(),
+                                "findingId", saved.getId(),
+                                "severity", saved.getSeverity().name()
+                        ))
+                        .build()
+        );
+
+        return saved;
+    }
+
+
+    /**
+     * 2️⃣ Start working on finding (USER)
+     */
+    @PutMapping("/{id}/start")
+    @PreAuthorize("hasRole('USER')")
+    public Finding startFinding(@PathVariable Long id) {
+
+        Finding finding = findingRepository.findById(id).orElseThrow();
+
+        finding.setStatus(FindingStatus.IN_PROGRESS);
+        finding.setUpdatedAt(LocalDateTime.now());
+
+        Finding saved = findingRepository.save(finding);
+
+        auditHistoryService.log(
+                saved.getId(),
+                "FINDING",
+                AuditHistoryType.FINDING_UPDATED,
+                "Finding started"
+        );
+
+        return saved;
+    }
+
+    /**
+     * 3️⃣ Resolve finding (USER)
+     */
+    @PutMapping("/{id}/resolve")
+    @PreAuthorize("hasRole('USER')")
+    public Finding resolveFinding(@PathVariable Long id) {
+
+        Finding finding = findingRepository.findById(id).orElseThrow();
+
+        finding.setStatus(FindingStatus.RESOLVED);
+        finding.setUpdatedAt(LocalDateTime.now());
+
+        Finding saved = findingRepository.save(finding);
+
+        auditHistoryService.log(
+                saved.getId(),
+                "FINDING",
+                AuditHistoryType.FINDING_UPDATED,
+                "Finding resolved"
+        );
+
+        return saved;
+    }
+
+    /**
+     * 4️⃣ Approve finding (MANAGER)
+     */
+    @PutMapping("/{id}/approve")
+    @PreAuthorize("hasRole('MANAGER')")
+    public Finding approveFinding(@PathVariable Long id) {
+
+        Finding finding = findingRepository.findById(id).orElseThrow();
+
+        String manager =
+                SecurityContextHolder.getContext()
+                        .getAuthentication().getName();
+
+        finding.setStatus(FindingStatus.ACCEPTED);
+        finding.setReviewedBy(manager);
+        finding.setUpdatedAt(LocalDateTime.now());
+
+        Finding saved = findingRepository.save(finding);
+
+        auditHistoryService.log(
+                saved.getId(),
+                "FINDING",
+                AuditHistoryType.FINDING_APPROVED,
+                "Finding approved"
+        );
+
+        return saved;
+    }
+
+    /**
+     * 5️⃣ Reject finding (MANAGER)
+     */
+    @PutMapping("/{id}/reject")
+    @PreAuthorize("hasRole('MANAGER')")
+    public Finding rejectFinding(@PathVariable Long id) {
+
+        Finding finding = findingRepository.findById(id).orElseThrow();
+
+        String manager =
+                SecurityContextHolder.getContext()
+                        .getAuthentication().getName();
+
+        finding.setStatus(FindingStatus.REJECTED);
+        finding.setReviewedBy(manager);
+        finding.setUpdatedAt(LocalDateTime.now());
+
+        Finding saved = findingRepository.save(finding);
+
+        auditHistoryService.log(
+                saved.getId(),
+                "FINDING",
+                AuditHistoryType.FINDING_REJECTED,
+                "Finding rejected"
+        );
+
+        return saved;
+    }
+
+    /**
+     * 6️⃣ View findings for an audit (USER / MANAGER)
+     */
+    @GetMapping("/audit/{auditId}")
+    @PreAuthorize("hasAnyRole('USER','MANAGER')")
+    public List<Finding> getFindings(@PathVariable Long auditId) {
+        return findingRepository.findByAuditId(auditId);
+    }
+}
+package com.tys.AuditPro.controller;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class ManagerController {
+
+    @GetMapping("/manager/test")
+    public String managerTest() {
+        return "Manager access OK";
+    }
+}
+
+package com.tys.AuditPro.controller;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class UserController {
+
+    @GetMapping("/user/test")
+    public String userTest() {
+        return "User access OK";
+    }
+}package com.tys.AuditPro.domain.audit;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "audits")
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Audit {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String auditName;
+
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    private AuditStatus status;
+
+    // Who created the audit
+    private String createdBy;
+
+    // Assigned auditor username
+    private String assignedTo;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
+package com.tys.AuditPro.domain.audit;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "audit_fields")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class AuditField {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String label;
+
+    @Column(nullable = false)
+    private String fieldKey; // a, b, c (used in rules)
+
+    @Column(nullable = false)
+    private String dataType; // STRING, NUMBER, BOOLEAN, DATE
+
+    @Column(nullable = false)
+    private String inputType; // TEXT, DROPDOWN, etc.
+
+    private Boolean required;
+
+    private Boolean readOnly;
+
+    private Boolean visible;
+
+    private Integer displayOrder;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "form_id", nullable = false)
+    private AuditForm auditForm;
+}
+package com.tys.AuditPro.domain.audit;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Entity
+@Table(name = "audit_forms")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class AuditForm {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String formName;
+
+    @Column(nullable = false, unique = true)
+    private String formCode;
+
+    private String description;
+
+    @Column(nullable = false)
+    private Integer version;
+
+//    @Column(nullable = false)
+//    private String status; // DRAFT, ACTIVE, INACTIVE
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private FormStatus status;
+
+
+    @OneToMany(
+            mappedBy = "auditForm",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<AuditField> fields;
+
+    private LocalDateTime createdAt;
+}
+
+
+package com.tys.AuditPro.domain.audit;
+
+import lombok.Getter;
+
+@Getter
+public enum AuditStatus {
+
+    CREATED,
+    ASSIGNED,
+    IN_PROGRESS,
+    UNDER_REVIEW,
+    APPROVED,
+    CLOSED;
+
+    public boolean canMoveTo(AuditStatus next) {
+
+        return switch (this) {
+            case CREATED -> next == ASSIGNED;
+            case ASSIGNED -> next == IN_PROGRESS;
+            case IN_PROGRESS -> next == UNDER_REVIEW;
+            case UNDER_REVIEW -> next == APPROVED;
+            case APPROVED -> next == CLOSED;
+            default -> false;
+        };
+    }
+}
+
+package com.tys.AuditPro.domain.audit;
+
+public enum FormStatus {
+    DRAFT,
+    ACTIVE,
+    INACTIVE
+}package com.tys.AuditPro.domain.finding;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "audit_findings")
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Finding {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // Parent audit
+    private Long auditId;
+
+    private String title;
+
+    @Column(length = 2000)
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    private FindingSeverity severity;
+
+    @Enumerated(EnumType.STRING)
+    private FindingStatus status;
+
+    // Auditor who created it
+    private String createdBy;
+
+    // Manager who approved/rejected
+    private String reviewedBy;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
+
+package com.tys.AuditPro.domain.finding;
+
+public enum FindingSeverity {
+    LOW,
+    MEDIUM,
+    HIGH,
+    CRITICAL
+}
+package com.tys.AuditPro.domain.finding;
+
+
+public enum FindingStatus {
+    OPEN,
+    IN_PROGRESS,
+    RESOLVED,
+    ACCEPTED,
+    REJECTED
+}package com.tys.AuditPro.domain.history;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "audit_history")
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class AuditHistory {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private Long referenceId;        // auditId OR findingId
+    private String referenceType;    // AUDIT / FINDING / RULE
+
+    @Enumerated(EnumType.STRING)
+    private AuditHistoryType action;
+
+    private String performedBy;
+    private String remarks;
+
+    private LocalDateTime performedAt;
+}
+
+package com.tys.AuditPro.domain.history;
+
+public enum AuditHistoryType {
+
+    AUDIT_CREATED,
+    AUDIT_ASSIGNED,
+    AUDIT_STARTED,
+    AUDIT_SUBMITTED,
+    AUDIT_APPROVED,
+    AUDIT_CLOSED,
+
+    FINDING_CREATED,
+    FINDING_UPDATED,
+    FINDING_APPROVED,
+    FINDING_REJECTED,
+
+    RULE_EXECUTED
+}package com.tys.AuditPro.domain.user;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "roles")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Role {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String name; // MANAGER, USER
+}
+package com.tys.AuditPro.domain.user;
+
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String username;
+
+    @Column(nullable = false)
+    private String password;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
+    @Column(nullable = false)
+    private boolean active = true;
+}
+package com.tys.AuditPro.dto;
+
+import lombok.Data;
+
+@Data
+public class AuditFieldRequest {
+    private String label;
+    private String fieldKey;
+    private String dataType;
+    private String inputType;
+    private boolean required;
+    private int displayOrder;
+}
+
+package com.tys.AuditPro.dto;
+
+import lombok.Data;
+
+@Data
+public class AuditFormRequest {
+    private String formName;
+    private String formCode;
+    private String description;
+}package com.tys.AuditPro.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class CreateAuditRequest {
+
+    @NotBlank(message = "Audit name is required")
+    private String name;
+}
+
+
+package com.tys.AuditPro.dto;
+
+import com.tys.AuditPro.domain.finding.FindingSeverity;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class CreateFindingRequest {
+
+    @NotBlank(message = "Title is required")
+    private String title;
+
+    @NotNull(message = "Severity is required")
+    private FindingSeverity severity;
+
+    @NotBlank(message = "Description is required")
+    private String description;
+}
+package com.tys.AuditPro.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class JwtResponse {
+    private String token;
+}
+package com.tys.AuditPro.dto;
+
+import lombok.Data;
+
+@Data
+public class LoginRequest {
+    private String username;
+    private String password;
+}
+package com.tys.AuditPro.exception;
+
+import lombok.Builder;
+import lombok.Getter;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Builder
+public class ApiError {
+
+    private String error;
+    private String message;
+    private int status;
+    private LocalDateTime timestamp;
+}
+
+package com.tys.AuditPro.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.time.LocalDateTime;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvalidAuditStateException.class)
+    public ResponseEntity<ApiError> handleInvalidAuditState(
+            InvalidAuditStateException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiError.builder()
+                        .error("INVALID_AUDIT_STATE")
+                        .message(ex.getMessage())
+                        .status(400)
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiError> handleAccessDenied(
+            AccessDeniedException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiError.builder()
+                        .error("ACCESS_DENIED")
+                        .message("You are not allowed to perform this action")
+                        .status(403)
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiError> handleNotFound(
+            ResourceNotFoundException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiError.builder()
+                        .error("NOT_FOUND")
+                        .message(ex.getMessage())
+                        .status(404)
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleGeneric(Exception ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiError.builder()
+                        .error("INTERNAL_SERVER_ERROR")
+                        .message("Something went wrong")
+                        .status(500)
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidationErrors(
+            MethodArgumentNotValidException ex) {
+
+        String message = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .findFirst()
+                .orElse("Validation failed");
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiError.builder()
+                        .error("VALIDATION_ERROR")
+                        .message(message)
+                        .status(400)
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
+
+}package com.tys.AuditPro.exception;
+
+public class InvalidAuditStateException extends RuntimeException {
+
+    public InvalidAuditStateException(String message) {
+        super(message);
+    }
+}
+
+package com.tys.AuditPro.exception;
+
+public class ResourceNotFoundException extends RuntimeException {
+
+    public ResourceNotFoundException(String message) {
+        super(message);
+    }
+}
+package com.tys.AuditPro.report.controller;
+
+import com.tys.AuditPro.report.repository.AuditReportRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/reports/audits")
+@RequiredArgsConstructor
+public class AuditReportController {
+
+    private final AuditReportRepository auditReportRepository;
+
+    // STEP 2.3 — Audit status summary
+    @GetMapping("/status-summary")
+    @PreAuthorize("hasRole('MANAGER')")
+    public Object auditStatusSummary() {
+        return auditReportRepository.countAuditsByStatus();
+    }
+
+    // STEP 4.3 — Audit progress report  ✅ ADD THIS HERE
+    @GetMapping("/progress")
+    @PreAuthorize("hasRole('MANAGER')")
+    public Object auditProgress() {
+        return auditReportRepository.auditProgress();
+    }
+}package com.tys.AuditPro.report.controller;
+
+import com.tys.AuditPro.report.repository.FindingReportRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/reports/findings")
+@RequiredArgsConstructor
+public class FindingReportController {
+
+    private final FindingReportRepository findingReportRepository;
+
+    @GetMapping("/severity-summary")
+    @PreAuthorize("hasRole('MANAGER')")
+    public Object findingSeveritySummary() {
+        return findingReportRepository.countBySeverity();
+    }
+}
+package com.tys.AuditPro.report.dto;
+
+import com.tys.AuditPro.domain.audit.AuditStatus;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class AuditProgressReport {
+
+    private Long auditId;
+    private String assignedTo;
+    private AuditStatus status;
+    private long totalFindings;
+}
+package com.tys.AuditPro.report.repository;
+
+import com.tys.AuditPro.domain.audit.Audit;
+import com.tys.AuditPro.report.dto.AuditProgressReport;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+
+public interface AuditReportRepository extends JpaRepository<Audit, Long> {
+
+    @Query("""
+        select a.status as status, count(a) as count
+        from Audit a
+        group by a.status
+    """)
+    List<AuditStatusCount> countAuditsByStatus();
+
+    @Query("""
+    select new com.tys.AuditPro.report.dto.AuditProgressReport(
+        a.id,
+        a.assignedTo,
+        a.status,
+        count(f)
+    )
+    from Audit a
+    left join Finding f on f.auditId = a.id
+    group by a.id, a.assignedTo, a.status
+""")
+    List<AuditProgressReport> auditProgress();
+
+}
+package com.tys.AuditPro.report.repository;
+
+import com.tys.AuditPro.domain.audit.AuditStatus;
+
+public interface AuditStatusCount {
+
+    AuditStatus getStatus();
+    long getCount();
+}
+package com.tys.AuditPro.report.repository;
+
+import com.tys.AuditPro.domain.finding.Finding;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+
+public interface FindingReportRepository extends JpaRepository<Finding, Long> {
+
+    @Query("""
+        select f.severity as severity, count(f) as count
+        from Finding f
+        group by f.severity
+    """)
+    List<FindingSeverityCount> countBySeverity();
+}
+package com.tys.AuditPro.report.repository;
+
+import com.tys.AuditPro.domain.finding.FindingSeverity;
+
+public interface FindingSeverityCount {
+
+    FindingSeverity getSeverity();
+    long getCount();
+}
+package com.tys.AuditPro.repository;
+
+import com.tys.AuditPro.domain.audit.AuditField;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface AuditFieldRepository extends JpaRepository<AuditField, Long> {
+
+    List<AuditField> findByAuditFormIdOrderByDisplayOrder(Long formId);
+}
+package com.tys.AuditPro.repository;
+
+import com.tys.AuditPro.domain.audit.AuditForm;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface AuditFormRepository extends JpaRepository<AuditForm, Long> {
+
+    Optional<AuditForm> findByFormCodeAndStatus(String formCode, String status);
+}
+
+package com.tys.AuditPro.repository;
+
+import com.tys.AuditPro.domain.history.AuditHistory;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface AuditHistoryRepository
+        extends JpaRepository<AuditHistory, Long> {
+
+    List<AuditHistory> findByReferenceIdAndReferenceTypeOrderByPerformedAtAsc(
+            Long referenceId, String referenceType);
+}
+package com.tys.AuditPro.repository;
+
+import com.tys.AuditPro.domain.audit.Audit;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface AuditRepository extends JpaRepository<Audit, Long> {
+
+    // Used for auditor dashboard
+    List<Audit> findByAssignedTo(String username);
+}
+package com.tys.AuditPro.repository;
+
+import com.tys.AuditPro.domain.finding.Finding;
+import com.tys.AuditPro.domain.finding.FindingStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface FindingRepository extends JpaRepository<Finding, Long> {
+
+    List<Finding> findByAuditId(Long auditId);
+
+    List<Finding> findByStatus(FindingStatus status);
+}
+package com.tys.AuditPro.repository;
+
+import com.tys.AuditPro.domain.user.Role;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface RoleRepository extends JpaRepository<Role, Long> {
+
+    Optional<Role> findByName(String name);
+}package com.tys.AuditPro.repository;
+
+import com.tys.AuditPro.domain.user.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    Optional<User> findByUsername(String username);
+}
+package com.tys.AuditPro.rules.actions;
+
+import com.tys.AuditPro.rules.RuleAction;
+import com.tys.AuditPro.rules.RuleContext;
+import org.springframework.stereotype.Component;
+
+@Component
+public class EscalateAuditAction implements RuleAction {
+
+    @Override
+    public void execute(RuleContext context) {
+        Long auditId = (Long) context.getData().get("auditId");
+        System.out.println("🚨 Escalation triggered for audit " + auditId);
+    }
+}
+
+package com.tys.AuditPro.rules.conditions;
+
+import com.tys.AuditPro.rules.RuleCondition;
+import com.tys.AuditPro.rules.RuleContext;
+import org.springframework.stereotype.Component;
+
+@Component
+public class HighSeverityFindingCondition implements RuleCondition {
+
+    @Override
+    public boolean evaluate(RuleContext context) {
+        Object severity = context.getData().get("severity");
+        return severity != null && severity.equals("HIGH");
+    }
+}
+package com.tys.AuditPro.rules;
+
+import lombok.Builder;
+import lombok.Getter;
+
+@Getter
+@Builder
+public class Rule {
+
+    private String name;
+    private RuleEvent event;
+    private RuleCondition condition;
+    private RuleAction action;
+}
+package com.tys.AuditPro.rules;
+
+public interface RuleAction {
+    void execute(RuleContext context);
+}
+package com.tys.AuditPro.rules;
+
+public interface RuleAction {
+    void execute(RuleContext context);
+}
+package com.tys.AuditPro.rules;
+
+import com.tys.AuditPro.rules.actions.EscalateAuditAction;
+import com.tys.AuditPro.rules.conditions.HighSeverityFindingCondition;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class RuleConfig {
+
+    @Bean
+    public Rule highSeverityFindingRule(
+            HighSeverityFindingCondition condition,
+            EscalateAuditAction action) {
+
+        return new Rule(
+                "High Severity Finding Escalation",
+                RuleEvent.FINDING_CREATED,
+                condition,
+                action
+        );
+    }
+}package com.tys.AuditPro.rules;
+
+import lombok.Builder;
+import lombok.Getter;
+
+import java.util.Map;
+
+@Getter
+@Builder
+public class RuleContext {
+
+    private RuleEvent event;
+    private Map<String, Object> data;
+
+}
+package com.tys.AuditPro.rules;
+
+import com.tys.AuditPro.domain.history.AuditHistoryType;
+import com.tys.AuditPro.service.AuditHistoryService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+@RequiredArgsConstructor
+public class RuleEngine {
+
+    private final List<Rule> rules;
+    private final AuditHistoryService auditHistoryService;
+
+    // 🔥 ASYNC ENTRY POINT
+    @Async("ruleExecutor")
+    public void fireAsync(RuleContext context) {
+
+        try {
+            fire(context);
+        } catch (Exception ex) {
+            System.err.println(
+                    "Rule execution failed for event "
+                            + context.getEvent() + " : " + ex.getMessage()
+            );
+        }
+    }
+
+    // 🔁 SYNC CORE LOGIC
+    public void fire(RuleContext context) {
+
+        rules.stream()
+                .filter(rule -> rule.getEvent() == context.getEvent())
+                .filter(rule -> rule.getCondition().evaluate(context))
+                .forEach(rule -> {
+
+                    // 1️⃣ Execute action
+                    rule.getAction().execute(context);
+
+                    // 2️⃣ Safe audit history logging
+                    Long auditId = (Long) context.getData().get("auditId");
+
+                    if (auditId != null) {
+                        auditHistoryService.log(
+                                auditId,
+                                "RULE",
+                                AuditHistoryType.RULE_EXECUTED,
+                                "Rule executed: " + rule.getName()
+                        );
+                    }
+                });
+    }
+}
+
+package com.tys.AuditPro.rules;
+
+public enum RuleEvent {
+    AUDIT_APPROVED,
+    FINDING_CREATED,
+    FINDING_UPDATED
+}
+package com.tys.AuditPro.security;
+
+import com.tys.AuditPro.domain.user.User;
+import com.tys.AuditPro.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class CustomUserDetailsService implements UserDetailsService {
+
+    private final UserRepository userRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found"));
+
+        return org.springframework.security.core.userdetails.User
+                .withUsername(user.getUsername())
+                .password(user.getPassword())
+                .authorities(List.of())
+                .disabled(!user.isActive())
+                .build();
+
+    }
+}package com.tys.AuditPro.security;
+
+import com.tys.AuditPro.domain.user.Role;
+import com.tys.AuditPro.domain.user.User;
+import com.tys.AuditPro.repository.RoleRepository;
+import com.tys.AuditPro.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Configuration;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@RequiredArgsConstructor
+@Configuration
+public class DataLoader implements CommandLineRunner {
+
+    private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Override
+    public void run(String... args) {
+
+        Role managerRole = roleRepository.findByName("MANAGER")
+                .orElseGet(() -> roleRepository.save(
+                        Role.builder().name("MANAGER").build()));
+
+        Role userRole = roleRepository.findByName("USER")
+                .orElseGet(() -> roleRepository.save(
+                        Role.builder().name("USER").build()));
+
+        userRepository.findByUsername("manager")
+                .orElseGet(() -> userRepository.save(
+                        User.builder()
+                                .username("manager")
+                                .password(passwordEncoder.encode("manager123"))
+                                .role(managerRole)
+                                .active(true)
+                                .build()
+                ));
+
+        userRepository.findByUsername("user")
+                .orElseGet(() -> userRepository.save(
+                        User.builder()
+                                .username("user")
+                                .password(passwordEncoder.encode("user123"))
+                                .role(userRole)
+                                .active(true)
+                                .build()
+                ));
+    }
+}
+package com.tys.AuditPro.security;
+
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.List;
+
+@Component
+@RequiredArgsConstructor
+public class JwtFilter extends OncePerRequestFilter {
+
+    private final JwtUtil jwtUtil;
+    private final UserDetailsService userDetailsService;
+
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain)
+            throws ServletException, IOException {
+
+        String header = request.getHeader("Authorization");
+
+        if (header != null && header.startsWith("Bearer ")) {
+
+            String token = header.substring(7);
+            Claims claims = jwtUtil.extractClaims(token);
+
+            String username = claims.getSubject();
+            String role = claims.get("role", String.class);
+
+            UserDetails userDetails =
+                    userDetailsService.loadUserByUsername(username);
+
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                    );
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+        }
+
+        filterChain.doFilter(request, response);
+    }
+}
+
+package com.tys.AuditPro.security;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+
+@Component
+public class JwtUtil {
+
+    private static final String SECRET =
+            "auditpro-secret-key-very-long-at-least-32-bytes";
+
+    public String generateToken(String username, String role) {
+
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("role", role)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 3600000))
+                .signWith(Keys.hmacShaKeyFor(SECRET.getBytes()), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public Claims extractClaims(String token) {
+
+        return Jwts.parserBuilder()
+                .setSigningKey(SECRET.getBytes())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+}
+package com.tys.AuditPro.security;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+    private final JwtFilter jwtFilter;
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(sm ->
+                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/auth/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+                        .requestMatchers("/manager/**").hasRole("MANAGER")
+                        .requestMatchers("/user/**").hasRole("USER")
+                        .anyRequest().authenticated()
+                )
+
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
+package com.tys.AuditPro;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+
+@SpringBootApplication
+@EnableMethodSecurity(prePostEnabled = true)
+@EnableAsync
+public class AuditProApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(AuditProApplication.class, args);
+	}
+
+}spring.application.name=AuditPro
+spring.datasource.username=root
+spring.datasource.password=Ned$tark07
+spring.datasource.url=jdbc:mysql://localhost/sbms39
+
+spring.jpa.hibernate.ddl-auto =update
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.2.12</version>
+
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.tys</groupId>
+	<artifactId>AuditPro</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>AuditPro</name>
+	<description>Audit project for Spring Boot</description>
+	<url/>
+	<licenses>
+		<license/>
+	</licenses>
+	<developers>
+		<developer/>
+	</developers>
+	<scm>
+		<connection/>
+		<developerConnection/>
+		<tag/>
+		<url/>
+	</scm>
+	<properties>
+		<java.version>17</java.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.5.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<!-- Spring Security -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<!-- JWT -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.5</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.30</version>
+			<scope>provided</scope>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
+
