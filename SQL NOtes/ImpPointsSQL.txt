@@ -1,0 +1,11 @@
+SQL:
+====
+
+1) to save script -> go to file -> save script as
+
+2) “Direct inserts without column names require strict column order and full value coverage; using column names avoids these issues.”
+
+	INSERT INTO users VALUES (...);
+
+	INSERT INTO users (name, email, gender, date_of_birth)
+	VALUES (...);
