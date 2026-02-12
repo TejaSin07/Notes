@@ -11,7 +11,7 @@ Java 1.2   (Collection Framework)
 ..
 
 Java 1.5  (Big Release)
-..
+.
 
 Java 1.8 (Big Release) ------- Functional Programming
 ..
@@ -589,7 +589,7 @@ public class MethodRef {
 	}
 
 	public static void main(String[] args) {
-		MyInterface mi = MethodRef::m2;
+		MyInterface mi = MethodRef::m2;    //static
 		mi.m1();
 	}
 }
@@ -640,9 +640,9 @@ class Doctor {
 }
 
 
-===========================================================================
+=========================================================================================
 Task : WAJP to print numbers from 1 to 5 using Thread with the help of Runnable interface
-============================================================================
+=========================================================================================
 
 
 //Approach-1

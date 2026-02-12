@@ -200,6 +200,12 @@ Many to many :
 
 A many-to-many relationship is implemented using a junction table with foreign keys to both parent tables and a composite primary key to prevent duplicate associations.
 
+1. Junction table is REQUIRED
+2. Junction table contains ONLY FKs (plus extra columns if needed)
+3. Composite PRIMARY KEY prevents duplicates
+4. FK constraints enforce integrity
+5. ON DELETE CASCADE cleans mappings automatically
+
 
 
 

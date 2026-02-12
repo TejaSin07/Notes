@@ -4,18 +4,22 @@ question:
 ---------
 1) when to use war and when to jar?
 
-| Criteria                | **JAR**                                          | **WAR**                                                     |
-| ----------------------- | ------------------------------------------------ | ----------------------------------------------------------- |
-| **Deployment style**    | Runs standalone using `java -jar`                | Needs external app server (Tomcat, JBoss, WebLogic, etc.)   |
-| **Server type**         | Embedded server inside the JAR                   | Server provided by the container                            |
-| **Used in**             | Modern microservices, cloud-native apps          | Legacy enterprise systems, monoliths                        |
-| **DevOps suitability**  | Excellent (Docker/K8s friendly)                  | Poor/average (depends on external server setup)             |
-| **Spring Boot default** | Yes                                              | No (requires customization)                                 |
-| **Maintenance**         | Easier — one self-contained app                  | Harder — depends on app server configuration                |
-| **Startup time**        | Faster (embedded server optimized)               | Slower (container-managed startup)                          |
-| **When to choose**      | When you control the runtime and want simplicity | When infra forces you to deploy on an enterprise app server |
-| **Example command**     | `java -jar app.jar`                              | Deploy `app.war` into Tomcat `webapps/` folder              |
-
+| Aspect              | JAR                                | WAR                      |
+| ------------------- | ---------------------------------- | ------------------------ |
+| Full form           | Java ARchive                       | Web ARchive              |
+| Purpose             | Standalone application             | Web application          |
+| Runtime             | **Owns runtime** (embedded server) | **Uses external server** |
+| Server needed       | ❌ No (embedded Tomcat/Jetty)       | ✅ Yes (Tomcat/WebLogic)  |
+| Run method          | `java -jar app.jar`                | Deploy to server         |
+| Web support         | REST, static content               | JSP, Servlets, Filters   |
+| JSP support         | ❌ (unless embedded Tomcat)         | ✅ Native                 |
+| Folder to remember  | `META-INF`                         | `WEB-INF`                |
+| Cloud / Kubernetes  | ✅ Best fit                         | ❌ Legacy fit             |
+| Startup time        | Fast                               | Slower                   |
+| Scaling             | Easy (horizontal)                  | Harder                   |
+| Modern usage        | Microservices, APIs                | Legacy web apps          |
+| Spring Boot default | ✅ Yes                              | ❌ No                     |
+| When to choose      | New development                    | Forced by legacy         |
 
 ======
 Maven

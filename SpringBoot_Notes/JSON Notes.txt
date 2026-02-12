@@ -52,6 +52,10 @@ Working with JSON in Java Applications
 Jackson API
 ==============
 
+:: In core Java, we add jackson-databind and use ObjectMapper manually to convert Java ↔ JSON.
+
+:: In Spring Boot, Jackson is auto-configured via spring-boot-starter-web, so no extra dependency or manual ObjectMapper is required for REST APIs.
+
 1) Add below dependency in pom.xml file
 
 		<dependency>

@@ -327,18 +327,15 @@ app - 45
 NOTE: Focus on Spring cloud version we adding in dependency.
 
 
-# IMP =>To Create Api that acts as a client to Admin, Eureka, zipkin add below dependencies to it along with other dependencies:
+# IMP => To Create Api that acts as a client to Admin, Eureka, zipkin add below dependencies to it along with other dependencies:
 
 1) Zipkin
 2) Codecentric's Spring Boot Admin(Client)
 3) Eureka Discovery Client
 
 => also add actuator dependency to monitor and manage application by with the help of admin server.
-
 => also give @EnableDiscoveryClient this annotation to main class. Then it will act as client to eureka server.
-
 => management.endpoints.web.exposure.include=*    <--- to enable actuator.
-
 => spring.boot.admin.client.url=http://localhost:1111/   <--- configuring endpoint url to register this application with admin client
 
 # Our api need to manually register with admin server to act as client, for zipkin and eureka it will auto register
@@ -358,7 +355,6 @@ Your Feign client calls the service by name, not by a fixed URL.
 Because of this, Spring Cloud performs client-side load balancing(implicitly present there)    IMP
 automatically and selects a different Welcome API instance for each request.
 That’s why the Welcome API port keeps changing on every call
-
 
 =============================================================
 Mini Project Implementation using Microservices Architecture
@@ -382,7 +378,6 @@ STOCK-PRICE-CALC-API : It is used to calculate total stocks cost based on compan
 -> Output : Total Stocks Cost
 
 Note: To calculate total stocks cost, STOCK-PRICE-CALC-API should get company stock price from STOCK-PRICE-API (INTER SERVICE COMMUNICATION)
-
 
 
 Steps to develop stock-price-api (Eureka-Client-1)
@@ -511,6 +506,7 @@ public interface StockPriceClient {
 	public StockPrice invokeStockPrice(@PathVariable String cname);
 
 }
+
 ---------------------------------------------------------------
 Note : Write @EnableFeignClients annotation at boot start class
 --------------------------------------------------------------

@@ -99,25 +99,23 @@ Service Registry:
 => It will provide user interface to get apis info.
 
 lect 2: (20 march 25)
-----------------------
+---------------------
 
 =============
 Admin Server
 =============
 
-=> It is used to monitor and manage all the apis at one place/
-
+=> It is used to monitor and manage all the apis at one place
 => It provide beautiful user interface to access all apis actuator endpoint at one place.
-
 
 =============
 Zipkin Server
 =============
 
-=> It isa used for distributed tracing of our request
+=> It is used for distributed tracing of our request
 => It provide beautiful user interface to access apis execution details.
 => Run below query in cmd for execution:
-   C:\Users\tejas\Desktop\springboot repo\jar zipkin>java -jar zipkin-server-3.5.0-exec.jar											
+   C:\Users\tejas\Desktop\springboot repo\jar zipkin>java -jar zipkin-server-3.5.0-exec.jar	
 
 =============
 Config Server
@@ -125,7 +123,7 @@ Config Server
 
 => It is used to separate application code and application properties.
 => It is used to externalise config props of our application.
-=> It makes our application  loosely coupled with properties file or yml file.
+=> It makes our application loosely coupled with properties file or yml file.
 
 ===========
 FeignClient

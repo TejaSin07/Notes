@@ -8,6 +8,31 @@ C:\Users\tejas\Desktop\springboot repo\SBMS-39-main\35_SB_REST_API        [IMP]
 C:\Users\tejas\Desktop\springboot repo\SBMS-39-main\13-SB-Autowiring
 C:\Users\tejas\Desktop\springboot repo\workspace-spring-tool-suite-4-4.27.0.RELEASE\14-DataJPAApp1
 
+Q. How to run Single method inside the Unit test class which is having n number of unit tests ?
+
+-> click on method name -->  right click  -> run 
+
+Q. which type of injection is best for unit testing ?
+
+-> constructor injection (no spring needed) 
+-> “Constructor injection doesn’t depend on Spring. It’s plain Java object creation. 
+   Spring just manages the object lifecycle and injects dependencies automatically.”
+
+Q. how to test private method ?
+=> “Private methods are tested indirectly through public methods.
+ If the public method’s behavior is correct, it confirms that the private logic executed correctly.”
+
+Q. Integration test runs in sequence?
+=> No .That's why we usually use @Transaction to not commit our data once Integration test is failed or succeed.
+
+Q. what if inner method did the commit ?
+=> Use Testcontainers + DB reset
+   Don’t rely on rollback -> Use fresh DB
+
+Q. how test containers works?
+=> Testcontainers is a Java library that talks to Docker, starts real infrastructure (DB, Kafka, Redis, etc.) during tests, 
+   wires your app to it, then kills everything after tests finish.
+
 
 
 What is Junit:
@@ -66,11 +91,11 @@ What is code coverage?
 Unit Testing for boot application
 =================================
 
-best practise :
+best practise (ask gpt for example) :
 ===============
 Test your business logic, not framework code.
 Keep one test focused on one behavior only.
-Follow Arrange–Act–Assert consistently
+Follow Arrange–Act–Assert consistently.
 Use meaningful and descriptive test method names.
 Prefer assertions on results or state over interaction verification.
 Use interaction verification only when methods return void.
@@ -108,27 +133,33 @@ Note : This dependency will be added by default when we create boot application.
 
 C:\Users\tejas\Desktop\springboot repo\SBMS-39-main\58_SB_Junit_App\target\site\jacoco
 
-SpringBoot Rest API + Junit + Mocking + Jacoco
+Spring Boot Rest API + Junit + Mocking + Jacoco
 ==============================================
 
 https : //GitHub.com/ashokitschool/sb_rest_api_junit_app.git
  
 IMP:
 ===
-=> first add jacoco plugin ,then run app ass maven test, then go to project directory 
+=> first add jacoco plugin ,then run app as maven test, then go to project directory 
 => C:\Users\tejas\Desktop\springboot repo\SBMS-39-main\58_SB_Junit_App\target\site\jacoco
 => JaCoCo is a code coverage tool.
 => That’s it.
 => It answers only one question:
 => Which lines / branches / methods were executed during tests?
+
 => how we do unit testing for post method?
-=> unit testing vs integration  testing
+
+=> unit testing vs integration testing
 => Integration testing calls real methods, real beans, and can use a real or test database.
 No mocks by default.
+
 => JUnit test order is not guaranteed
+
 => @SpringBootTest vs @ExtendWith(value = { MockitoExtension.class })
+
 => Jacoco lets you exclude classes/packages you don’t want to count for test coverage. This is normal, practical, and often necessary.
 Below is exactly how it works, no fluff.
+
 => JaCoCo measures execution of bytecode instructions — which exist in methods and constructors, not in fields.
 
 Why exclusions exist (reality check)
@@ -196,13 +227,9 @@ Common exclusion patterns (copy-paste safe)
 <exclude>**/entity/**</exclude>
 <exclude>**/config/**</exclude>
 <exclude>**/constants/**</exclude>
-<exclude>**/*Exception.class</exclude>
+<exclude>**/*Exception.class</exclude>      //class having name xyzException is going to be excluded
 <exclude>**/*Application.class</exclude>
 
-Interview Question:
-------------------
-
-Q. how to do unit testing for private method ??
 
 -@Test
 
@@ -323,7 +350,7 @@ public string getUserEmail(Integer  uid){
 	String email = dao.findEmailByid(uid);
 	Stringh format = email.toLowerCase();
 	return format;
-}
+	}
 
 }
 
@@ -406,6 +433,7 @@ XML → parsed into DOM tree
 XPath navigates the XML tree
 
 => What is the CORRECT approach?
+
 Write two test methods for the SAME endpoint
 
 Test Method	Accept Header	Assertion
@@ -458,7 +486,7 @@ DB (H2 / Testcontainers)
 4️⃣ Use real DB (important)
 Choose one:
 H2 (quick)
-Testcontainers (preferred in real projects)
+Testcontainers (preferred in real projects)   -> coz we need db that behave same as prod db
 Steps to Run Integration Tests
 5️⃣ Add Failsafe plugin (mandatory)
 <plugin>
@@ -493,5 +521,129 @@ In console you must see:
 Running CustomerControllerIT
 
 If not seen → test never ran → no report.
+
+
+| Aspect                     | Production Method | Integration Test |
+| -------------------------- | ----------------- | ---------------- |
+| `@Transactional` starts TX | ✅                 | ✅                |
+| Commit by default          | ✅                 | ❌                |
+| Auto rollback              | ❌                 | ✅                |
+| Rollback on exception      | ✅                 | ✅                |
+| DB stays clean             | ❌                 | ✅                |
+
+
+
+
+
+
+========================
+UNIT TEST ANNOTATIONS
+========================
+
+@Test
+- Marks a method as a unit test.
+- Used in all test types.
+
+@ExtendWith(MockitoExtension.class)
+- Enables Mockito WITHOUT Spring.
+- Used for pure unit testing.
+- No Spring context loaded.
+
+@Mock
+- Creates a mock object.
+- Used to mock dependencies.
+
+@InjectMocks
+- Injects mocks into the class under test.
+- Used for service / utility unit tests.
+
+@WebMvcTest(Controller.class)
+- Loads ONLY the controller layer.
+- Does NOT load service, repo, DB.
+- Used for controller unit testing.
+
+@MockBean
+- Creates a mock inside Spring context.
+- Used with @WebMvcTest to mock service layer.
+
+Example (Unit Test):
+
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+
+    @Mock
+    UserRepository repo;
+
+    @InjectMocks
+    UserService service;
+
+    @Test
+    void testLogic() {
+        // unit test
+    }
+}
+
+@WebMvcTest(UserController.class)
+class UserControllerTest {
+
+    @Autowired
+    MockMvc mockMvc;
+
+    @MockBean
+    UserService service;
+}
+
+
+
+=============================
+INTEGRATION TEST ANNOTATIONS
+=============================
+
+@SpringBootTest
+- Loads FULL Spring Boot application context.
+- Loads controllers, services, repos, configs.
+- Used for integration testing.
+
+@AutoConfigureMockMvc
+- Enables MockMvc with real Spring context.
+- Used for HTTP integration tests.
+
+@Autowired
+- Injects real Spring-managed beans.
+
+@Transactional
+- Rolls back DB changes AFTER each test.
+- Keeps test DB clean.
+- weather exception came or not, test completed or not data always rolled back if
+  transactional is enabled
+- only committed on success if we use @Commit 
+
+
+@Commit
+- Overrides rollback.
+- Commits data even in tests.
+
+@ActiveProfiles("test")
+- Activates test-specific configuration.
+
+Example (Integration Test):
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@Transactional
+class UserControllerIT {
+
+    @Autowired
+    MockMvc mockMvc;
+
+    @Test
+    void testEndToEndFlow() {
+        // integration test
+    }
+}
+
+
+
 
 

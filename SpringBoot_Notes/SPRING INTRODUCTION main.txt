@@ -496,7 +496,17 @@ public class Car extends Engine {
 HAS-A relation
 ==================
 
+public class Engine {
+	
+	public int start() {
+		System.out.println("Engine Starting...");
+		return 1;
+	}
+
+}
+
 public class Car  {
+	
 	public void drive() {
 		
 		Engine eng = new Engine();
@@ -509,6 +519,8 @@ public class Car  {
 		}
 	}
 }
+
+new Car().drive();
 
 =============
 Conclusion

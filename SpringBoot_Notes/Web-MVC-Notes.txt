@@ -4,7 +4,7 @@ Git Repo URL : https://github.com/ashokitschool/SBMS-39.git
 
 
 
-Feature				Servlets			Spring WebMVC
+Feature				Servlets(dispatcher servlet)			Spring WebMVC
 Architecture	Low-level request handling			High-level MVC framework
 Ease of Use	Manual parsing of parameters, response handling	Annotations simplify request mapping
 REST Support	Needs manual JSON conversion			Built-in REST API support
@@ -26,7 +26,7 @@ Spring Web MVC
 		1) Web Application ( C 2 B )
 		2) Distributed Application ( B 2 B )
 
--> We need to use 'springboot-starter-web' dependency to work with Spring Web MVC module.
+->  We need to use 'springboot-starter-web' dependency to work with Spring Web MVC module.
 -> 'web-starter' will provide embedded container by default. We no need to setup server manually.
 
 				- Apache (Default)
@@ -44,7 +44,7 @@ Note: When we develop java web app using servlets we need capture form data like
 	 	Long ph = Long.parseLong(phno);
 
 Note: We no need to write this logic in web mvc. It will take care of capturing form data and convert 
-into corresponding data type and store into java object.	 	
+into corresponding data type and store into java object.
 
 ============================
 Spring Web MVC Architecture
@@ -75,18 +75,14 @@ Note:  DispatcherServlet , HandlerMapper, ViewResolver are predefine classes i.e
 2️⃣ DispatcherServlet (Front Controller)
 
 Entry point of every Spring MVC request.
-
 It receives the request first.
-
 It delegates to other components to handle it.
 
 ↓
 
 3️⃣ HandlerMapping
-
 DispatcherServlet asks HandlerMapping:
 “Which controller method should handle this URL?”
-
 It returns the Controller (Handler) info + method to be invoked.
 
 ↓
@@ -94,19 +90,13 @@ It returns the Controller (Handler) info + method to be invoked.
 4️⃣ Controller (Request Handler)
 
 Your code runs here.
-
 It processes the request, interacts with the service layer or DB.
-
 It prepares Model data and returns ModelAndView object.
-
 Model → data to show
-
 View name → name of JSP/HTML/Thymeleaf page
-
 ↓
 
 5️⃣ ViewResolver
-
 DispatcherServlet sends the view name to the ViewResolver.
 
 ViewResolver maps that logical view name to an actual file (like /WEB-INF/views/customers.jsp).
@@ -114,9 +104,7 @@ ViewResolver maps that logical view name to an actual file (like /WEB-INF/views/
 ↓
 
 6️⃣ View (JSP/Thymeleaf/etc.)
-
 The view gets the model data.
-
 It renders the UI (HTML page) to show the data to the user.
 
 ↓
@@ -249,7 +237,7 @@ Develop Boot web app to save and retrieve products data
 	 	model.addAttribute("pobj",new Product());
 	 	return "index";
 	 }
-//	 NOte :this code also works same as above code
+//	 Note :this code also works same as above code
 
 lect 37:
 =========
@@ -404,7 +392,6 @@ two ways to develop controller   ==>  MsgController class in 25 th application
 lect 39:
 =========
 
-
 ==============
 Requirement : 
 ==============
@@ -526,7 +513,7 @@ b)	@ExceptionHandler(value = Exception.class)
 This is a class-level annotation.
 It is used to define a global exception handler that applies to all controllers in the application.
 It provides a centralized way to handle exceptions across multiple controllers.
-In control advise also we use  ExceptionHandler
+In control advise also, we use  ExceptionHandler
 
 example:
 @ControllerAdvice
@@ -545,7 +532,7 @@ public class GlobalExceptionHandler {
 2) If you handle exceptions at the method level using @ExceptionHandler in the same class, that handler will take precedence over any global exception handler (like one defined in a @ControllerAdvice class).
 
 3)If we want to handle user defined exception (not predefined) then we need add that exception class having extension Exception.  
------------------------------------
+
 
 1.Controller-based vs Global exception handler in Spring
 
@@ -679,7 +666,7 @@ Path Parameters  (write after / )" @PathVariable "
 => Path Parameters will be separated by '/'
 
 => Path Parameters can present anywhere in the URL
-	Ex :  www.ashokit.in/course/{java}/info
+	Ex :  www.ashokit.in/course/java/info
 
 => We can read Path Parameters using @PathVariable annotation.
 
@@ -1017,15 +1004,10 @@ What are Profiles in Spring Boot ?
 			- PROD
 
 -> Local env is used for development purpose
-
 -> DEV env is used by developers for integration testing
-
 -> QA env is used by Testing team for system integration testing
-
 -> UAT env is used by Client side team for testing (GO/No-GO)
-
 -> PILOT env is used to test app with live data (Pre-Prod)
-
 -> PROD env is used for live access.
 
 
@@ -1036,8 +1018,6 @@ What are Profiles in Spring Boot ?
 		- kafka properties
 		- redis properties
 		- payment-gateway properties
-
-
 
 => If we use single application.properties file to maintain config properties then maintenance will become difficult.
 

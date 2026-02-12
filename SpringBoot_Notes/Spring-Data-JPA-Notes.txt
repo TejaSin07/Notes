@@ -98,7 +98,7 @@ Note: The java class which is mapped with database table is called as Entity cla
 => We will use below annotations to create Entity classes
 				
 @Entity : Represent java class as an Entity class    
-Imp Note: write getter and setter for all field except which are auto generated like if we generate id automatically then just write getter.
+Imp Note: write getter and setter for all field except which are auto generated like if we generate "id" automatically then just write getter.
 
 @Table : To map java class name with table name (Optional).
 	coz table name automatically become same as class name(exact same). 
@@ -172,9 +172,9 @@ Data JPA App with Oracle : https://www.youtube.com/watch?v=ZGKHCJsp4hg
            |   MySQL DB     |
            +----------------+
 
-=======================================
+======================================
 Developing First Data JPA Application 
-========================================
+======================================
 
 1) DB Setup (MysQL DB Server + MySQL Workbench)
 
@@ -208,6 +208,21 @@ spring.jpa.show-sql=true 				:-> Tells Hibernate to print SQL statements in the 
 @Repository <-- optional  to write  
 public interface EmpRepository extends CrudRepository<Employee, Integer>{
 }
+
+| Aspect                           | **Interface ONLY** | **Extends JpaRepository / CrudRepository** |
+| -------------------------------- | ------------------ | ------------------------------------------ |
+| Proxy creation                   | ✅ Yes              | ✅ Yes                                      |
+| Query derivation(findBy<ExactEntityFieldName>) | ✅ Yes              | ✅ Yes                                      |
+| `save()`                         | ❌ No               | ✅ Yes                                      |
+| `findById()`                     | ❌ No               | ✅ Yes                                      |
+| `delete()`                       | ❌ No               | ✅ Yes                                      |
+| Pagination                       | ❌ No               | ✅ Yes                                      |
+| Sorting                          | ❌ No               | ✅ Yes                                      |
+| Batch operations                 | ❌ No               | ✅ Yes                                      |
+| EntityManager wiring             | ❌ Manual           | ✅ Auto                                     |
+| Boilerplate                      | ⚠️ You write more  | ✅ Almost zero                              |
+| Industry usage                   | ⚠️ Rare            | ✅ Standard                                 |
+
 
 Q. why @Repository optional  to write ? 
 
@@ -599,6 +614,7 @@ what is Specification:
 => QBE execute query that are give result similar to object example that by using " == ".
 => But if we want ">","<",between like result then we need to use specification
 =>How to Set Up Specification in Spring Data JPA
+
 | Approach                          | Works | Recommended |
 | --------------------------------- | ----- | ----------- |
 | Extend `JpaSpecificationExecutor` | ✅     | ✅ YES       |
@@ -698,9 +714,9 @@ public class Product {
 @CreationTimestamp
 @UpdateTimestamp
 
-============
+==========
 Generators  (problem statement : user not going write its own primary key so we need to generate )
-============
+==========
 
 => Generators are used to set the value for primary key columns=
 		@@ Primary Key = Not null + unique constrains
@@ -709,7 +725,7 @@ Generators  (problem statement : user not going write its own primary key so we 
 => For every table at least one primary key is required.
 => no need of setter for primary key , but getter should be there if we want to access the  primary key 
 
-	public Employee( String name, Double salary) {  
+	public Employee( String name, Double salary) {   
 		this.name = name;
 		this.salary = salary;
 	}
@@ -739,7 +755,6 @@ sequence generator : it supports db sequences (oracle)
 universal unique identifier(uuid):
 -----------------------------------
 uuid generator : alpha-numeric value for pk (datatype string)
-
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -791,7 +806,9 @@ create table person(
 )
 
  : we are creating entity class that not contain variable that include in pk. We only create variable having type class that contain  
+
  : create new class containing variable that needs to combine for pk.(this class is not entity, give @Embeddable annotation their)
+
  : create object of this class in service 
 
 Q. When to Use @Embeddable?
@@ -834,11 +851,10 @@ Transaction Rollback:
 =====================
 
 - Method level annotation
-- @Transactional(rollbackOn = Exception.class) this annotation makes sure that all  lines/total method executed then only add data to table.
-till method completion its storing data to temporary lets say spring memory.  
+- @Transactional(rollbackOn = Exception.class) this annotation makes sure that all lines/total method executed then only add data to table.
+Before COMMIT, data is stored in database memory (buffers) and undo/redo logs — NOT permanently in table files.
 
 ---Imp to Note -> above line
-
 
 transaction rollback :if any one of the query not executed then don't make any changes in table.
 
@@ -883,6 +899,7 @@ Association Mapping:
  -> if we not used cascade then person will save but passport table is not updated.
  -> Cascade means whatever persistence action is performed on the parent entity, the same action
     is automatically performed on the associated child entity.
+
 save(entity)
    |
    |-- cascade → save(child1)

@@ -61,9 +61,9 @@ Task
 
 lect 48;
 ========
-=================
+=============
 What is HTTP
-=================
+=============
 
 => HTTP stands for Hyper Text Transfer Protocol
 => HTTP acts as mediator between Client & Server
@@ -113,15 +113,15 @@ Client says: “I can handle only this type of response.”
 HTTP Methods
 ==============
 
-GET  ---> It is used to get the data (no request body)
-POST ---> Send data (create record)
-PUT  ---> Update record (complete update)
-PATCH ---> Partial Update
+GET    ---> It is used to get the data (no request body)
+POST   ---> Send data (create record)
+PUT    ---> Update record (complete update)
+PATCH  ---> Partial Update
 DELETE ---> Delete Record
 
-===================
+=================
 HTTP Status Codes
-===================
+=================
 
 1xx (100-199) : Informational
 2xx (200-299) : Success
@@ -214,8 +214,9 @@ HTTP GET Request
 => Query Parameters we can read using @RequestParam annotation
 => Path Parameters we can read using @PathVariable annotation.
 
-=========================================================================
+========================================================================================================
 ✅ Final Thought:
+
 @RestController is distributed because it lets external clients talk to your Spring Boot application over
  the network — making it a key player in distributed architectures like microservices.
 
@@ -282,14 +283,14 @@ Consumes = strict → request Content-Type must match.
 
 Produces = loose → response type is flexible, Spring won’t force JSON unless you return an object that can be serialized.
 
-
 Summary Chart
 What You Return			What Spring Sends	Content-Type
 String				Plain Text		text/plain
 ResponseEntity<String>		Plain Text		text/plain
 ResponseEntity<POJO>		JSON			application/json
 ResponseEntity<List<POJO>>	JSON array		application/json
-=============================================================
+
+===========================================================================
 
 Diff between method returning ResponseEntity<xyz> vs xyz:
 ---------------------------------------------------------
@@ -383,7 +384,7 @@ HTTP DELETE Request
 produces : Represents rest api method response body data format
 consumes : Represents rest api method request body data format
 
-*both are optional,but for document creation it is recommended.
+*both are optional, but for document creation it is recommended.
 
 @RequestParam : To read query params from url
 @PathVariable : To read path params from URL

@@ -694,6 +694,17 @@ private final Lock lock = new ReentrantLock();
 | **Custom object lock**              | `synchronized(lock){}`            | Custom object     | Only code synchronized on **same lock object**       | ❌             | Best practice, fine-grained         |
 | **ReentrantLock**                   | `lock.lock()`                     | Lock instance     | Only code using same `Lock`                          | ✅             | Timeout, fairness, advanced control |
 
+Quick memory rules (interview gold) ::
+
+Same lock → synchronization works
+Different lock → NO protection
+synchronized → JVM-managed
+ReentrantLock → developer-managed
+Instance lock ≠ class lock
+
+NOTE ::
+synchronized applies ONLY to the method or block where it is written.
+It does NOT automatically apply to all methods of that object.
 
 ReentrantLock:
 
@@ -810,6 +821,9 @@ class ThreadDemo {
 ==========
 Dead Lock
 =========
+Note::
+
+Thread.sleep() will not release  lock.
 
 -> Dead Lock means ambiguity problem among the threads
 -> If 2 threads are waiting for each other to release the resources is called as dead lock.

@@ -116,8 +116,8 @@ grep 'Exceptiom' filename : It will print the line which contains Exception
 WinScp:
 ======
 => It is GUI based software
-=> It is used to connect from windows to linux maashine
-=> Using this WinSCP we can upload and download files from windows to linux and vice versa
+=> It is used to connect from windows to Linux machine
+=> Using this WinSCP we can upload and download files from windows to Linux and vice versa
 
 Splunk:
 =======
@@ -128,7 +128,8 @@ ELK
 
 E - Elastic search
 L - log stash
-K - kibana
+K - Kibana
+
 => The above 3 open source products are used for log monitoring.
 
 
