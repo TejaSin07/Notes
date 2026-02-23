@@ -1,0 +1,334 @@
+/*
+===========================================================
+Example: User Registration & Login with BCrypt
+User ID  : john
+Password : My@123
+===========================================================
+*/
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+public class BcryptDemo {
+
+    public static void main(String[] args) {
+
+        // ---------------------------------------------
+        // REGISTRATION FLOW (Admin creates user)
+        // ---------------------------------------------
+
+        String userId = "john";
+        String rawPassword = "My@123";
+
+        PasswordEncoder encoder = new BCryptPasswordEncoder(10);
+
+        /*
+         In our application, when an admin creates a user,
+         the password is hashed using BCrypt.
+         BCrypt automatically generates a random salt
+         and embeds it within the hashed output.
+         Only the final hash string is stored in the database.
+        */
+
+        String storedHash = encoder.encode(rawPassword);
+
+        System.out.println("Stored in DB for user 'john':");
+        System.out.println(storedHash);
+
+        /*
+         Example stored value:
+
+         $2a$10$7EqJtq98hPqEX7fNZaFWoOe6Hkdfhsdjkfhsdkjfhskjdhfksjdhfksjdhf
+
+         Structure:
+         $2a$  -> Algorithm version
+         10    -> Cost factor
+         Next 22 chars -> Salt
+         Remaining     -> Final hash
+        */
+
+
+        // ---------------------------------------------
+        // LOGIN FLOW (User tries to login)
+        // ---------------------------------------------
+
+        String loginPassword = "My@123"; // password entered by user
+
+        /*
+         During login, Spring Security uses BCrypt’s matches() method.
+         It extracts the salt and cost factor from the stored hash,
+         re-hashes the incoming password using the same parameters,
+         and compares the result.
+        */
+
+        boolean isMatch = encoder.matches(loginPassword, storedHash);
+
+        if (isMatch) {
+            System.out.println("Authentication Successful");
+        } else {
+            System.out.println("Authentication Failed");
+        }
+
+        /*
+         Internally matches() does:
+
+         1. Read cost factor from storedHash
+         2. Extract salt from storedHash
+         3. Hash loginPassword using same salt + cost
+         4. Compare newly generated hash with storedHash
+         5. If equal -> authentication succeeds
+        */
+    }
+}
+
+
+TLS = Secure envelope for data while traveling.
+Cloudflare = Security gate + shield in front of your application.
+
+
+========================================================
+Short Summary (BCrypt Registration & Login Flow)
+========================================================
+
+When an admin creates a user (e.g., user ID: john, password: My@123), the backend does not store the plain password. Instead, BCrypt:
+
+- Generates a random salt automatically
+- Combines the password with the salt
+- Applies multiple hashing rounds (based on cost factor)
+- Produces a final hash string
+
+This final hash (which already contains the salt and cost factor) is stored in the database.
+
+During login:
+
+- The user enters the password.
+- Spring Security calls matches().
+- BCrypt extracts the salt and cost factor from the stored hash.
+- It re-hashes the entered password using the same parameters.
+- If the newly generated hash matches the stored hash, authentication succeeds.
+
+Key Points:
+
+- Salt is generated automatically by BCrypt.
+- Salt is embedded inside the stored hash.
+- The original password is never stored.
+- Authentication works by re-hashing and comparing, not by decrypting.
+
+
+In a real Spring Security application, the password matching logic 
+(BCrypt) is triggered when AuthenticationManager.authenticate() is called.
+
+
+
+========================================================
+JWT COMPLETE FLOW (Creation + Validation + Signature)
+========================================================
+
+1️⃣ LOGIN → JWT CREATION
+
+Step 1: User sends email + password.
+
+Step 2: AuthenticationManager verifies:
+- User exists
+- Password matches
+
+Step 3: If authentication is successful, JWT is created.
+
+JWT contains:
+- Header  → algorithm (HS256), type (JWT)
+- Payload → subject (username/email), roles, issued time, expiry time
+
+Step 4: Signature is created using SECRET key.
+
+Signature creation process:
+
+1. Convert Header to Base64
+2. Convert Payload to Base64
+3. Join them with a dot:
+
+   Base64(Header) + "." + Base64(Payload)
+
+4. Apply HMAC-SHA256 using SECRET key:
+
+   Signature = HMAC_SHA256(SECRET, header.payload)
+
+5. Convert signature to Base64
+
+Final JWT format:
+
+Base64(Header) + "." + Base64(Payload) + "." + Base64(Signature)
+
+Step 5: Token is returned to client.
+
+
+--------------------------------------------------------
+
+2️⃣ EVERY REQUEST → JWT VALIDATION
+
+Step 1: Client sends token in Authorization header.
+
+Step 2: Server splits token into:
+- Header
+- Payload
+- Signature
+
+Step 3: Server recreates signature using same SECRET:
+
+   NewSignature = HMAC_SHA256(SECRET, header.payload)
+
+Step 4: Server compares:
+   NewSignature == TokenSignature ?
+
+- If not equal → token is invalid
+- If equal → continue
+
+Step 5: Server checks expiration time.
+
+- If expired → reject
+- If valid → request is authenticated
+
+
+--------------------------------------------------------
+
+3️⃣ CLAIM EXTRACTION
+
+After successful validation:
+
+- Extract subject (who the user is)
+- Extract roles (what user can access)
+- Extract expiration (validity)
+
+These values are read from payload.
+
+
+--------------------------------------------------------
+
+FINAL FLOW
+
+Login:
+Authenticate → Create Header + Payload → 
+Generate Signature using SECRET → 
+Return JWT
+
+Request:
+Receive JWT → Recreate signature using SECRET → 
+Compare signatures → Check expiry → 
+Extract data → Allow access
+
+
+
+========================================================
+WHY NEW ACCESS TOKEN IS DIFFERENT AFTER REFRESH
+========================================================
+
+Even if:
+* userId is same
+* roles are same
+* secret key is same
+
+The access token will still be different because:
+
+* iat (issued time) changes
+* exp (expiration time) changes
+
+Since payload changes, the signature also changes.
+So every newly generated access token is unique.
+
+
+--------------------------------------------------------
+
+WHY WE NEED REFRESH TOKEN
+--------------------------------------------------------
+
+Access Token:
+* Short-lived (10–15 minutes)
+* Used to access APIs
+* Limits damage if stolen
+
+Refresh Token:
+* Long-lived (7–30 days)
+* Used only to generate new access tokens
+* Keeps user logged in without re-entering password
+
+Without refresh token:
+* User must login again after access token expires.
+
+With refresh token:
+* Access token expires → refresh token generates new one.
+* Better security + better user experience.
+
+
+--------------------------------------------------------
+
+FINAL IDEA
+--------------------------------------------------------
+
+Access token = Short-term API access  
+Refresh token = Safe session continuation  
+
+Tokens are different each time because timestamps change.
+
+
+
+========================================================
+GENERATING NEW ACCESS TOKEN USING REFRESH TOKEN
+========================================================
+
+FLOW:
+
+Step 1: Client sends Refresh Token to /refresh endpoint.
+
+Step 2: Server validates Refresh Token:
+- Verify signature using secret key
+- Check expiration
+- (Optional) Verify token exists in DB and is not revoked
+
+Step 3: Extract user identity (userId / username) from refresh token.
+
+Step 4: Fetch latest roles from DB or Redis.
+
+Step 5: Generate new short-lived Access Token.
+
+Step 6: Return new Access Token to client.
+
+
+--------------------------------------------------------
+SIMPLE REAL PROJECT CODE
+--------------------------------------------------------
+
+
+// 1️⃣ Refresh Endpoint
+@PostMapping("/refresh")
+public ResponseEntity<?> refresh(@RequestBody RefreshRequest request) {
+
+    String refreshToken = request.getRefreshToken();
+
+    // Validate refresh token
+    if (!jwtService.validateRefreshToken(refreshToken)) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    // Extract user identity
+    String userId = jwtService.extractUsername(refreshToken);
+
+    // Fetch latest roles
+    List<String> roles = userService.getUserRoles(userId);
+
+    // Generate new access token
+    String newAccessToken = jwtService.generateAccessToken(userId, roles);
+
+    return ResponseEntity.ok(new AuthResponse(newAccessToken));
+}
+
+
+// 2️⃣ Generate Access Token
+public String generateAccessToken(String userId, List<String> roles) {
+
+    return Jwts.builder()
+            .setSubject(userId)
+            .claim("roles", roles)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15)) // 15 min
+            .signWith(getSignKey(), SignatureAlgorithm.HS256)
+            .compact();
+}

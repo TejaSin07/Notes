@@ -1013,7 +1013,7 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 
     @Override
     @RestResource(exported = false)
-    void deleteById(Integer id);
+    v3333333333oid deleteById(Integer id);
 }
 📝 Summary:
 

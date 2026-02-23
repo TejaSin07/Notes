@@ -1,0 +1,197 @@
+/********************************************************************************************
+ * TEAMMATE+ – REDIS DATA FORMAT, FLUSH STRATEGY & AUTHORIZATION SUMMARY (SHORT NOTE)
+ ********************************************************************************************/
+
+/*
+===========================================================================================
+1️⃣ IN WHICH FORMAT REDIS STORES DATA?
+===========================================================================================
+
+Redis is a key-value in-memory data store.
+It does NOT store data in tables like relational DB.
+It stores data in DATA STRUCTURES.
+
+Common Redis Data Types:
+- String
+- Set
+- Hash
+- List
+- Sorted Set
+
+For RBAC (Role-Based Access Control) in TeamMate+,
+we use SET because:
+
+✔ Fast membership check (O(1))
+✔ No duplicate values
+✔ Ideal for permissions
+*/
+
+
+/*
+---------------------------------------
+🔹 SMALL EXAMPLE – TEAMMATE+ SCENARIO
+---------------------------------------
+
+User: tejas@gmail.com
+Role: ADMIN
+Permissions:
+    AUDIT_CREATE
+    AUDIT_DELETE
+    REPORT_EXPORT
+
+REDIS STORAGE FORMAT:
+
+Key: roles:user:tejas@gmail.com
+Type: SET
+Value:
+    ADMIN
+
+Key: perm:role:ADMIN
+Type: SET
+Value:
+    AUDIT_CREATE
+    AUDIT_DELETE
+    REPORT_EXPORT
+
+Internally Redis stores:
+- Key as string
+- Values inside optimized hash-table structure
+- Expiry timestamp if TTL set
+*/
+
+
+/*
+===========================================================================================
+2️⃣ HOW REDIS INSERTION WORKS (CACHE ASIDE PATTERN)
+===========================================================================================
+
+STEP 1: Request comes
+STEP 2: Check Redis
+STEP 3: If MISS → Fetch from DB
+STEP 4: Store in Redis
+STEP 5: Apply TTL
+
+Example (Spring Boot):
+
+redisTemplate.opsForSet()
+             .add("perm:role:ADMIN", "AUDIT_CREATE");
+
+redisTemplate.expire("perm:role:ADMIN", 30, TimeUnit.MINUTES);
+
+TTL ensures auto-expiration.
+*/
+
+
+/*
+===========================================================================================
+3️⃣ HOW WE DO DATA FLUSH IN REAL-TIME TEAMMATE+ PROJECT
+===========================================================================================
+
+❌ We NEVER use global flush like:
+    FLUSHALL
+
+Because:
+- It deletes everything
+- Causes DB load spike
+- Breaks performance
+
+✔ We use GRANULAR EVICTION.
+
+Example 1: Admin updates ADMIN role
+
+@Transactional
+public void updateRole(String roleName) {
+
+    roleRepository.updatePermissions(roleName);
+
+    // Flush only affected role
+    redisTemplate.delete("perm:role:" + roleName);
+}
+
+Example 2: Admin updates user-role mapping
+
+redisTemplate.delete("roles:user:tejas@gmail.com");
+
+Next request:
+→ Redis MISS
+→ Fetch from DB
+→ Store updated data
+
+This ensures:
+✔ Immediate reflection
+✔ No stale permission
+✔ No global performance impact
+*/
+
+
+/*
+===========================================================================================
+4️⃣ TTL & EVICTION POLICY IN TEAMMATE+
+===========================================================================================
+
+TTL (Time To Live):
+- Role → Permission: 30 min
+- User → Role: 15 min
+- Prevents stale memory
+- Auto cleanup
+
+Eviction Policy (redis.conf):
+
+maxmemory 4gb
+maxmemory-policy allkeys-lfu
+
+LFU (Least Frequently Used):
+- Removes least-used keys when memory full
+- Protects Redis from overflow
+
+Important:
+TTL → Data freshness
+LFU → Memory pressure handling
+*/
+
+
+/*
+===========================================================================================
+5️⃣ AUTHORIZATION FLOW (TEAMMATE+)
+===========================================================================================
+
+LOGIN:
+→ JWT created (contains userId only)
+
+REQUEST:
+→ JWT validated
+→ Extract email
+→ Redis roles:user:email
+→ Redis perm:role:ADMIN
+→ Combine permissions
+→ Custom AOP checks @RequirePermission
+→ Controller executes
+
+Authorization Principles:
+✔ JWT = Identity only
+✔ DB = Source of truth
+✔ Redis = Performance layer
+✔ Explicit eviction on role update
+✔ TTL as safety
+✔ LFU for memory management
+
+This ensures:
+- Scalable
+- Secure
+- Consistent
+- Production-ready RBAC
+*/
+
+
+/********************************************************************************************
+ * FINAL SUMMARY
+ *
+ * Redis stores RBAC data using SET structure.
+ * Keys follow prefix pattern (roles:user:, perm:role:).
+ * Data inserted using cache-aside strategy.
+ * Data flushed using targeted delete (never full flush).
+ * TTL + LFU used for memory and freshness control.
+ * Authorization enforced via AOP with dynamic role-permission resolution.
+ *
+ * This is production-grade Redis + RBAC implementation for TeamMate+.
+ ********************************************************************************************/

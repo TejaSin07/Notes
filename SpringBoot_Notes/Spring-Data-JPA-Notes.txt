@@ -57,7 +57,7 @@ What is persistence layer ?
 			4) Spring ORM
 			5) Spring Data JPA
 
-Note: Spring Data JPA is the latest trend in the market to developer Persistence layer in java based applications.			
+Note: Spring Data JPA is the latest trend in the market to developer Persistence layer in java based applications.		
 
 ===============================
 Why to use Spring Data JPA ?

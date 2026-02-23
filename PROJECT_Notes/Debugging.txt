@@ -1,0 +1,367 @@
+==========================================================
+IDENTIFIERS IN REAL-TIME MICROSERVICE APPLICATION
+(Audit / Enterprise System Context)
+==========================================================
+
+
+==========================================================
+1) WHY THESE IDS ARE REQUIRED (REAL-TIME PURPOSE)
+==========================================================
+
+✔ Trace ID
+----------------------------------------------------------
+• Identifies a complete request journey across services.
+• Used for distributed tracing.
+• Helps answer: "Where did this request fail?"
+• Critical for microservices debugging.
+
+Example:
+User → API Gateway → Audit Service → Rule Engine → Kafka → Notification
+
+All linked using same traceId.
+
+
+✔ Span ID
+----------------------------------------------------------
+• Represents one operation within a trace.
+• Each service call / DB call / external call creates new span.
+• Helps identify which specific step is slow or failed.
+
+Trace = whole story
+Span = one chapter
+
+
+✔ User ID
+----------------------------------------------------------
+• Required for audit compliance.
+• Answers: "Which user performed this action?"
+• Mandatory in audit applications.
+
+Example:
+userId=U1023 created finding F9001
+
+
+✔ Role
+----------------------------------------------------------
+• Shows authorization context.
+• Helps in debugging RBAC issues.
+• Important in systems with layered permissions.
+
+
+✔ Tenant ID (Multi-tenant systems)
+----------------------------------------------------------
+• Identifies customer/account in SaaS systems.
+• Prevents cross-tenant data confusion.
+• Helps isolate tenant-specific issues.
+
+
+✔ Assessment ID / Audit ID
+----------------------------------------------------------
+• Business identifier.
+• Connects logs to a specific audit workflow.
+• Very important for domain-level debugging.
+
+
+✔ Environment Tag (dev / qa / prod)
+----------------------------------------------------------
+• Distinguishes logs from different deployments.
+• Prevents confusion when multiple environments exist.
+• Required in centralized log systems (Splunk/Datadog).
+
+
+==========================================================
+2) HOW WE CONFIGURE THEM (SHORT & PRACTICAL)
+==========================================================
+
+------------------------------------------
+A) Trace ID & Span ID (Auto Generated)
+------------------------------------------
+
+Dependency (Spring Boot 3+):
+
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-tracing-bridge-otel</artifactId>
+</dependency>
+
+application.properties:
+
+management.tracing.enabled=true
+management.tracing.sampling.probability=1.0
+
+Log4j2 pattern:
+
+pattern="%d %-5level traceId=%X{traceId} spanId=%X{spanId} userId=%X{userId} tenantId=%X{tenantId} - %msg%n"
+
+Component Used:
+• Micrometer Tracing
+• OpenTelemetry
+• MDC (Mapped Diagnostic Context)
+
+
+------------------------------------------
+B) User ID, Role, Tenant ID (From JWT)
+------------------------------------------
+
+Filter Component:
+
+@Component
+public class LoggingContextFilter implements Filter {
+
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+            throws IOException, ServletException {
+
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            if (auth != null) {
+                MDC.put("userId", auth.getName());
+                MDC.put("role", auth.getAuthorities().toString());
+            }
+
+            String tenantId = ((HttpServletRequest) req).getHeader("X-Tenant-Id");
+            MDC.put("tenantId", tenantId);
+
+            chain.doFilter(req, res);
+        } finally {
+            MDC.clear();
+        }
+    }
+}
+
+Component Used:
+• Spring Security
+• Servlet Filter
+• MDC
+
+
+------------------------------------------
+C) Assessment ID (Business Context)
+------------------------------------------
+
+Inside service/controller:
+
+MDC.put("assessmentId", assessmentId);
+
+Component Used:
+• Manual MDC injection
+• Business layer logic
+
+
+------------------------------------------
+D) Environment Tag
+------------------------------------------
+
+application.properties:
+
+app.env=prod
+
+log4j2.xml:
+
+env=${sys:app.env}
+
+Or hardcoded in pattern.
+
+
+==========================================================
+3) HOW IDS TRAVEL (SYNC, ASYNC, SAME SERVICE, DIFF SERVICE)
+==========================================================
+
+------------------------------------------
+A) SAME SERVICE (Single Request Thread)
+------------------------------------------
+
+Request enters →
+Filter sets MDC →
+Logger reads MDC →
+All logs in same thread contain same IDs.
+
+Mechanism:
+• MDC uses ThreadLocal storage.
+
+
+------------------------------------------
+B) SYNCHRONOUS (HTTP CALL BETWEEN SERVICES)
+------------------------------------------
+
+Service A → RestTemplate/WebClient → Service B
+
+Trace ID:
+• Automatically propagated via HTTP headers.
+• Header example: traceparent
+
+User/Tenant:
+• Passed via JWT or custom headers.
+• Service B extracts them again and sets MDC.
+
+Flow:
+
+Service A:
+traceId=abc123
+
+HTTP Header:
+traceparent: abc123
+
+Service B:
+extract header → continue same trace
+
+
+------------------------------------------
+C) ASYNCHRONOUS (Kafka / RabbitMQ)
+------------------------------------------
+
+Service A publishes event.
+
+Tracing library:
+• Injects trace context into message headers.
+
+Kafka message contains:
+traceparent header
+
+Service B consumes:
+• Extracts trace context
+• Creates new span under same trace
+• Sets MDC again
+
+Trace continues across async boundary.
+
+
+------------------------------------------
+D) THREAD SWITCHING (@Async)
+------------------------------------------
+
+If using @Async:
+Trace context must propagate.
+
+Spring Boot + Micrometer handles this automatically.
+
+Without tracing:
+MDC would be lost.
+
+
+==========================================================
+REAL-TIME PRODUCTION ARCHITECTURE
+==========================================================
+
+Each microservice must:
+
+• Enable tracing (Micrometer + OpenTelemetry)
+• Extract user info from JWT
+• Store business IDs in MDC
+• Include IDs in log pattern
+• Propagate tenant headers manually if required
+• Avoid TRACE level in production
+
+Logs then go to:
+
+• Splunk
+• Datadog
+• ELK
+
+Tracing goes to:
+
+• Zipkin
+• Jaeger
+• Datadog APM
+
+
+==========================================================
+FINAL SUMMARY
+==========================================================
+
+Trace ID  → Technical distributed debugging
+Span ID   → Operation-level visibility
+User ID   → Accountability
+Role      → Authorization context
+Tenant ID → Multi-tenant isolation
+Audit ID  → Business workflow tracking
+Env Tag   → Deployment separation
+
+All IDs printed via MDC.
+Trace auto-propagated.
+Business IDs propagated via JWT or headers.
+
+
+==========================================
+RECREATING & DEBUGGING ISSUE (REAL SYSTEM)
+==========================================
+
+1) IDENTIFY THE ISSUE
+--------------------------------
+• Get traceId from logs
+• Note timestamp
+• Note service name
+• Note endpoint
+• Note userId / tenantId
+• Note error message
+
+
+2) FOLLOW THE TRACE
+--------------------------------
+• Search traceId in log monitoring tool (Splunk/Datadog)
+• Check full request flow across services
+• Identify which service failed
+• Classify error (4xx / 5xx / timeout / DB / auth)
+
+
+3) GET THE PAYLOAD
+--------------------------------
+• Ask upstream system (frontend / calling service)
+• Or check Kafka message (async case)
+• Or check API gateway logs
+• Avoid blindly logging full payload
+
+
+4) RECREATE IN SAME ENVIRONMENT
+--------------------------------
+• Use Postman / Curl
+• Use same endpoint
+• Use same headers
+• Use same JWT
+• Use same tenantId
+• Use same payload
+
+Check if issue reproduces.
+
+
+5) VERIFY CONTEXT
+--------------------------------
+• Check deployment version
+• Check feature flags
+• Check DB data state
+• Check Redis/cache state
+• Check permission mapping (RBAC)
+
+
+6) IF NOT REPRODUCING
+--------------------------------
+• Compare config between working and failing case
+• Check external dependencies (DB/Kafka/Redis)
+• Check resource metrics (CPU, memory, thread pool)
+
+
+7) REPRODUCE LOCALLY (IF NEEDED)
+--------------------------------
+• Pull same code version
+• Seed required DB data
+• Use same payload
+• Add temporary debug logs
+• Use debugger to trace flow
+
+
+8) FIX STRATEGY
+--------------------------------
+• Config issue → update property
+• Cache issue → invalidate
+• Data issue → correct record
+• Code bug → patch & redeploy
+
+
+==========================================
+KEY PRINCIPLE
+==========================================
+Start with traceId → follow flow → identify failure point →
+recreate with same context → then debug code.
+
+Never start directly from code.
+==========================================

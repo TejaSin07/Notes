@@ -1,0 +1,160 @@
+===============================
+KAFKA SHORT NOTES
+===============================
+
+1) TOPICS AND THEIR USE
+-----------------------
+
+- Topic = Logical category where messages are stored.
+- Producer publishes to a topic.
+- Consumer subscribes to a topic.
+- Topic is divided into partitions.
+
+Example:
+  order.created
+  order.payment.completed
+
+Use:
+  - Decouple services
+  - Enable async communication
+  - Event-driven architecture
+
+
+2) PUBLISHER SMALL SETUP (SPRING BOOT)
+---------------------------------------
+
+application.properties
+
+spring.kafka.bootstrap-servers=localhost:9092
+
+
+Producer Service
+
+@Autowired
+private KafkaTemplate<String, Object> kafkaTemplate;
+
+public void publishOrder(Order order) {
+    kafkaTemplate.send("order.created", order);
+}
+
+Flow:
+  Order Object
+     ↓
+  JsonSerializer
+     ↓
+  Kafka Broker
+     ↓
+  Stored in Topic Partition
+
+
+3) CONSUMER SMALL SETUP (SPRING BOOT)
+--------------------------------------
+
+application.properties
+
+spring.kafka.bootstrap-servers=localhost:9092
+
+
+Consumer Listener
+
+@KafkaListener(
+    topics = "order.created",
+    groupId = "payment-group"
+)
+public void consumeOrder(Order order) {
+    System.out.println(order);
+}
+
+Flow:
+  Consumer joins group
+     ↓
+  Kafka assigns partition
+     ↓
+  Polls messages
+     ↓
+  Processes message
+     ↓
+  Commits offset
+
+
+4) PARTITIONING AND OFFSET
+--------------------------
+
+Partition:
+  - Topic is divided into partitions.
+  - Enables parallel processing.
+  - Ordering guaranteed only inside one partition.
+
+Example:
+  Topic: order.created
+
+  Partition 0:
+    Offset 0 → Order1
+    Offset 1 → Order4
+
+  Partition 1:
+    Offset 0 → Order2
+    Offset 1 → Order5
+
+Offset:
+  - Sequential number inside partition.
+  - Tracks consumer progress.
+  - Stored per (Consumer Group + Partition).
+
+Rule:
+  Next read = Last committed offset + 1
+
+
+5) SMALL END-TO-END FLOW
+------------------------
+
+User places order
+    ↓
+Order Service
+    ↓
+Publish → order.created topic
+    ↓
+Kafka stores message in Partition
+    ↓
+Payment Service consumes
+    ↓
+Payment successful
+    ↓
+Publish → order.payment.completed
+    ↓
+Delivery Service consumes
+
+
+6) ZOOKEEPER AND KAFKA SERVER (LOCAL)
+--------------------------------------
+
+Old Setup:
+  ZooKeeper + Kafka Broker
+
+ZooKeeper:
+  - Managed metadata
+  - Leader election
+  - Broker coordination
+
+Kafka Broker:
+  - Stores messages
+  - Handles partitions
+  - Serves producers & consumers
+
+Modern Setup (Recommended):
+  Kafka in KRaft mode (No ZooKeeper)
+
+Local:
+  - Run Kafka via Docker
+  - Expose port 9092
+  - Connect via localhost:9092
+
+===============================
+KEY FORMULA
+===============================
+
+Partition → Parallelism
+Consumer Group → Load balancing
+Offset → Progress tracking
+Kafka → Event backbone
+===============================

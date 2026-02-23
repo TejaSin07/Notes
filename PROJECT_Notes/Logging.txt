@@ -1,0 +1,300 @@
+===============================
+LOGGING IMPLEMENTATION NOTES
+(Spring Boot + Log4J2 + Splunk)
+===============================
+
+
+1) DEFAULT LOGGING DEPENDENCY IN SPRING BOOT
+============================================
+
+• When we add:
+
+    spring-boot-starter-web
+
+• Spring Boot automatically includes:
+
+    spring-boot-starter-logging
+
+• Default logging framework = LOGBACK
+
+• No configuration required initially.
+• Logs printed to console by default.
+• Default log level = INFO.
+
+
+---------------------------------------------
+
+
+2) HOW WE SETUP LOG4J2 AND WHY
+==============================
+
+WHY SWITCH TO LOG4J2?
+---------------------
+• Better async performance
+• Advanced filtering
+• Better rolling strategy control
+• Enterprise standard in many systems
+• More flexible configuration
+
+STEP 1 — Exclude default Logback
+--------------------------------
+
+In pom.xml:
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+    <exclusions>
+        <exclusion>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+
+
+STEP 2 — Add Log4J2 dependency
+-------------------------------
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-log4j2</artifactId>
+</dependency>
+
+
+STEP 3 — Create configuration file
+-----------------------------------
+
+File location:
+
+src/main/resources/log4j2.xml
+
+Log4J2 reads this file automatically.
+
+
+---------------------------------------------
+
+
+3) APPENDER SETUP (FILES + CONSOLE)
+====================================
+
+APPENDER = destination where logs are written.
+
+Common types:
+• ConsoleAppender
+• RollingFileAppender
+• AsyncAppender
+• DatabaseAppender
+
+
+BEST PRACTICE FILE STRUCTURE
+----------------------------
+
+1) app.log      → all logs (DEBUG, INFO, WARN, ERROR)
+2) error.log    → only WARN & ERROR
+3) (optional) debug.log → only DEBUG (rare in production)
+
+WHY?
+----
+• app.log = full history
+• error.log = quick production monitoring
+• debug.log = troubleshooting
+
+
+SAMPLE ENTERPRISE CONFIG
+------------------------
+
+<Root level="info">
+    <AppenderRef ref="Console"/>
+    <AppenderRef ref="AppFile"/>
+    <AppenderRef ref="ErrorFile"/>
+</Root>
+
+
+LOG LEVEL STRATEGY
+------------------
+
+Development:
+    root = DEBUG
+
+Production:
+    root = INFO
+
+Never use TRACE in production.
+
+
+ROLLING STRATEGY (BEST PRACTICE)
+---------------------------------
+
+• Size-based rolling (10MB)
+• Keep max 7 or 30 files
+• Compress old logs (.gz)
+
+Example:
+
+<Policies>
+    <SizeBasedTriggeringPolicy size="10MB"/>
+</Policies>
+
+<DefaultRolloverStrategy max="7"/>
+
+
+---------------------------------------------
+
+
+4) CHANGES REQUIRED IN application.properties
+=============================================
+
+When using Log4J2:
+
+DO NOT use:
+    logging.logback.*
+    logging.file.name
+
+Those are for Logback only.
+
+
+Optional properties:
+
+# Override root level (if needed)
+logging.level.root=info
+
+# Override specific package
+logging.level.in.tejas=debug
+
+
+Usually:
+All major configuration stays inside log4j2.xml.
+
+
+---------------------------------------------
+
+
+5) WHAT DEVELOPER NEEDS FOR SPLUNK INTEGRATION
+==============================================
+
+BASIC FLOW
+----------
+
+Application
+    ↓
+Log file (app.log)
+    ↓
+Splunk Forwarder
+    ↓
+Splunk Server
+    ↓
+Dashboard & Search
+
+
+DEVELOPER RESPONSIBILITIES
+--------------------------
+
+1) Write logs to proper external location
+   Example:
+       C:/logs/myapp/app.log
+       /var/log/myapp/app.log
+
+2) Use structured log format
+   Prefer JSON for Splunk parsing.
+
+3) Include important fields:
+   • timestamp
+   • log level
+   • service name
+   • environment
+   • thread name
+   • correlationId (very important in microservices)
+
+4) Avoid:
+   • Logging sensitive data
+   • Huge debug logs in production
+   • TRACE level in production
+
+
+OPTIONAL (ADVANCED)
+-------------------
+
+Use JSON layout:
+
+<PatternLayout pattern="%d %level %logger %msg%n"/>
+
+Or JSON layout for better Splunk indexing.
+
+
+---------------------------------------------
+
+
+FINAL SUMMARY
+=============
+
+Default Framework:
+    Logback
+
+Enterprise Preferred:
+    Log4J2
+
+Recommended Production Setup:
+    • Root level = INFO
+    • app.log → all logs
+    • error.log → WARN & ERROR
+    • Rolling enabled
+    • Retention policy configured
+    • Logs stored outside project folder
+    • JSON format for Splunk
+
+Logging is not just printing messages.
+It is observability + troubleshooting + production monitoring.
+
+TASK:: WORK on datadog ,async communication working
+
+
+
+
+==============================
+SLF4J – Short Note
+==============================
+
+• SLF4J (Simple Logging Facade for Java) is a logging API.
+• It does NOT log messages by itself.
+• It acts as a bridge between your code and a logging framework 
+  like Log4j2 or Logback.
+
+Flow:
+Application Code → SLF4J → Log4j2/Logback → Console/File
+
+----------------------------------------
+
+Example Implementation:
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class Demo {
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(Demo.class);
+
+    public static void main(String[] args) {
+
+        logger.info("Application started");
+        logger.debug("Debug message");
+        logger.error("Error occurred");
+
+    }
+}
+
+----------------------------------------
+
+Key Points:
+• Use SLF4J in code (not Log4j2 directly)
+• Keeps application loosely coupled
+• Logging level controlled via config file
+• Standard in Spring Boot projects
+
+==============================
+
+
+
+
+

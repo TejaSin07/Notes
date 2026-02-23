@@ -213,7 +213,7 @@ What is @ComponentScan annotation ?
 ===================================
 
 => It is used to scan the project and identify spring beans available in the application. 
- (A Spring Bean is simply an object that is managed by the Spring Container.)
+  (A Spring Bean is simply an object that is managed by the Spring Container.)
 
 => Component Scanning works based on base-package of application.
 

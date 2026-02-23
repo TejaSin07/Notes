@@ -218,7 +218,7 @@ Version Control Software:
 
 Software:
 ---------
-1) SVN (outdated
+1) SVN (outdated)
 2) Git Hub -- Microsoft
 3) BitBucket -- Atalasian
 
@@ -445,7 +445,7 @@ Git Hub Lab Task
 
 - this .gitignore is used to configure the files or folders which we want to ignore from our commits
 - the files and folders which are not requires to commit to central repository those things we can configure in .gitignore file
-ex . in maven project ,'target' folder will be available which is not required to commit to central repository. This we can configure in .gitignore filw 
+ex . in maven project ,'target' folder will be available which is not required to commit to central repository. This we can configure in .gitignore file
  
 -To ignore the target/ folder (commonly used in Java/Maven projects), add the following line to your .gitignore file:
 
@@ -467,11 +467,12 @@ Interview que:
 | Typical command         | `git clone <url>`           | `git pull origin main` |
 
 2) git push vs git pull
+
 | Feature                 | `git push`          | `git pull`               |
 | ----------------------- | ------------------- | ------------------------ |
 | Direction               | Local → Remote      | Remote → Local           |
 | Purpose                 | Upload your commits | Download others’ commits |
-| Requires local commits? | ✔ Yes               | ❌ No                     |
+| Requires local commits? | ✔ Yes                | ❌ No                     |
 | Affects remote repo?    | ✔ Yes               | ❌ No                     |
 | Affects local repo?     | ❌ No                | ✔ Yes                    |
 | Typical use             | Share code          | Get latest code          |
@@ -493,6 +494,8 @@ Interview que:
 
 
 
+
+
 4) git fetch vs git pull
 	fetch -> download changes from remote to local not to working tree
 	pull -> directly download form remote to working tree
@@ -502,6 +505,9 @@ merge will maintain commit history
 rebase will not maintain commit history
 
 git rebase is used to move or replay your branch commits on top of another branch. It creates a clean, linear commit history by rewriting commit history.
+
+
+6) NOTE:: git pull = git fetch + git merge
 
 ✅ Common Rebase Command
 

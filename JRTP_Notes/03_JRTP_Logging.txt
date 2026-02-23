@@ -14,7 +14,7 @@ we implemented logic at :
 => to implement logging we have several logging framework.
 	-> Log4J
 	-> Log4J2
-	-> LogBack
+	-> LogBack  (default)
 
 => when exception occurred in the project, we need to monitor log message and we need to troubleshoot the problem the fix the problem.
 => To monitor log message we will use several tools
@@ -149,36 +149,6 @@ K - Kibana
         Run http://localhost:8080/
     }
 return
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

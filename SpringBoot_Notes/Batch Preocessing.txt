@@ -1,0 +1,346 @@
+=============================
+SPRING BATCH – COMPLETE NOTE
+=============================
+
+1) WHY BATCH PROCESSING CAME INTO PICTURE
+------------------------------------------
+
+In real-world systems, we often need to process:
+
+- Millions of records
+- Large CSV / Excel files
+- End-of-day financial transactions
+- Payroll calculations
+- Data migrations
+- Monthly report generation
+
+Normal request-response applications are NOT suitable for:
+
+- Heavy data loads
+- Long-running processes
+- Memory-heavy operations
+- Failure recovery
+- Restart capability
+
+Batch processing was introduced to solve:
+
+✔ Large data handling
+✔ Background processing
+✔ Transaction management
+✔ Restartability
+✔ Error tracking
+✔ Scalability
+
+
+2) WHAT IS THE USE OF BATCH PROCESSING?
+---------------------------------------
+
+Batch processing is used to:
+
+- Process bulk data efficiently
+- Run automated background jobs
+- Handle large file imports/exports
+- Perform scheduled business tasks
+- Ensure reliable processing with rollback & restart
+- Maintain execution tracking and job history
+
+Key benefits:
+
+✔ Chunk-based processing (better memory management)
+✔ Built-in transaction handling
+✔ Failure recovery
+✔ Job monitoring
+✔ Parallel execution support
+✔ Metadata tracking
+
+
+3) CORE COMPONENTS IN SPRING BATCH
+------------------------------------
+
+Spring Batch mainly works with:
+
+1) Job
+2) Step
+3) Reader
+4) Processor
+5) Writer
+6) JobLauncher
+7) JobRepository (Metadata tables)
+
+
+4) FLOW OF BATCH EXECUTION
+---------------------------
+
+User/API/Scheduler
+        ↓
+   JobLauncher
+        ↓
+        Job
+        ↓
+       Step
+        ↓
+Reader → Processor → Writer
+        ↓
+     Chunk Commit
+        ↓
+ Repeat Until File Ends
+
+
+5) EXPLANATION OF EACH COMPONENT
+---------------------------------
+
+1) Job
+------
+- Represents entire batch process
+- Contains one or more steps
+- Example: importCustomers
+
+2) Step
+-------
+- A single phase in a job
+- Can be chunk-based or tasklet-based
+- Example: Read CSV and save to DB
+
+3) Reader
+---------
+- Reads data from source
+- CSV / Database / XML / API
+- Example: FlatFileItemReader
+
+4) Processor
+------------
+- Applies business logic
+- Filtering
+- Transformation
+- Validation
+- Returning null skips record
+
+5) Writer
+---------
+- Writes processed data
+- To database / file / API
+
+6) Chunk
+--------
+- Processes records in groups
+- Example: chunk(10)
+
+Means:
+Read 10 → Process 10 → Write 10 → Commit
+Repeat
+
+Improves:
+✔ Performance
+✔ Memory usage
+✔ Transaction control
+
+7) JobRepository
+----------------
+- Stores metadata in DB
+- Tracks:
+  - Job execution status
+  - Step status
+  - Failure details
+  - Restart information
+
+
+6) SMALL REAL-WORLD USE CASE
+-----------------------------
+
+Use Case: CSV Customer Import
+
+Problem:
+Company receives 5 million customer records in CSV daily.
+
+Solution Using Batch:
+- Reader → Read CSV file
+- Processor → Filter only US customers
+- Writer → Save to database
+- Chunk size → 1000
+- Scheduler → Run at 1 AM daily
+
+Benefits:
+✔ Automated processing
+✔ Failure restart support
+✔ Efficient memory usage
+✔ Background execution
+✔ Scalable
+
+
+7) WHEN TO USE BATCH PROCESSING
+--------------------------------
+
+Use batch when:
+
+✔ Large volume data
+✔ No immediate user response required
+✔ Scheduled jobs
+✔ Data transformation/migration
+✔ Report generation
+
+Do NOT use batch when:
+
+✘ Real-time processing required
+✘ Small request-response operations
+✘ Low data volume
+
+
+8) SUMMARY
+----------
+
+Batch processing is designed for:
+
+- Large-scale
+- Background
+- Reliable
+- Restartable
+- Automated data processing
+
+Parallel processing is optional.
+Scheduling is optional.
+Chunk processing is core.
+
+Spring Batch provides enterprise-level tools to handle
+bulk data safely and efficiently.
+
+
+
+==============================================
+DIFFERENCE: MULTI-THREADED STEP vs PARTITIONING
+==============================================
+
+1) BASIC IDEA
+--------------
+
+Multi-Threaded Step:
+- One step
+- Multiple threads process chunks in parallel
+- Shared step execution
+
+Partitioning:
+- One master step
+- Splits work into multiple slave steps
+- Each partition has its own step execution
+
+
+2) ARCHITECTURE
+----------------
+
+Multi-Threaded Step:
+
+   Step
+     ├── Thread 1 (chunk)
+     ├── Thread 2 (chunk)
+     ├── Thread 3 (chunk)
+
+All threads share:
+- Same reader
+- Same execution context
+- Same step metadata
+
+
+Partitioning:
+
+   Master Step
+       ├── Slave Step 1 (Thread 1)
+       ├── Slave Step 2 (Thread 2)
+       ├── Slave Step 3 (Thread 3)
+
+Each slave step has:
+- Its own reader instance
+- Its own execution context
+- Separate step execution metadata
+
+
+3) READER BEHAVIOR
+-------------------
+
+Multi-Threaded Step:
+- Reader is shared
+- Must be thread-safe
+- Risk of stream closed / race conditions
+
+Partitioning:
+- Each partition has its own reader
+- Safer for file processing
+- Cleaner resource handling
+
+
+4) FAILURE HANDLING
+--------------------
+
+Multi-Threaded Step:
+- If one thread fails → entire step fails
+- Harder to isolate failures
+
+Partitioning:
+- If one partition fails → only that partition fails
+- Better restart control
+
+
+5) RESTARTABILITY
+------------------
+
+Multi-Threaded Step:
+- Restart is at step level
+- Less granular control
+
+Partitioning:
+- Restart can happen per partition
+- More precise recovery
+
+
+6) PERFORMANCE
+---------------
+
+Multi-Threaded Step:
+- Good performance improvement
+- Suitable for moderate workloads
+
+Partitioning:
+- Better scalability
+- Suitable for very large datasets
+- Can scale across machines (remote partitioning)
+
+
+7) COMPLEXITY
+--------------
+
+Multi-Threaded Step:
+- Easy to configure
+- Less code
+
+Partitioning:
+- More configuration
+- Requires partitioner logic
+- Higher complexity
+
+
+8) WHEN TO USE
+---------------
+
+Use Multi-Threaded Step when:
+- Data is independent
+- Reader is thread-safe
+- Moderate data volume
+- Simpler design is enough
+
+Use Partitioning when:
+- Very large datasets
+- Strict performance requirements
+- Need restart per partition
+- Enterprise-level batch systems
+
+
+9) SUMMARY
+-----------
+
+Multi-Threaded Step:
+Fast but shared state.
+
+Partitioning:
+Fast + isolated + scalable + better failure handling.
+
+==============================================
+END
+==============================================
