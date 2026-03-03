@@ -26,8 +26,8 @@ SQL:
 
 
 6) | Feature               | PRIMARY KEY                      | UNIQUE                          |
-| --------------------- | -------------------------------- | ------------------------------- |
-| Purpose               | Uniquely identifies **each row** | Enforces uniqueness of a column |
+| --------------------- | -------------------------------- | -------------------------------    |
+| Purpose               | Uniquely identifies **each row** | Enforces uniqueness of a column    |
 | NULL allowed          | ❌ **Not allowed**                | ✅ Allowed (DB-dependent)        |
 | Number per table      | ❌ Only **one**                   | ✅ **Multiple** allowed          |
 | Duplicate values      | ❌ Not allowed                    | ❌ Not allowed                   |
@@ -97,13 +97,13 @@ Relationship rules → stored as constraints (FOREIGN KEY)
 
 NOTE [need to confirm]::
 MySQL auto-drops dependent INDEXES, but never auto-drops FOREIGN KEYS.
-| Constraint             | Auto-dropped when column is dropped? |
+| Constraint             			| Auto-dropped when column is dropped? |
 | ---------------------- 			| ------------------------------------ |
-| NOT NULL              		 	| ✅ (column property)     |
-| UNIQUE (single column)   | ✅                                     |
-| UNIQUE (composite)    	 | ❌                                    |
-| PRIMARY KEY            		| ❌ (if part of PK)     |
-| FOREIGN KEY           			 | ❌                                    |
+| NOT NULL              		 	| ✅ (column property)     		|
+| UNIQUE (single column)   			| ✅                                     |
+| UNIQUE (composite)    	 		| ❌                                    |
+| PRIMARY KEY            			| ❌ (if part of PK)     		|
+| FOREIGN KEY           			| ❌                                    |
 
 
 

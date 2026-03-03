@@ -1,0 +1,95 @@
+# JAVA
+
+1. Upcasting down casting – type casting
+2. Stream API interview questions
+3. Java version new features (17)
+4. Java 8
+5. Optional class
+6. Future / Completable Future
+7. Comparator / Comparable
+8. Inner classes
+9. Internal working of HashMap
+10. Concurrent HashMap , Hash table, HashMap
+11. Adapter design pattern
+12. Java 17 feature you used in project?
+13. record
+14. instance of
+
+---
+
+# API / MICROSERVICES
+
+14. When do you think you should create new version of API?
+15. Can two version of API run at same time?
+16. UUID
+17. SOAP vs JSON, when to use what?
+18. Idempotency – why PUT & POST not same?
+19. Content type & Accept of REST
+20. API versioning strategy
+21. DTOs
+22. @Async
+23. How do you define service boundary which microservice should have in detail?
+24. Before dynamic RBAC how roles are hardcoded in your system? Have you used @PreAuthorize?
+25. Complete flow when request goes in & comes out
+26. Write API for me to get all users? How you write that?
+27. How you manage versioning of your API?
+
+---
+
+# PROJECT BASED
+
+27. What are the common issues that you faced in your project?
+28. What have you done in your project that you are currently proud of apart from hackathon?
+29. Which algorithm used to decrypt the password?
+30. Is it possible to stop/delete API even if it is in running application? How on code level internally?
+31. What is the definition of done while writing code?
+32. When you are working on something critical & there was senior person ask for help. How you tackle this situation?
+33. How many environment do you have? How automation testing is done? How do you resolve issue in each environment?
+34. How you catched all response code & send format which is same but related to that response only?
+
+---
+
+# PROJECT (DETAILED DISCUSSION)
+
+1. What was your contribution? -> RBAC
+2. What was your biggest challenge? How you overcome that?
+3. To implement any functionality you faced difficulty & you need to learn some tech & how you implemented that?
+4. How you optimised your API?
+5. Which endpoint/API you created?
+6. What was the DB schemas you worked on?
+7. How implementing Redis & Kafka improved response time?
+8. How performance testing done in your project?
+9. How you know response code improved by x second?
+10. SDLC of your project
+11. Tell when your responsibility over feature you delivered
+12. How do you know when Redis cache should flush out the data & where do you write the logic?
+13. do you know multithreading and how you implemented in your project
+
+
+# SPRING BOOT
+
+1. Application starting how things work
+2. Run method
+3. CommandLineRunner vs ApplicationRunner run
+4. AOP
+5. JPA – Lazy, Eager
+6. N+1 query
+7. Status codes
+8. Why we need to convert checked exception to unchecked
+9. How can we catch all type of response codes for exception & send one uniform format in output?
+10. Debugging code line by line
+11. Integration testing
+12. Unit testing
+13. Batch processing
+14. Environment variable
+15. SonarQube
+
+---
+
+# SQL
+
+1. N+1 query problem
+2. How indexing improve response
+3. Which DB schema you worked on?
+4. How DB managed for each client?
+5. How DB migration done?
