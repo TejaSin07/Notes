@@ -1,0 +1,39 @@
+1)  project
+-> rule engine
+-> capital group
+-> hackathon
+-> where you used data structure and which you used
+-> api you created  and db schemas you created 
+-> sdlc of your project prepare with example [sdlc]
+-> jwt , Kafka , docker, Kubernetes, Jenkins, asynchronous, synchronous
+-> why saga is not implemented in your project
+-> how db is managed for each client and also give more idea about db migration 
+-> debugging
+-> SonarQube
+-> pr review
+-> how you test your implemented changes correct or not in local
+-> unit testing vs integration testing
+-> more on feature you implemented as sdlc
+-> feature you worked on 
+-> bugs you faced recently and how you tackle them 
+-> how previous auhtentication present in your project 
+
+2) git GitHub   -> 1st 
+-> how you managed versions 
+-> how you managed db migration
+-> how you run your app locally
+-> where you stored your secrete locally and for prod
+
+3) design pattern -> factory , saga
+4) collections
+5) solid
+6) JPA  		-> 2nd 
+7) react basics, html, css, react
+8) QUE  - find second highest by sql by dsa by streams
+9) buy and sell stocks, find non repeating  char of string
+10) multithreading  -> give example of race condition  -> and circular dependency & deadlock-> how to avoid
+11) debugging 
+12) logging
+13) what you are doing currently, what you day to day activity includes
+14) sql -> delete vs truncate vs drop  -> 3rd
+ 

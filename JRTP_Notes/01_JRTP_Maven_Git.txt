@@ -91,9 +91,8 @@ cmd :
 $ mvn compile --> create .class file (Creates target/ and compiles source code into .class files.)
 $ mvn clean  --> delete .class file (delete target folder)
 $ mvn test   --> executes junit
-$ mvn package--> create jar/war file
-$ mvn install--> store artifact into artifact repo (Note: it will execute compile test package all and upload project jar file to local or remote repository)
-
+$ mvn package--> create jar/war file --> and store to project folder target
+$ mvn install--> store artifact into artifact repo --> store to target and local .m2/repository
 in IDE:
 right click on project :- run as :- select goal
 
