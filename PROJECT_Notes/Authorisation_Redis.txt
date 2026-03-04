@@ -1,3 +1,413 @@
+
+==============================
+PREVIOUS AUTHORIZATION SETUP
+(Static / Hard-coded Roles)
+==============================
+
+1) PREDEFINED ROLES IN THE SYSTEM
+
+The application had predefined roles already configured in the backend code.
+These roles were fixed and could NOT be modified by the admin.
+
+Example predefined roles:
+
+    ADMIN
+    AUDITOR
+    REVIEWER
+    OBSERVER
+
+Internally Spring Security stores roles with prefix ROLE_ :
+
+    ROLE_ADMIN
+    ROLE_AUDITOR
+    ROLE_REVIEWER
+    ROLE_OBSERVER
+
+
+--------------------------------------------------
+
+2) ADMIN CREATES USER AND ASSIGNS ROLE
+
+Admin could create a new user and assign one of the predefined roles.
+
+Example:
+
+    User      Assigned Role
+    -----------------------
+    Tejas     ADMIN
+    Rahul     AUDITOR
+    Priya     REVIEWER
+
+Example DB record:
+
+    username : rahul
+    role     : ROLE_AUDITOR
+
+
+--------------------------------------------------
+
+3) PROTECTING APIs USING @PreAuthorize
+
+To restrict access to APIs we used Spring Security annotation
+@PreAuthorize.
+
+Example:
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteAudit(Long id){
+        auditRepository.deleteById(id);
+    }
+
+Meaning:
+
+    Only users with ADMIN role can execute this method.
+
+
+--------------------------------------------------
+
+4) HOW @PreAuthorize CHECKS ROLE
+
+When request comes:
+
+    Client Request
+         ↓
+    JWT Token Validated
+         ↓
+    Roles extracted from token
+         ↓
+    Authentication object created
+         ↓
+    Stored inside SecurityContext
+
+Example SecurityContext:
+
+    User : rahul
+    Authorities : [ROLE_AUDITOR]
+
+
+Now Spring evaluates:
+
+    @PreAuthorize("hasRole('ADMIN')")
+
+Spring internally converts this to:
+
+    ROLE_ADMIN
+
+Then it checks:
+
+    Does ROLE_ADMIN exist in authentication authorities?
+
+
+--------------------------------------------------
+
+5) FINAL AUTHORIZATION DECISION
+
+CASE 1 : ROLE PRESENT
+
+    Authorities : [ROLE_ADMIN]
+    Required    : ROLE_ADMIN
+
+    Result → Access Granted
+    Method executes
+
+
+CASE 2 : ROLE NOT PRESENT
+
+    Authorities : [ROLE_AUDITOR]
+    Required    : ROLE_ADMIN
+
+    Result → AccessDeniedException
+    HTTP 403 Forbidden
+    Method execution blocked
+
+SHORT SUMMARY
+
+    • Roles were predefined in the system
+    • Admin could only assign roles to users
+    • APIs were protected using @PreAuthorize
+    • Spring fetched roles from SecurityContext
+    • If role matched → method executed
+    • If role missing → access denied
+
+
+==================================
+Circuit breaker config 
+==================================
+
+
+===========================================
+RESILIENCE4J CIRCUIT BREAKER - SETUP NOTES
+===========================================
+
+PURPOSE
+-------
+Circuit Breaker protects an application from repeatedly calling a failing service.
+If a service fails frequently, the circuit opens and prevents further calls,
+redirecting requests to a fallback method.
+
+Example:
+Primary Service : Redis
+Fallback Service: Database
+
+--------------------------------------------------
+1. ADD DEPENDENCY (MAVEN)
+--------------------------------------------------
+
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+</dependency>
+
+
+--------------------------------------------------
+2. ENABLE ACTUATOR (FOR MONITORING)
+--------------------------------------------------
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+
+--------------------------------------------------
+3. CONTROLLER IMPLEMENTATION
+--------------------------------------------------
+
+package in.ashokit.rest;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
+@RestController
+public class DemoRestController {
+
+    @GetMapping("/data")
+    @CircuitBreaker(
+        name = "ashokit", 
+        fallbackMethod = "getDataFromDB"
+    )
+    public String getDataFromRedis() {
+
+        System.out.println("Calling Redis Service...");
+
+        // Simulating failure
+        int i = 10 / 0;
+
+        return "Data fetched from Redis";
+    }
+
+
+    // FALLBACK METHOD
+    // Must have same return type
+    // Must accept Throwable parameter
+
+    public String getDataFromDB(Throwable t) {
+
+        System.out.println("Fallback triggered: calling DB");
+
+        return "Data fetched from Database";
+    }
+}
+
+
+--------------------------------------------------
+4. APPLICATION.YML CONFIGURATION
+--------------------------------------------------
+
+server:
+  port: 8081
+
+spring:
+  application:
+    name: resilience4j-demo
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+  endpoint:
+    health:
+      show-details: always
+
+  health:
+    circuitbreakers:
+      enabled: true
+
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+
+        registerHealthIndicator: true
+
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+
+        permittedNumberOfCallsInHalfOpenState: 3
+
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+
+        waitDurationInOpenState: 30s
+
+        failureRateThreshold: 50
+
+        eventConsumerBufferSize: 10
+
+
+--------------------------------------------------
+5. IMPORTANT CONFIGURATION PARAMETERS
+--------------------------------------------------
+
+slidingWindowSize
+-----------------
+Number of requests used to calculate failure rate.
+
+Example:
+slidingWindowSize = 10
+Circuit breaker tracks last 10 calls.
+
+
+minimumNumberOfCalls
+--------------------
+Minimum calls required before calculating failure rate.
+
+Example:
+minimumNumberOfCalls = 5
+
+
+failureRateThreshold
+--------------------
+Percentage of failures allowed before opening circuit.
+
+Example:
+failureRateThreshold = 50
+
+If more than 50% requests fail → circuit opens.
+
+
+waitDurationInOpenState
+-----------------------
+Time circuit stays OPEN before testing service again.
+
+Example:
+waitDurationInOpenState = 30s
+
+
+permittedNumberOfCallsInHalfOpenState
+
+-------------------------------------
+Number of test calls allowed when circuit is HALF_OPEN.
+
+Example:
+3 test requests allowed.
+
+
+--------------------------------------------------
+6. CIRCUIT BREAKER STATES
+--------------------------------------------------
+
+1. CLOSED
+---------
+Normal operation.
+Requests go to primary service.
+
+2. OPEN
+-------
+Service failure detected.
+Primary service calls are blocked.
+Fallback method is executed.
+
+3. HALF_OPEN
+------------
+After wait duration expires.
+Limited calls are allowed to test service.
+
+If successful → circuit closes.
+If failure → circuit opens again.
+
+
+--------------------------------------------------
+7. REQUEST FLOW
+--------------------------------------------------
+
+CLIENT
+  |
+  v
+CIRCUIT BREAKER
+  |
+  v
+PRIMARY SERVICE (REDIS)
+  |
+  | success
+  v
+RESPONSE TO CLIENT
+
+
+If failure occurs:
+
+CLIENT
+  |
+  v
+CIRCUIT BREAKER
+  |
+  v
+PRIMARY SERVICE FAILS
+  |
+  v
+FALLBACK METHOD
+  |
+  v
+DATABASE RESPONSE
+
+
+--------------------------------------------------
+8. MONITORING CIRCUIT BREAKER
+--------------------------------------------------
+
+Check circuit breaker status using actuator:
+
+http://localhost:8081/actuator/health
+
+or
+
+http://localhost:8081/actuator/circuitbreakers
+
+
+--------------------------------------------------
+9. KEY INTERVIEW POINT
+--------------------------------------------------
+
+Circuit Breaker prevents cascading failures in 
+microservices by temporarily stopping calls to a 
+failing service and redirecting requests to a 
+fallback mechanism.
+--------------------------------------------------
+
+
+
+
+
+States of circuit breaker
+========================
+---------------------------------
+WHICH LOGIC RUNS IN WHICH STATE
+---------------------------------
+
+STATE       PRIMARY LOGIC (REDIS)      FALLBACK
+
+CLOSED      YES                        Only if exception occurs
+
+OPEN        NO                         Always executed
+
+HALF_OPEN   Limited requests           If those requests fail
+
+
 /********************************************************************************************
  * TEAMMATE+ – REDIS DATA FORMAT, FLUSH STRATEGY & AUTHORIZATION SUMMARY (SHORT NOTE)
  ********************************************************************************************/
@@ -6,6 +416,7 @@
 ============================================
 1️⃣ IN WHICH FORMAT REDIS STORES DATA?
 ===================================
+
 
 Redis is a key-value in-memory data store.
 It does NOT store data in tables like relational DB.

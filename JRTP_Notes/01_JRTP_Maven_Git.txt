@@ -204,8 +204,6 @@ Maven dependency scope
 
 inside dependencies we can add scope tag and inside scope tag you can write scope ,.. i.e when we need dependencies while test or runtime or while xyz function perform.
 
-
-
 lect 6(27 may 25):
 ==================
 
@@ -274,6 +272,9 @@ $ git init
 
 $ git add <file|.|folder>  
     - add file(s) to the staging area
+    - git add src/main/java/com/audit/service/AuditService.java
+    - git add src/main/java
+    - git add .
 
 $ git status  
     - check current status (staged / unstaged / untracked files)
@@ -323,8 +324,8 @@ Solution: Press Esc, type(it may not visible) :q! and press Enter to force quit 
 common prob:
 
 GIT MERGE CONFLICT(same line/same file different code):
-------------------
-1. person A pull 
+-------------------------------------------------------
+1. person A pull
 2. person b pull
 3. person A push 
 4. now b try to push, but he updated older version. Alert msg given by git while push
@@ -332,8 +333,8 @@ GIT MERGE CONFLICT(same line/same file different code):
 
 =================================================================================
 
-Q. I created a new folder from scratch. How do I push my files to a remote repo?
---------------------------------------------------------------------------------
+Q. I created a new folder from scratch. How do I push my files to a remote repo ?
+---------------------------------------------------------------------------------
 
 Step 1: Go inside your project folder
 cd /path/to/your-folder
@@ -396,8 +397,10 @@ Git Branches:
 	- prod team
 
 -> when multiple teams are working parallelly code integrations will become difficult
+
 -> Every team should have separate code base for easy maintenance
 	note : Under one repository multiple branches will be created
+
 -> using branches multiple teams can work parallelly.
 
 => we can create branches from git repository directly
@@ -429,8 +432,8 @@ Git Hub Lab Task
 1. Create Maven Web Application
 2. Add 'Spring-Core' dependency in project pom.xml file (www.mvrepository.com)
 3. Package maven project as war file using maven goal
-4. Create Git repository in github / bitbucket (public repo)
-5. Push maven project into github repo using gitbash
+4. Create Git repository in GitHub / bitbucket (public repo)
+5. Push maven project into GitHub repo using gitbash
 (target folder shouldn't be committed, add this in .gitignore file)
 6. Make changes in pom.xml and push changes to github repo using git bash
 7. Create 'feature' branch in git repo from main branch
@@ -451,17 +454,18 @@ ex . in maven project ,'target' folder will be available which is not required t
 target/
 
 lect 8:(28 may)
----------
+--------------
 Interview que:
--------------
+--------------
 
 1) git clone vs git pull
+
 | Feature                 | `git clone`                 | `git pull`             |
 | ----------------------- | --------------------------- | ---------------------- |
 | Purpose                 | Get repo for the first time | Update existing repo   |
-| Creates new folder?     | ✔ Yes                       | ❌ No                   |
-| Downloads full history? | ✔ Yes                       | ✔ Only new changes     |
-| Initializes `.git/`?    | ✔ Yes                       | ❌ Already exists       |
+| Creates new folder?     | ✔ Yes                       | ❌ No                 |
+| Downloads full history? | ✔ Yes                       | ✔ Only new changes    |
+| Initializes `.git/`?    | ✔ Yes                       | ❌ Already exists     |
 | Used once or repeated?  | Usually once                | Repeated many times    |
 | Typical command         | `git clone <url>`           | `git pull origin main` |
 
@@ -471,9 +475,9 @@ Interview que:
 | ----------------------- | ------------------- | ------------------------ |
 | Direction               | Local → Remote      | Remote → Local           |
 | Purpose                 | Upload your commits | Download others’ commits |
-| Requires local commits? | ✔ Yes                | ❌ No                     |
-| Affects remote repo?    | ✔ Yes               | ❌ No                     |
-| Affects local repo?     | ❌ No                | ✔ Yes                    |
+| Requires local commits? | ✔ Yes               | ❌ No                   |
+| Affects remote repo?    | ✔ Yes               | ❌ No                   |
+| Affects local repo?     | ❌ No               | ✔ Yes                   |
 | Typical use             | Share code          | Get latest code          |
 
 
@@ -483,7 +487,7 @@ Interview que:
 
 	To avoid losing your work on Bug A or committing incomplete code, you can use git stash to temporarily save your current changes.
 
-	When you run git stash, Git stores all your uncommitted changes (staged and unstaged) in a temporary memory area (called a "stash") 
+	When you run git stash, Git stores all your uncommitted changes (staged and unstaged ) in a temporary memory area (called a "stash") 
 	and restores your working directory to a clean state, just like it was right after your last pull.
 
 	This allows you to switch context and fix Bug B without mixing it with incomplete changes from Bug A.
@@ -491,7 +495,13 @@ Interview que:
 	Once Bug B is fixed and committed, you can return to your previous work by running git stash pop, which re-applies the saved changes from 
 	Bug A so you can continue where you left off.
 
-
+| Step | Command                    | Purpose                             |
+| ---- | -------------------------- | ----------------------------------- |
+| 1️⃣  | `git stash`                | Save (stash) current changes        |
+| 2️⃣  | `git stash list`           | See all saved stashes               |
+| 3️⃣  | `git stash show -p`        | Check what changes are inside stash |
+| 4️⃣  | `git stash pop`            | Apply stash and remove it           |
+| 5️⃣  | `git stash drop stash@{0}` | Delete specific stash manually      |
 
 
 
@@ -515,6 +525,8 @@ $ git rebase main
 
 This moves all commits from the feature branch to the top of the main branch.
 
+7) git commit vs normal save 
+
 lect 9:(29 may)
 ======
 
@@ -524,11 +536,6 @@ $ git diff - shows unstaged changes: differences between the working directory a
 
 	It helps you see what changes you made since the last git add.
  
-
-
-
-
-
 Full Workflow Example
 =====================
 
@@ -582,3 +589,8 @@ git pull will pull main
 git push will push main
 git commit will commit on main
 
+
+
+
+Question ::
+1) can we pull changes from one branch and add those changes to other branch with out locally pulled

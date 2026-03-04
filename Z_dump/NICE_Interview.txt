@@ -3,11 +3,11 @@
 -> capital group
 -> hackathon
 -> where you used data structure and which you used
--> api you created  and db schemas you created 
+-> api you created  and dB schemas you created 
 -> sdlc of your project prepare with example [sdlc]
 -> jwt , Kafka , docker, Kubernetes, Jenkins, asynchronous, synchronous
 -> why saga is not implemented in your project
--> how db is managed for each client and also give more idea about db migration 
+-> how dB is managed for each client and also give more idea about db migration 
 -> debugging
 -> SonarQube
 -> pr review
@@ -16,7 +16,10 @@
 -> more on feature you implemented as sdlc
 -> feature you worked on 
 -> bugs you faced recently and how you tackle them 
--> how previous auhtentication present in your project 
+-> how previous authentication present in your project 
+-> s3 bucket
+-> properties file environment variable
+-> IAM,EC2,EKS,S3
 
 2) git GitHub   -> 1st 
 -> how you managed versions 
@@ -36,4 +39,6 @@
 12) logging
 13) what you are doing currently, what you day to day activity includes
 14) sql -> delete vs truncate vs drop  -> 3rd
+15) marker interface
+16) print stack trace
  
