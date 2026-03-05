@@ -21,6 +21,8 @@
 -> properties file environment variable
 -> IAM,EC2,EKS,S3
 
+-> how qa approves and uat approves
+
 2) git GitHub   -> 1st 
 -> how you managed versions 
 -> how you managed db migration
