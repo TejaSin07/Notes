@@ -594,3 +594,324 @@ git commit will commit on main
 
 Question ::
 1) can we pull changes from one branch and add those changes to other branch with out locally pulled
+
+
+
+
+GIT BASICS SUMMARY
+==================
+
+--------------------------------------------------
+1) CREATION OF LOCAL REPOSITORY
+--------------------------------------------------
+
+Step 1: Create a project folder
+
+    mkdir git-deep-practise
+    cd git-deep-practise
+
+Step 2: Initialize Git repository
+
+    git init
+
+What happens internally:
+
+    .git/ directory is created
+
+Structure:
+
+    git-deep-practise/
+        └── .git/
+            ├── HEAD
+            ├── config
+            ├── objects/
+            ├── refs/
+            └── hooks/
+
+Meaning of important folders:
+
+    objects/    → stores commits, trees, blobs
+    refs/       → stores branch pointers
+    HEAD        → tells which branch is currently active
+    config      → repo configuration
+
+Example:
+
+    cat .git/HEAD
+
+Output:
+
+    ref: refs/heads/main
+
+Meaning:
+
+    HEAD → main branch
+
+--------------------------------------------------
+2) CREATING BRANCH FROM MAIN
+--------------------------------------------------
+
+First check current branch:
+
+    git branch
+
+Example output:
+
+    * main
+
+Branches are stored in:
+
+    .git/refs/heads/
+
+Example:
+
+    .git/refs/heads/main
+
+Content:
+
+    ad0a1ac316682dfd09d13ac4371a0d19653149ea
+
+Meaning:
+
+    branch name → commit hash
+
+--------------------------------------------------
+
+METHOD 1 : Create branch only
+
+    git branch dev
+
+Result:
+
+    dev branch created but still on main
+
+Check:
+
+    git branch
+
+Output:
+
+      dev
+    * main
+
+--------------------------------------------------
+
+METHOD 2 : Create branch and switch
+
+    git checkout -b dev
+
+Meaning:
+
+    create branch + switch to it
+
+--------------------------------------------------
+
+METHOD 3 : Modern command (recommended)
+
+    git switch -c dev
+
+Meaning:
+
+    same as checkout -b
+
+--------------------------------------------------
+
+Switch to existing branch:
+
+    git checkout dev
+
+or
+
+    git switch dev
+
+--------------------------------------------------
+
+Branch pointer concept:
+
+Before branch creation:
+
+    main
+     |
+  commit A
+
+After branch creation:
+
+    main
+     |
+  commit A
+     |
+    dev
+
+Both point to the SAME commit.
+
+--------------------------------------------------
+3) HOW HEAD WORKS
+--------------------------------------------------
+
+HEAD is a pointer that tells Git:
+
+    "Which branch you are currently working on"
+
+Check HEAD:
+
+    cat .git/HEAD
+
+Example output:
+
+    ref: refs/heads/dev
+
+Meaning:
+
+    HEAD → dev
+
+--------------------------------------------------
+
+Switch branch example:
+
+    git checkout dev
+
+Internally Git changes:
+
+    HEAD → refs/heads/dev
+
+Working directory updates to dev snapshot.
+
+--------------------------------------------------
+
+Example state:
+
+    main → commit A
+    dev  → commit B
+
+Graph:
+
+        B (dev)
+        |
+        A (main)
+
+HEAD → dev
+
+--------------------------------------------------
+4) WHAT HAPPENS WHEN COMMIT IS MADE
+--------------------------------------------------
+
+Example commit:
+
+    git commit -m "Added dev feature"
+
+New commit created:
+
+    a3de8ac
+
+Branch pointer moves forward.
+
+Graph:
+
+        a3de8ac  ← dev
+           |
+        ad0a1ac  ← main
+
+Important rule:
+
+    Commit moves the CURRENT branch only.
+
+--------------------------------------------------
+5) THREE IMPORTANT GIT AREAS
+--------------------------------------------------
+
+Git works with three areas:
+
+1) Working Directory
+2) Staging Area (Index)
+3) Repository
+
+Flow:
+
+    Working Directory
+            ↓
+        git add
+            ↓
+      Staging Area
+            ↓
+        git commit
+            ↓
+         Repository
+
+--------------------------------------------------
+6) HOW FILES CHANGE WHEN SWITCHING BRANCH
+--------------------------------------------------
+
+Example:
+
+main branch:
+
+    app.txt → empty
+
+dev branch:
+
+    app.txt → "dev feature"
+
+Switch branch:
+
+    git checkout main
+
+Result:
+
+    Git restores files based on main commit snapshot.
+
+Meaning:
+
+    Working directory reflects the current branch state.
+
+--------------------------------------------------
+7) VISUAL FLOW
+--------------------------------------------------
+
+Initial:
+
+    main
+     |
+  commit A
+
+Create dev:
+
+    main
+     |
+  commit A
+     |
+    dev
+
+Commit in dev:
+
+        commit B
+           |
+          dev
+           |
+        commit A
+           |
+          main
+
+HEAD always points to current branch.
+
+--------------------------------------------------
+8) IMPORTANT INTERVIEW CONCEPT
+--------------------------------------------------
+
+A Git branch is NOT a folder.
+
+A branch is simply:
+
+    branch_name → commit_pointer
+
+Example:
+
+    main → ad0a1ac
+    dev  → a3de8ac
+
+Branch creation is extremely fast because:
+
+    Git only creates a pointer, not a copy of files.
+
+--------------------------------------------------
+END
+--------------------------------------------------

@@ -43,4 +43,5 @@
 14) sql -> delete vs truncate vs drop  -> 3rd
 15) marker interface
 16) print stack trace
- 
+17) what is circular dependency 
+18) reflection

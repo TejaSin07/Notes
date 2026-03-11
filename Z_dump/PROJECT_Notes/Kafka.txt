@@ -1,3 +1,11 @@
+
+
+topics 
+
+1) DLQueue
+2) retry mechanisam
+3) fan out
+
 ===============================
 KAFKA SHORT NOTES
 ===============================

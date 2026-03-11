@@ -35,7 +35,7 @@ Cloud service model
 2) PaaS  (platform as a service)
 	ex : 
 3) SaaS  (software as a service)
-	ex : Drive, zoom, dropbox, salesforce
+	ex : Drive, zoom, drop box, salesforce
 
 
 lect 57:
@@ -50,8 +50,7 @@ Cloud Providers:
 4) Salesforce ->  
 
 
-
-Q.What is operating system?
+Q. What is operating system?
 ---------------------------
 
 => OS is a mediator between user and computer
@@ -63,7 +62,7 @@ Q.What is operating system?
 2) Linux OS
 3) MAC OS
 
-Windos OS
+Windows OS
 ==========
 => developed by Microsoft 
 => Single User Os
@@ -137,7 +136,7 @@ Mobaxterm connection:
 --------------------
 
 1) Open mobaxterm go to session 
-2) click on ssh
+2) click on ssh [secure shell]
 3) add your aws machine public ip address to remote host and also paste the user name (most likely ec2-user) in specify username block
 4) select advanced SSH setting ,then click on use private key -> and select the file which we download for key-value pair  :"C:\Users\tejas\Downloads\tejasSIn.pem"   <-- pem file
 
