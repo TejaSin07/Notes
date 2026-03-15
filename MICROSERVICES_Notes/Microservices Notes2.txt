@@ -594,7 +594,7 @@ IMP: A client authenticates once with an authorization server to obtain a JWT.
 load balancing. The request is forwarded to a microservice, where Spring Security
 independently validates the JWT and enforces authorization before executing business logic.
 
-Q. How we can add pathvariable query parameter then how path looks in routing 
+Q. How we can add path variable query parameter then how path looks in routing 
 Q. what if multiple api share same path at start
 Q .is there alternative for service registry and eureka, api  gateway 
 

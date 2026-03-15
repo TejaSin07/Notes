@@ -72,9 +72,9 @@ What is dependency injection ?
 Note: In normal java apps, programmers are responsible to perform DI.
 Note: If we use spring core then IOC container will take care of Dependency Injection.
 
-================
+==============
 What is IOC ?
-================
+==============
 
 => Inversion of control
 => IOC is a principle which is responsible to manage and collaborate dependencies among the objects in the application.

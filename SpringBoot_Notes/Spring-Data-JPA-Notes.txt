@@ -524,6 +524,12 @@ public interface EmpRepository extends CrudRepository<Employee, Integer> {
 
 }
 
+
+| Query Type               | Required Annotations                   |
+| ------------------------ | -------------------------------------- |
+| SELECT                   | `@Query` only                          |
+| UPDATE / DELETE / INSERT | `@Query + @Modifying + @Transactional` |
+
 ==================================================================
 
 =======

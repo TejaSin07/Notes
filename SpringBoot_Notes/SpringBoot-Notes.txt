@@ -134,9 +134,9 @@ Actuators
 JAR file: executed with main method 
 WAR file: not executed by main method i.e web application.
 
-=======================================
+=====================================
 Day-02 : Developing Spring Boot Apps
-=======================================
+=====================================
 
 => We can develop in 2 ways
 

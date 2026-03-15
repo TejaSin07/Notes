@@ -55,10 +55,8 @@ Environment setup
 Note : If you are not able to create Maven project in IDE then close your IDE and delete .m2 folder and
 open your IDE.
 
-
-
 lect 4:(26 may 25)
-------
+------------------
 
 Maven Terminology:
 ------------------
@@ -89,10 +87,11 @@ packaging : how you want to package your app(jar/war)
 Maven Goals: Goals are used to perform maven build process
 cmd :
 $ mvn compile --> create .class file (Creates target/ and compiles source code into .class files.)
-$ mvn clean  --> delete .class file (delete target folder)
+$ mvn clean  --> delete .class file  (delete target folder)
 $ mvn test   --> executes junit
 $ mvn package--> create jar/war file --> and store to project folder target
 $ mvn install--> store artifact into artifact repo --> store to target and local .m2/repository
+
 in IDE:
 right click on project :- run as :- select goal
 
@@ -915,3 +914,270 @@ Branch creation is extremely fast because:
 --------------------------------------------------
 END
 --------------------------------------------------
+
+
+====================================================
+GIT BRANCH MANAGEMENT PRACTICE (LOCAL → REMOTE FLOW)
+====================================================
+
+----------------------------------------------------
+1. Create Local Repository
+----------------------------------------------------
+
+mkdir git-deep-practice
+cd git-deep-practice
+
+git init
+
+Check repo structure
+ls -a
+# .git folder created
+
+
+----------------------------------------------------
+2. Create First File & Commit
+----------------------------------------------------
+
+echo "Version 1" > app.txt
+
+git status
+
+git add app.txt
+
+git commit -m "Initial commit"
+
+Verify commit
+git log --oneline
+
+
+----------------------------------------------------
+3. Understand Branch Basics
+----------------------------------------------------
+
+Check branch
+git branch
+
+HEAD points to main
+
+Check branch reference
+cat .git/refs/heads/main
+
+
+----------------------------------------------------
+4. Create Local Branch
+----------------------------------------------------
+
+Create dev branch (LOCAL)
+git branch dev
+
+Check branches
+git branch
+
+Switch branch
+git checkout dev
+
+
+----------------------------------------------------
+5. Make Changes in Dev Branch
+----------------------------------------------------
+
+echo "Dev Feature 1" >> app.txt
+
+git add .
+git commit -m "Added dev feature"
+
+Check history
+git log --oneline --graph --all
+
+
+----------------------------------------------------
+6. Switch Branch
+----------------------------------------------------
+
+git checkout main
+
+Files revert to main branch version
+
+
+----------------------------------------------------
+7. Merge Branch
+----------------------------------------------------
+
+Merge dev → main (LOCAL)
+
+git merge dev
+
+
+----------------------------------------------------
+8. Connect Remote Repository
+----------------------------------------------------
+
+Create repo on GitHub
+
+Add remote
+
+git remote add origin https://github.com/<username>/git-deep-practice.git
+
+Verify remote
+git remote -v
+
+
+----------------------------------------------------
+9. Push Local Branch to Remote
+----------------------------------------------------
+
+Push main branch
+
+git push -u origin main
+
+Meaning:
+LOCAL main → REMOTE main
+
+
+----------------------------------------------------
+10. Push Dev Branch
+----------------------------------------------------
+
+git push -u origin dev
+
+Branch created on REMOTE
+
+
+----------------------------------------------------
+11. Create QA Branch
+----------------------------------------------------
+
+Switch to dev
+git checkout dev
+
+Create qa branch (LOCAL)
+git checkout -b qa
+
+Push qa branch (REMOTE)
+git push -u origin qa
+
+
+----------------------------------------------------
+12. Feature Development Workflow
+----------------------------------------------------
+
+Switch to dev
+git checkout dev
+
+Create feature branch
+git checkout -b feature-login
+
+Make changes
+git add .
+git commit -m "Login feature added"
+
+Push feature branch
+git push -u origin feature-login
+
+
+----------------------------------------------------
+13. Pull Request Flow (GitHub)
+----------------------------------------------------
+
+Create PR:
+
+feature-login → dev
+
+After approval → merge
+
+
+----------------------------------------------------
+14. Update Local Dev
+----------------------------------------------------
+
+git checkout dev
+git pull origin dev
+
+
+----------------------------------------------------
+15. Move Code to QA
+----------------------------------------------------
+
+git checkout qa
+
+Merge dev → qa
+git merge dev
+
+Push qa
+git push origin qa
+
+
+----------------------------------------------------
+16. Bug Fix Workflow
+----------------------------------------------------
+
+git checkout dev
+
+Create bugfix branch
+git checkout -b bugfix-login
+
+Fix code
+git add .
+git commit -m "Fixed login bug"
+
+Push branch
+git push -u origin bugfix-login
+
+Create PR:
+
+bugfix-login → dev
+
+
+----------------------------------------------------
+17. Release to Production
+----------------------------------------------------
+
+Merge flow
+
+feature → dev → qa → main
+
+
+----------------------------------------------------
+IMPORTANT COMMANDS SUMMARY
+----------------------------------------------------
+
+git status
+git branch
+git checkout <branch>
+git checkout -b <branch>
+
+git add .
+git commit -m "message"
+
+git merge <branch>
+
+git remote add origin <repo-url>
+
+git push origin <branch>
+git pull origin <branch>
+
+git log --oneline --graph --all
+
+
+----------------------------------------------------
+GIT STRUCTURE
+----------------------------------------------------
+
+Working Directory
+        ↓
+Staging Area (git add)
+        ↓
+Local Repository (git commit)
+        ↓
+Remote Repository (git push)
+
+
+----------------------------------------------------
+BRANCH TYPES (REAL PROJECT)
+----------------------------------------------------
+
+main        → Production
+qa          → Testing
+dev         → Integration
+feature-*   → Developer work
+bugfix-*    → Bug fixes
