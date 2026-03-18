@@ -6,6 +6,8 @@ topics
 2) retry mechanisam
 3) fan out
 
+C:\Users\tejas\Desktop\springboot repo\project\kafka_consumer_app
+
 ===============================
 KAFKA SHORT NOTES
 ===============================
@@ -157,9 +159,9 @@ Local:
   - Expose port 9092
   - Connect via localhost:9092
 
-===============================
+=============
 KEY FORMULA
-===============================
+=============
 
 Partition → Parallelism
 Consumer Group → Load balancing
