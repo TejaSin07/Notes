@@ -96,7 +96,7 @@ You don’t add them manually.
 			d) spring-boot-starter-security
 Note: when we add pom starter boot will take care of dependency version.
 
-A Spring Boot starter will ALWAYS look like this: spring-boot-starter-<feature>
+A Spring Boot starter will ALWAYS look like this: spring-boot-starter-<feature>  <---IMP
 
 =================
 Embedded Servers
@@ -117,9 +117,9 @@ Auto Configuration
 
 => Boot will identify configurations required for the application based on pom starters and it will provide that configuration in runtime.	
 
-===========
+=========
 Actuators	
-===========
+=========
 
 => To monitor and manage our application
 => Production Ready Features
@@ -212,8 +212,8 @@ What is @SpringBootApplication annotation?
 What is @ComponentScan annotation ?
 ===================================
 
-=> It is used to scan the project and identify spring beans available in the application. 
-  (A Spring Bean is simply an object that is managed by the Spring Container.)
+=> It is used to scan the project and identify spring beans available in the application.
+   (A Spring Bean is simply an object that is managed by the Spring Container.)
 
 => Component Scanning works based on base-package of application.
 
@@ -267,11 +267,11 @@ method/i.e object from method we use @bean annotation at method level.
 
 When to use @component,@service & @Repository :
 
-| Layer             | Annotation      | Compulsory?  | Why not @Component?           |
-| ----------------- | --------------- | ------------ | ----------------------------- |
-| Data Access (DAO) | **@Repository** | ✔ YES        | Exception translation         |
-| Business Logic    | **@Service**    | ✔ Mostly YES | Proper AOP proxying, clarity  |
-| Utility / Helper  | @Component      | ✔ YES        | No special layer logic needed |
+| Layer             | Annotation      | Compulsory?  | Why not @Component?            |
+| ----------------- | --------------- | ------------ | -----------------------------  |
+| Data Access (DAO) | **@Repository** | ✔ YES        | Exception translation          |
+| Business Logic    | **@Service**    | ✔ Mostly YES | Proper AOP proxying, clarity   |
+| Utility / Helper  |   @Component    | ✔ YES        | No special layer logic needed  |
 
 
 🔹 Why we use @Bean in Spring:
@@ -372,8 +372,27 @@ Interview one-liner:
 ======================
 
 “IoC (Inversion of Control) means giving control of object creation and dependency management to the Spring container.
-When we call SpringApplication.run(), it starts that IoC container, which scans, creates, and wires all Spring beans automatically.”
+When we call SpringApplication.run(),it starts that IoC container, which scans, creates, and wires all Spring beans automatically.”
 
+==============================================
+BeanFactory vs ApplicationContext (Short Notes)
+==============================================
+
+BeanFactory:
+- Basic IoC container
+- Lazy loading (bean created on getBean())
+- Limited features (no AOP, events, annotations)
+- Rarely used in real projects
+
+ApplicationContext:
+- Advanced container (extends BeanFactory)
+- Eager loading (beans created at startup)
+- Supports AOP, events, @Autowired, @Component, profiles
+- Used in all Spring Boot applications
+
+Key Point:
+Spring Boot uses ApplicationContext (BeanFactory is used internally)
+*/
 =============================================
 How IoC will be started in boot application ?
 =============================================
@@ -549,6 +568,7 @@ No annotations required unless using annotation-based configuration.
 Dependency identified by bean name or ref attribute.
 
 2. Spring Boot / Modern Spring (Annotation-based)
+
 Setter injection done using @Autowired on setter method.
 Setter name does NOT matter — Spring resolves dependency by type, not name.
 Fewer configurations; everything is annotation-driven.
@@ -812,9 +832,6 @@ FI --> target class variable
 => Field Injections is simple to write.
 => IOC violating oops principles.
 => It is giving chance to violate Single Responsibility principle.  
-
-
-
 
 NOTE: we can call context.getBean by two ways:
 		UserService service = context.getBean(UserService.class);   //by using class 

@@ -209,6 +209,29 @@ A many-to-many relationship is implemented using a junction table with foreign k
 
 
 
+imp point 
+1) we use 'like' for pattern mathcing
+2) to match the  exact value we use '=='
+3) use 'is null' for matching null
+4) we not used where to apply offset and null
+5) best practise to  include sorting column 
+6) sorting we do by using order by
+7) between x and y and <any other condition>
+9) IN('Male','Others')
+10) group by rules 
+-> If a column is not inside an aggregate function, it must be present in GROUP BY
+-> WHERE → filters before grouping
+-> HAVING → filters after grouping
+-> GROUP BY treats all NULL values as one group
+-> FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY
+11) null treated as unknown in sql thats why unique has one or more than one null values
+12) while droping table we need to first drop child then only parent
+13) inner only gives matching from both 
+14) The number of columns and their data types must match in all 
+statements.
+15)  stored procedure is a saved SQL block that can be executed later.
+16) trigger is a special kind of stored program that is automatically execute
+17) select --- from user u INNER JOIN orders o  on u.id = o.user_id;
 
 
 

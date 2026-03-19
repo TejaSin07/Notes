@@ -1,4 +1,4 @@
-Topics to cover:
+44Topics to cover:
 ----------------
 
 1) Association mapping
@@ -59,9 +59,9 @@ What is persistence layer ?
 
 Note: Spring Data JPA is the latest trend in the market to developer Persistence layer in java based applications.		
 
-===============================
+============================
 Why to use Spring Data JPA ?
-===============================
+============================
 
 => No need to write boilerplate code (duplicate)
 => No need to write queries 
@@ -211,8 +211,8 @@ public interface EmpRepository extends CrudRepository<Employee, Integer>{
 
 | Aspect                           | **Interface ONLY** | **Extends JpaRepository / CrudRepository** |
 | -------------------------------- | ------------------ | ------------------------------------------ |
-| Proxy creation                   | ✅ Yes              | ✅ Yes                                      |
-| Query derivation(findBy<ExactEntityFieldName>) | ✅ Yes              | ✅ Yes                                      |
+| Proxy creation                   | ✅ Yes             | ✅ Yes                                      |
+| Query derivation(findBy<ExactEntityFieldName>) | ✅ Yes              | ✅ Yes                        |
 | `save()`                         | ❌ No               | ✅ Yes                                      |
 | `findById()`                     | ❌ No               | ✅ Yes                                      |
 | `delete()`                       | ❌ No               | ✅ Yes                                      |
@@ -220,8 +220,8 @@ public interface EmpRepository extends CrudRepository<Employee, Integer>{
 | Sorting                          | ❌ No               | ✅ Yes                                      |
 | Batch operations                 | ❌ No               | ✅ Yes                                      |
 | EntityManager wiring             | ❌ Manual           | ✅ Auto                                     |
-| Boilerplate                      | ⚠️ You write more  | ✅ Almost zero                              |
-| Industry usage                   | ⚠️ Rare            | ✅ Standard                                 |
+| Boilerplate                      | ⚠️ You write more   | ✅ Almost zero                              |
+| Industry usage                   | ⚠️ Rare             | ✅ Standard                                 |
 
 
 Q. why @Repository optional  to write ? 
@@ -240,7 +240,7 @@ This is because Spring automatically detects repository interfaces that extend
 
 Q. EmpRepository and CrudRepository both are interfaces then definitely both have abstract methods .i.e no body method then how tasks are working?
 
-================================================================================================================================================
+===================================================================================================================================================
 
 ✅ CrudRepository is an interface with no method bodies, but Spring dynamically implements it at runtime.
 ✅ Spring creates a PROXY class that IMPLEMENTS EmpRepository and interacts with the database.
@@ -265,7 +265,7 @@ spring.datasource.username=root
 spring.datasource.password=Ned$tark07
 spring.datasource.url=jdbc:mysql://localhost/sbms39
 
-spring.jpa.hibernate.ddl-auto=update   
+spring.jpa.hibernate.ddl-auto=update
 ^ 
 ✅ update CREATES new tables and columns but doesn’t remove old ones.
 ✅ Best for development (not for production).
@@ -273,6 +273,14 @@ spring.jpa.hibernate.ddl-auto=update
 ✅ For production, use "validate" to ensure correctness without modifying the schema.   <-- imp
 
 spring.jpa.show-sql=true    --> it will show queries that executed on console
+
+
+none        → do nothing
+validate    → check schema, fail if mismatch      -> we use this in real prod  and Schema changes handled via: => Flyway
+update      → modify schema (safe changes only)
+create      → drop + recreate tables (data lost)
+create-drop → create on start, drop on shutdown
+
 
 Q. what if we only change id and all data is same ,then which query is executed?
 
@@ -285,6 +293,57 @@ Q. What's the need of proxy class?
 lect23:
 ======
 C:\Users\tejas\Desktop\springboot repo\workspace-spring-tool-suite-4-4.27.0.RELEASE\15-DtaJpa-JpaRepo
+
+
+=========================================================
+Custom Repository (Without JpaRepository/CrudRepository)
+=========================================================
+
+1) Create a normal class (not interface)
+   - Define repository as a concrete class
+
+2) Annotate with @Repository
+   - So Spring manages it as a bean
+
+3) Inject DB access tool manually
+   - EntityManager (JPA)
+   - JdbcTemplate (SQL)
+   - JDBC (Connection, PreparedStatement)
+
+4) Write CRUD methods manually
+   - save()
+   - findById()
+   - findAll()
+   - delete()
+
+5) Handle queries manually
+   - JPQL (if using EntityManager)
+   - SQL (if using JdbcTemplate/JDBC)
+
+6) Map results manually
+   - Convert DB result → Java object
+
+7) Manage transactions
+   - Use @Transactional where required
+
+8) Inject into Service layer
+   - Use constructor injection
+
+-----------------------------------------------
+Key Points
+-----------------------------------------------
+- No auto-generated methods
+- Full control over queries
+- More boilerplate code
+- Used for complex or performance-critical logic
+
+-----------------------------------------------
+One-line
+-----------------------------------------------
+Custom repository is a manually implemented 
+@Repository class where database operations 
+are handled explicitly without extending 
+Spring Data interfaces.
 
 ==============================
 Crud Repository Methods (12)   <-- it provide 12 method
@@ -482,7 +541,7 @@ SQL : select * from emp_tbl where emp_id=101
 HQL : From Employee where eid=101 	
 
 SQL : select emp_id, emp_name from emp_tbl	
-HQL : select eid, ename from Employee
+HQL : select eid, ename from Employee  or SELECT e.eid, e.ename FROM Employee e
 
 Spring Data JPA lets you write normal SQL queries explicitly in your repository interface by using:
 

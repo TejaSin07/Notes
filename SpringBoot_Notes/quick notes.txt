@@ -1,0 +1,42 @@
+quick notes
+
+1) custome repo ->In a custom repository, we create a @Repository class, inject EntityManager provided by Spring, and use it to manually perform CRUD operations and queries.
+
+
+2) Most built-in CRUD methods in CrudRepository operate using the primary key, and for non-ID fields, we define custom methods using naming conventions or @Query.
+
+3) @Query("from Worker w where w.ename = :name and w.esalary = :salary")
+List<Worker> getWorkersHQL(
+    @Param("name") String name,
+    @Param("salary") Double salary
+);
+
+4) @Query(value = "SELECT * FROM worker WHERE ename = :name AND esalary = :salary", nativeQuery = true)
+List<Worker> getWorkersSQL(
+    @Param("name") String name,
+    @Param("salary") Double salary
+);
+
+5) Sort sort = Sort.by("salary").descending();  //and sort by accept arguments in varArgs format 
+List<Worker> list = repo.findAll(sort);
+
+6) Pageable pageable = PageRequest.of(0, 5, Sort.by("salary").descending()); 
+Page<Worker> page = repo.findAll(pageable);
+
+7) If no @Table or @Column is specified, JPA uses the class name as table name and field names as column names (Spring Boot usually converts them to lowercase/snake_case).
+
+8) @GeneratedValue is designed for primary keys only, so for additional UUID fields you must generate them manually or use Hibernate-specific generators.
+
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Integer id;
+
+@Column(unique = true, nullable = false, updatable = false)
+private UUID uuid;
+
+@PrePersist
+public void generateUUID() {
+    if (uuid == null) {
+        uuid = UUID.randomUUID();
+    }
+}

@@ -567,79 +567,122 @@ Task : Take 2 inputs and perform sum of two inputs and return output
 BiFunction<Integer,Integer,Integer> bif = (a,b) -> a+b;
 
 Integer sum = bif.apply(10,20);
-
-
 ================
 Method References
-=================
+================
 
--> Method reference means Reference to one method from another method
+// Method reference = referring a method without invoking it
+// It is shorthand for lambda expressions
 
-package in.ashokit.java8;
+// There are 4 types:
+
+// =======================================================
+// 1) Reference to static method
+// =======================================================
 
 @FunctionalInterface
 interface MyInterface {
-	public void m1();
+    void m1();
 }
 
-public class MethodRef {
+class StaticMethodRef {
 
-	public static void m2() {
-		System.out.println("This is m2( ) method");
-	}
+    public static void m2() {
+        System.out.println("Static method m2()");
+    }
 
-	public static void main(String[] args) {
-		MyInterface mi = MethodRef::m2;    //static
-		mi.m1();
-	}
-}
-
-
-package in.ashokit.java8;
-
-public class InstanceMethodRef {
-
-	public void m1() {
-		for (int i = 1; i <= 5; i++) {
-			System.out.println(i);
-		}
-	}
-
-	public static void main(String[] args) {
-
-		InstanceMethodRef im = new InstanceMethodRef();
-
-		Runnable r = im::m1;
-		Thread t = new Thread(r);
-
-		t.start();
-	}
+    public static void main(String[] args) {
+        MyInterface mi = StaticMethodRef::m2;
+        mi.m1();
+    }
 }
 
 
+// =======================================================
+// 2) Reference to instance method of a particular object
+// =======================================================
 
-public class Test {
+class InstanceMethodRef {
 
-	public static void main(String[] args) {
+    public void m1() {
+        for (int i = 1; i <= 3; i++) {
+            System.out.println(i);
+        }
+    }
 
-		// Doctor d = new Doctor();
+    public static void main(String[] args) {
 
-		Supplier<Doctor> s = Doctor::new;
-		Doctor doctor = s.get();
-		System.out.println(doctor.hashCode());
+        InstanceMethodRef im = new InstanceMethodRef();
 
-	}
+        Runnable r = im::m1;   // object already available
+        new Thread(r).start();
+    }
+}
 
+
+// =======================================================
+// 3) Reference to instance method of arbitrary object
+// =======================================================
+
+import java.util.*;
+import java.util.function.*;
+
+class ArbitraryObjectRef {
+
+    public static void main(String[] args) {
+
+        List<String> list = Arrays.asList("a", "b", "c");
+
+        // ❌ Won’t work directly
+        // list.forEach(String::toUpperCase);
+
+        // ✅ Works in stream (object comes as parameter)
+        list.stream()
+            .map(String::toUpperCase)
+            .forEach(System.out::println);
+
+        // Lambda equivalent:
+        // str -> str.toUpperCase()
+
+        // Another example
+        Function<String, Integer> f = String::length;
+        System.out.println(f.apply("hello")); // 5
+    }
+}
+
+
+// =======================================================
+// 4) Reference to constructor
+// =======================================================
+
+import java.util.function.Supplier;
+
+class Test {
+
+    public static void main(String[] args) {
+
+        Supplier<Doctor> s = Doctor::new;
+        Doctor doctor = s.get();
+        System.out.println(doctor.hashCode());
+    }
 }
 
 class Doctor {
 
-	public Doctor() {
-		System.out.println("Doctor constructor....");
-	}
+    public Doctor() {
+        System.out.println("Doctor constructor...");
+    }
 }
 
 
+// =======================================================
+// 🔥 Summary
+// =======================================================
+
+// 1) ClassName::staticMethod
+// 2) object::instanceMethod
+// 3) ClassName::instanceMethod   (IMPORTANT - missing earlier)
+// 4) ClassName::new
 =========================================================================================
 Task : WAJP to print numbers from 1 to 5 using Thread with the help of Runnable interface
 =========================================================================================
