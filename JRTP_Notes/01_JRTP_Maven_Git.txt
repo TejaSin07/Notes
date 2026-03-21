@@ -172,7 +172,6 @@ How to connect to remote repository
 -> configure remote repository in settings.xml
 -> setting.xml file will be there in apache-maven/conf directory
 
-
 What is maven multi module project ?
 ===================================
 

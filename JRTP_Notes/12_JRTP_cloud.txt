@@ -213,7 +213,7 @@ Ubuntu / Debiun : apt
 How to run Spring -boot application in Linux :
 ==============================================
 
-1) install git : $ sudo yum install git 
+1) install git   : $ sudo yum install git 
 2) install maven : $ sudo yum install maven 
  
 Note : when we install maven java install automatically because maven require java(mostly java 17 )
@@ -334,7 +334,7 @@ S3 (Simple storage service)
 -> s3 stands for simple storage service
 -> we can store unlimited data using s3 service in AWS cloud
 -> s3 will store data in the form objects
-	Object ==> file 
+	Object ==> file
 
 ===============================
 Hosting Static website using s3
@@ -346,17 +346,13 @@ https://github.com/ashokitschool/s3_static_website_hosting.git
 lect 61:
 =======
 
-
-==========
+=========
 Route 53
-==========
-
-
-		   DNS
+=========
+ 		   DNS
 domain name   -------------> app-url
 
-www.ies.com  -----------> app-url
-
+www.ies.com   -------------> app-url
 
 steps: (pay and use)
 -------

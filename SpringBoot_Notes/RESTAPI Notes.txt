@@ -27,9 +27,9 @@ Note: Distributed applications are used for code reusability
 			1) SOAP Webservices (Outdated)
 			2) RESTFul Services (trending)
 
-===================================================
+=====================
 What is REST API ?  
-===================================================
+======================
 
  REST - Representational State Transfer
  REST = transferring the representation of resource state between client and server.
@@ -80,14 +80,15 @@ What is HTTP
 ========================
 HTTP Request Structure
 ========================
+
 => It contains below parts
 		a) Request Line (Http Method Type + URL)
 		b) Request Headers (Metadata) (Key-Value)
 		c) Request Body (Payload - text/xml/json)
 
-=============================
+========================
 HTTP Response Structure
-=============================
+========================
 
 => It contains below parts
 		a) Response Line (Status Code + Status MSG)
@@ -301,7 +302,7 @@ Diff between method returning ResponseEntity<xyz> vs xyz:
 | **Response body**           | ✔ Fully customizable                                | ✔ Only body gets returned      |
 | **Error handling**          | ✔ Can return structured error responses             | ❌ Must rely on exceptions      |
 | **REST best practices**     | ✔ Recommended                                       | ⚠️ Basic / limited             |
-| **Flexibility**             | ✔ High                                              | ❌ Low                          |
+| **Flexibility**             | ✔ High                                              | ❌ Low                         
 | **Spring default behavior** | Does NOT rely on defaults                           | Uses Spring's default 200 OK   |
 | **Useful when**             | APIs need status codes, headers, or error responses | Quick/simple return only       |
 
@@ -354,7 +355,7 @@ HTTP Post Request
 	@PostMapping(
 			value = "/customer", 
 			consumes = "application/json",// it is taking input in json format
-			produces = "text/plain"	// it is sending data in text formmat
+			produces = "text/plain"	// it is sending data in text format
 	)
 	public ResponseEntity<String> createCustomer(@RequestBody Customer c) {	//Without @RequestBody, Spring won't convert JSON to Java objects properly.
 		System.out.println(c);
@@ -477,7 +478,7 @@ What is xml ?
 -> XML is interoperable (language independent)
 -> XML is used to represent the data
 
-----------
+
 syntax:
 ----------
 <person>
@@ -1013,7 +1014,7 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 
     @Override
     @RestResource(exported = false)
-    v3333333333oid deleteById(Integer id);
+    void deleteById(Integer id);
 }
 📝 Summary:
 

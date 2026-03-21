@@ -162,7 +162,7 @@ public class MsgController {
 </html>
 ----------------------------------------------------------------
 
-MultiAction controller: same as above ,controller that handles more than one request.
+MultiAction controller: same as above,controller that handles more than one request.
 
 ===========================
 Spring Web MVC Assignments
@@ -387,8 +387,7 @@ two ways to develop controller   ==>  MsgController class in 25 th application
 | `@Controller`                   | `String`    | `"index"`          | Treated as **view name** → ViewResolver looks for `index.html` | HTML page `index.html` is rendered                   |
 | `@Controller` + `@ResponseBody` | `String`    | `"index"`          | Treated as **plain response**                                  | Response body = `index`                              |
 | `@RestController`               | `String`    | `"index"`          | Treated as **plain response**                                  | Response body = `index`                              |
-| `@RestController`               | HTML String | `"<h1>Hello</h1>"` | Sent as **raw HTML text** (not resolved via ViewResolver)      | Browser interprets HTML and renders `<h1>Hello</h1>` 
-
+| @RestController                 | HTML String | "<h1>Hello</h1>" | Sent as raw response body (via HttpMessageConverter, not ViewResolver) | Rendered as HTML ONLY if Content-Type is text/html, otherwise shown as plain text    
 lect 39:
 =========
 
@@ -789,7 +788,7 @@ Form Validations C:\Users\tejas\Desktop\springboot repo\SBMS-39-main\30_WebMVC_F
 => Client side validations will execute at browser. People can disable client side validations using inspect option in browser.
   (client side/user side = on html pages)
 
-Q. => if we edit html and insert illegal value  after refreshing page what happen??
+Q. => if we edit html and insert illegal value after refreshing page what happen??
    -- html page again restore to original, but again we can edit and pass illegal data .
   
 => Server side validations will execute in our code. These are highly recommended in application.

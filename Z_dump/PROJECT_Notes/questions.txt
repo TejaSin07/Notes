@@ -1,0 +1,213 @@
+1) Wildcards
+2) volatile
+3) association mapping   - done
+4) try catch resource
+5) http vs https
+6) Interservice communication(servicemeshs)
+7) DAO vs DTO
+8) AOP           
+9) Logging       
+10) Deployment
+11) unit testing  
+12) Spring Batch 
+13) git GitHub : 
+14) Jenkins pipeline
+15) Which injection is better, and there use.
+16) fail fast vs fail safe (iterator, fail safe work with snapshot)
+17) Reflection
+18) how you increase code coverage?
+19) when to use path variable vs query parameter vs body 
+20) how you handle white label page error
+21) Throwable
+22) custom annotation
+23) NoSQL
+24) env variables ,how real time app save password
+25) How can we configure multiple db in on application
+26) Jobs
+27) file uploading 
+28) Idempotency
+29) process and thread and there memory management 
+30) producer consumer 
+31) which collection is used to resolve this
+32) memory leaks and memory management
+33) integer is immutable?
+34) cascading 
+35) entity life cycle
+36) db migration flyway
+37) debugging
+38) scenario based questions
+39) git hub
+40) kafka redis config and how you used in your project
+41) varargs
+42) bean lifecyle
+43) logs in aptakube 
+
+1) Wildcards
+2) volatile
+3) association mapping   
+4) try catch resource
+5) http vs https
+6) Interservice communication(servicemeshs)
+7) DAO vs DTO
+8) AOP           - 2)
+9) Logging       - 3) 
+10) Deployment
+11) unit testing - 1) 
+12) Spring Batch - 4) 
+13) git GitHub : 
+14) Jenkins pipeline
+15) Which injection is better, and there use.
+16) fail fast vs fail safe
+17) Reflection
+18) microservice adv vs dissadv
+19) nth salary
+20) real use of concurrent HashMap
+21) groupby ,max, min
+22) dto vs dto vs pojo
+23) interservice communication with Kubernetes
+25) @requestParam and @pathvarible
+26) naming convention
+27) microservices managed and the main problems faced
+28) sonarqube
+
+=>“I increase code coverage by adding meaningful unit tests for business logic, 
+covering both positive and negative paths, including edge cases and exception scenarios.
+ I also refactor hard-to-test code, add controller tests where needed, and avoid counting 
+boilerplate like DTOs or config classes. My focus is on test quality, not just numbers.”
+
+
+1) how properties file manage
+2) how secret are managed
+3) how application deployed
+4) what is the deployment process
+5) how we can check available table of uat
+6) cicd in details
+7) Jenkins 
+8) distributed tracing
+9) ips
+10) design pattern used in project
+11) frontend html css javascript
+12) what you worked in microservice
+13) jpa  (n+1 query , why transaction needed in lazy if there hikaripool)
+14) n+1 query prob
+15) Linux 
+16) Advantage and disadvantage of all
+17) DSA
+18) practise sql and streams and findBy repo methods and hql and sql query
+19) how you check local db and how data is reset there can we do it manually
+20) where you used path and query in real project
+21) env you have in your project
+22) how you run you application ,if you are using shell script then how you debug in debug mode,and how we run fronend
+23) ways to send response in request entity and how status aregenerated
+24)  Prometheus → Grafana
+25) how we manage pom files in our project
+26) ways to get errors ,exception
+27) kafka redis config
+28) mono and flux
+29) mongodb
+
+
+JRTP
+====
+
+
+1) Singleton Design Pattern
+2) how HashMap works internally 
+3) fail safe  and fail fast collections
+4) what is constructor chaining
+5) how many ways we can create object for a class in java
+6) what is cloning and why we need
+7) what are the methods available in object class
+8) String vs String Buffer vs StringBuilder
+9) what is exception hierarchy in java
+10) what is serialization and de serialization 
+11) what is transient keyword in java
+12) Diff between comparable and comparator
+13) how many ways we can create thread in java
+14) runnable vs callable in java
+15) what is executer framework in java
+16) what is  the  contract between hashCode() and equals() methods
+17) Checked vs unchecked exception
+18) what is try-with-resources in java
+19) what are concurrent collection in java
+20) difference between interfaces and abstract classes
+21) what is shallow cloning and deep cloning 
+22) what is the difference between filter() and map() method in Stream api?
+23) what is the purpose of User Defined Exception ?
+24) What is diff between concurrent HashMap and HashMap?
+25) what is Weak hash Map in java?
+26) what is factory design pattern
+27) how to read file data using java 8
+28) program to generate random text using java
+29) program to generate OTP using java
+30) program to check String contains only alphabets
+31) what are the rules for method overloading
+32) what are variable arguments in java
+33) how to increase heap size while running java program
+34) what are generics in java
+35) what is auto boxing auto unboxing 
+36) how to catch multiple exceptions using single catch block
+37) what is StringJoiner class
+38) what is  SplIterator
+39) can we declare method as abstract and final 
+40) how to  create user defined immutable class in java
+41) what are the class loaders available in java?
+42) what is thread local class?
+43) can we overload main() method in java class?
+44) can we run java program without main method?
+45) what is polymorphism with example
+46) what are SOLID oops principles?
+47) what is encapsulation with example?
+48) how to filter employees based on given salary using stream api
+49 ) diff lambda expression and method references
+50) what is the use of default and static methods in interface
+51) what is optional class in java 8?
+52) what is completable feature in java?
+
+
+
+Interview que:
+==============
+
+
+1) Diff betwn constructor and method
+2) What is serialization 
+3) How to handle exceptions in java
+4) List vs set 
+5) What is synchronization
+6) try-catch with throws keyword in single method 
+7)  difference between throw and throws
+8) Serializable interface is part of which package 
+9) oops
+10) what is IOC container in spring 
+11) what is loosely coupling and tightly coupling
+12) what are access modifiers in java
+13) what is the use of postman 
+14) program to write toggle a string (uppercase to lowercase and vice  versa)_
+15) what is dependency Injection and how many ways  we can do that?
+16)  write a java program to find smallest elements which right side for each element 
+		
+	 String arr[] = {"11","2","5","10","4"} 
+
+17) write a java program to find third highest value in the given array 
+	int [] arr = {1,6,1,7,6,9,8}
+
+18) freq of digits in given number 
+
+	ip: 65734252
+
+
+19) which annotations you are using in spring boot ?
+
+20) how to implement serialization with code?
+21) REST api annotations
+22) Array vs ArrayList 
+23) what is multi threading 
+24) how to achieve Syncronization
+25) List out some unchecked exception 
+26) How Lombok will generate setters and getters 
+27) collections freameworks vs collection (I) vs collections(C)
+28) what is rest api?
+29) diff between access specifiers and access modifiers 
+
+

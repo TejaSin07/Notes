@@ -40,3 +40,38 @@ public void generateUUID() {
         uuid = UUID.randomUUID();
     }
 }
+
+
+9) Validation should be applied on DTO  -> DTO ensures the client remains stable and independent from backend and database changes.
+
+10) JSON → snake_case :: Java → camelCase
+
+11) @JsonProperty is used to explicitly map JSON fields to Java fields, especially when names differ or when we want control over serialization/deserialization.
+
+
+12) Java 8 + javax → legacy systems  :: Java 17 + jakarta → modern systems
+
+13) circuit breaker -> spring-cloud-starter-circuitbreaker-resilience4j
+spring-boot-starter-aop -> Recommended (practical use) -> spring-boot-starter-actuator
+-> (if retry needed)resilience4j-retry
+
+14) “How do you ensure your code works locally?”
+
+Say:
+
+I run the application locally and verify that it starts without errors.
+I test APIs using tools like Postman or Swagger to validate end-to-end functionality.
+I check database interactions and logs for correctness.
+I also run unit tests to ensure business logic and edge cases are covered.
+For critical flows, I rely on integration testing to validate the complete flow.
+
+15) in git merge request even if we are merging our branches but only commits are update in main branch.
+
+16) You get conflict only when your commit areas are updated by someone after your last pull;
+
+17) Encryption: Converting data into a secure form using a key so only authorized parties can decrypt it.
+Encoding: Transforming data into a different format for compatibility or transmission, which can be easily reversed without a key.
+Hashing: Converting data into a fixed-length value using a one-way function that cannot be reversed to the original data.
+
+18) 
+

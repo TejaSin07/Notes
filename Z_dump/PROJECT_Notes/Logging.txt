@@ -1,6 +1,6 @@
 ===============================
 LOGGING IMPLEMENTATION NOTES
-(Spring Boot + Log4J2 + Splunk)
+(Spring Boot + Log4J2 + Splunk)  {aptakube + datadog + SonarQube + putty}
 ===============================
 
 

@@ -41,8 +41,6 @@ Dis-Advantages
 -> Microservices suggesting to develop application functionalities with loosely coupling
 -> In Microservices architecture we don't develop all the functionalities in single project. We will divide project functionalities into several REST APIs.
 
-*********************Note: One REST API is called as one Microservice************************
-
 -> Microservices architecture based project means collection of REST APIs.
 -> Microservices is not related to only java. Any programming language specific project can use Microservices Architecture.
 
@@ -150,7 +148,7 @@ Admin Server
 -> Admin Server is used to manage all backend apis actuator endpoints at one place
 -> Our backend apis will be registered with Admin Server
 -> Admin Server will provide User interface to monitor apis actuator endpoints
--> Setting up a Spring Boot Admin Server, which acts as the monitoring dashboard for your microservices.
+-> Setting up a Spring Boot Admin Server,which acts as the monitoring dashboard for your microservices.
 
 -> @EnableAdminServer: Turns this application into a Spring Boot Admin Server.
 		     : This is a monitoring dashboard for your Spring Boot microservices.
@@ -614,7 +612,6 @@ Note IMP:
 	1) we do routing in yml file
 	2) and we apply filter by extending class with Global filter Interface .we need to override filter method
 
-
 1) Create Spring boot application with below dependencies
 
 		-> web-stater
@@ -720,12 +717,11 @@ public class MyPostFilter implements GlobalFilter {
 -> Any cross-cutting logics like security, logging, monitoring can be implemented using Filters
 
 
-
 ===========================================
 Spring Boot Admin Server and Admin Client
 ============================================
 
--> Admin server will provide user interface to monitor and manage all the apis actuator endpoints
+-> Admin server will provide user interface to monitor and manage all the apis actuator endpoints.
 -> The REST APIs of our application should register with admin server (It is called as Admin client)
 
 Note: Using this approach we can monitor all the apis at one place
@@ -822,7 +818,7 @@ Q. suppose we place active.profile - qa and we dont have greet-qa yml file then?
 
 -> then it will go with greet.yml main file 
 
-IMP: while profile selection always use application.yml file if you do any slection in git hub config file it will not work
+IMP: while profile selection always use application.yml file if you do any selection in git hub config file it will not work
 ex : Set profile in client / JVM / env variable
 
 
@@ -935,7 +931,7 @@ method till that time. So in circuit breaker most of the time only one method ex
 ref app -> 51:
 -------------
 => It is one of the most famous design pattern in microservices.
-=> It is used to implement fault tolerant systems
+=> It is used to implement fault tolerant systems.
 => Fault Tolerant systems also called as Resilience system.
 => In Java Spring Boot, a circuit breaker is a design pattern used to detect failures and encapsulate the logic of preventing failure from constantly recurring, which helps in providing stability and resilience in distributed systems.
 => The most commonly used library for implementing circuit breakers in Spring Boot is **Resilience4j**.
@@ -1069,7 +1065,7 @@ Note: Kafka server setup done  by Kafka team .
 
 ==> get more info about kafka topic 
 
-extra -> in aws there is also one servise called canasis works same as kafka.
+extra -> in aws there is also one service called canasis works same as kafka.
 
 #Step 1: Download zookeeper from below url
 	url: http://mirrors.estointernet.in/apache/zookeeper/
@@ -1157,7 +1153,7 @@ Note: DB call is always costly (it will take more time to execute)
 
 2) RedisTemplate : It provides methods to perform operations with Redis Server
 
-3) OpsForHash: It is providing methods to peform operations based on Hash key
+3) OpsForHash: It is providing methods to perform operations based on Hash key
 
 
 put (...)
@@ -2297,37 +2293,6 @@ export class AppComponent {
 <hr/>
 
 <button (click)="handleWelcomeBtn()">Get Welcome Msg</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
