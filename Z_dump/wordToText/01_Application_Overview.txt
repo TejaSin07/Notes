@@ -1,0 +1,7136 @@
+==== 02_1_Application_Overview_.txt ====
+
+1. Application Overview 
+ 
+- Tell me about your application 
+
+Our application is an internal auditing app used by companies to perform audit workflow in the proper 
+manner. 
+
+Audit is basically  maintaining internal information about an entity 
+For ex  your finance department auditing will include fields like risks ,control ,documents 
+
+- Who uses it? 
+Senior/junior auditors ,directors ,managers  
+
+- Why do they use it? 
+
+ To have an insight of what going on inside the company
+
+==== 03_2_Architecture__Design_.txt ====
+
+2. Architecture & Design 
+ 
+- Architecture of the application 
+
+Our application follows a hybrid architecture and is currently in a transition phase  
+from a monolithic system to a microservices-based architecture. 
+
+At present, we have a single monolithic application that acts as the primary API Gateway.  
+It serves as the main entry point for client requests and handles request routing,  
+
+authentication, and some shared business logic. 
+
+Alongside the monolith, we have identified and segregated certain business functionalities  
+into independent microservices. These microservices are gradually being extracted from  
+the monolith and communicate with it through REST APIs and asynchronous messaging where 
+required. 
+
+On the frontend, we use React with TypeScript for building the user interface, Redux for  
+state management, and Vite as the build tool to ensure fast development and optimized builds. 
+
+For infrastructure and supporting components: 
+- Redis is used for caching and performance optimization. 
+- Kafka is used for asynchronous event-driven communication. 
+- Docker is used for containerizing application components. 
+- Kubernetes is used for container orchestration and auto-scaling. 
+- AWS EC2 is used for hosting application services. 
+- AWS Lambda is used for specific event-driven or background tasks. 
+- AWS S3 is used for secure document and file storage. 
+
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+- Splunk is used for centralized logging. 
+- Datadog is used for monitoring, metrics, and alerting. 
+
+Currently, the application uses a single shared database, which is typical during the  
+initial phase of migrating from a monolith to microservices. This setup simplifies  
+data consistency and reduces operational complexity while the migration is ongoing. 
+
+Overall, this architecture enables us to maintain system stability, support scalability,  
+and modernize the application incrementally without impacting existing users. 
+
+- Why this architecture? 
+
+We chose this hybrid architecture because the application was originally built as a  
+monolith and was already serving active users. Moving directly to a full  
+microservices architecture would have been risky, time-consuming, and could have  
+impacted production stability. 
+
+By keeping the monolith as the central entry point and gradually extracting selected  
+modules into microservices, we can modernize the system incrementally without  
+disrupting existing functionality. 
+
+This approach allows us to: 
+- Avoid a big-bang rewrite 
+- Reduce production risk 
+- Continue feature development during migration 
+- Scale only high-traffic or critical modules as microservices 
+- Validate microservices in production step by step 
+
+ n6- 
+
+Using a single shared database during the transition simplifies data consistency and  
+reduces operational complexity 
+
+Que on Archetecure:: 
+
+1) which services converted to microservices and why? 
+-> We first extracted reporting, document management, notification, and background job modules into 
+microservices. These modules were either resource-intensive, event-driven, or required independent 
+scalability. 
+Core transactional audit workflows remained in the monolith to maintain data consistency and reduce 
+migration risk during the transition phase. 
+
+2) how do you debug and which software do you use ? 
+
+a)  Synchronous (restTemplate) 
+b)  Asynchronous(web client) 
+c)  kafka 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+- Advantages of the architecture
+
+==== 106_13_do_you_know_multithreading_and_how_you_implemented_in_your_project_.txt ====
+
+13. do you know multithreading and how you implemented in your project 
+
+14.not reproducible issue? 
+
+Yes — this duplicate survey response issue was not consistently reproducible. 
+
+How We Tried to Recreate It: 
+
+1) Sent multiple rapid requests from frontend. 
+2) Used Fiddler to fire parallel API requests. 
+3) Enabled Chrome DevTools network throttling (3G mode). 
+4) Tested with concurrent sessions. 
+
+Still not reproducible consistently. 
+
+Observation: 
+- It was a race condition. 
+- Timing dependent. 
+- Occurred only under specific production latency scenarios. 
+- Non-deterministic in local/dev environments. 
+
+Resolution Approach: 
+Instead of chasing reproduction, 
+we focused on structural prevention. 
+
+Upgraded schema and enforced: 
+
+    UNIQUE (user_id, survey_id, question_id) 
+
+Now: 
+- Even if any client sends duplicate concurrent requests, 
+- Even if retries happen due to network, 
+- Even if new frontend is integrated, 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Database prevents duplicate entries. 
+
+Key Learning: 
+- Some concurrency bugs are rare and timing-sensitive. 
+- Do not rely only on application-level fixes. 
+- Enforce critical business rules at database level. 
+- Fix the architecture, not just the symptom.
+
+==== 107_16_Why_do_we_need_integer_pk_if_we_have_uuid_.txt ====
+
+16. Why do we need integer pk if we have uuid? 
+
+=> UUID ensures global uniqueness and prevents ID enumeration. However, BIGINT 
+primary keys provide better indexing, faster joins, lower storage cost, and improved write 
+performance due to sequential inserts. So we use BIGINT internally for database efficiency 
+and UUID externally for security and distributed system compatibility. 
+
+ 
+ 
+ 
+Authentication 
+
+Authentication in our project is implemented using JWT (JSON Web Token) and follows a 
+stateless authentication model. 
+
+The application is stateless, and authentication is handled at the API Gateway level. 
+Spring Security is used to validate and authenticate requests using a chain of 
+security filters. 
+
+When a user logs in: 
+- If no JWT is present, the API Gateway validates the user credentials 
+  (user ID and password) against the database. 
+- Once the credentials are successfully verified, the system generates a JWT. 
+
+The generated JWT contains: 
+- User ID 
+- User roles  
+- Token metadata (expiry, issuer, etc.) 
+
+Two types of tokens are issued:
+
+==== 109_2_Refresh_Token_.txt ====
+
+2. Refresh Token 
+
+The Access Token: 
+- Is short-lived 
+- Is stored in the frontend Redux store 
+- Is sent with every API request in the Authorization header 
+- Is used to authenticate and authorize the user for each request 
+
+The Refresh Token: 
+- Is long-lived 
+- Is stored securely in browser cookies 
+- Is used only when the access token expires or becomes invalid 
+
+For every incoming request: 
+- The API Gateway validates the access token using Spring Security filters 
+- If the token is missing, expired, the request is rejected 
+
+If the access token is expired: 
+- The refresh token is sent to generate a new access token 
+- If the refresh token is also invalid, the user is logged out and access is denied 
+
+Overall, authentication is enforced through a combination of 
+JWT-based stateless security and Spring Security filter chains. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Authorization 
+
+ 
+UPDATED AUTHORIZATION FLOW (Dynamic Role & Permission Lookup) 
+ 
+
+Systems roles :: system roles has some non editable and viewable permissions to create 
+custom permission we need to copy system roles and then edit permission inside them  
+
+5 System roles :: Admin, reviewer, observer , auditor, business contact 
+
+Authorization in our project follows a role-to-permission based access control model, 
+but roles and permissions are resolved dynamically on every request. 
+
+Each role in the system is mapped to a defined set of permissions for specific 
+functional areas of the application. These permissions control access at both 
+API and business logic levels. 
+
+-------------------------------------------------------- 
+
+🔐 Authentication Phase (JWT Based) 
+
+When a user is authenticated: 
+
+- A JWT is generated containing only user identity (userId / username) 
+- Roles and permissions are NOT permanently trusted from the token 
+- The JWT is used only to prove identity and validate authenticity. 
+
+-------------------------------------------------------- 
+
+🚀 Request Processing & Authorization Phase 
+
+For every incoming request: 
+
+1⃣ JWT is validated 
+   - Signature verified using secret key 
+   - Expiration checked 
+
+2⃣ User identity is extracted from JWT (userId / username) 
+
+3⃣ Roles and permissions are fetched dynamically: 
+   - First lookup in Redis (fast in-memory cache) 
+   - If not present, fetch from database 
+   - Cache the result in Redis 
+
+4⃣ Authorization checks are performed: 
+   - User’s roles are mapped to permissions 
+   - Requested resource is matched against required permission 
+   - Access is granted or denied 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+This ensures: 
+✔ Immediate reflection of role or permission updates   
+✔ Centralized and consistent authorization   
+✔ No stale role data from old tokens   
+
+-------------------------------------------------------- 
+
+🧩 AOP-Based Authorization Enforcement 
+
+To enforce authorization consistently: 
+
+- Custom annotations are defined on controller or service methods 
+- An authorization aspect intercepts method execution 
+- The aspect retrieves the authenticated user identity 
+- It fetches current roles and permissions (from Redis/DB) 
+- It validates required permissions before allowing execution 
+
+If required permission is missing: 
+
+- Execution is blocked 
+- Authorization exception is thrown 
+- Business logic is not executed 
+
+-------------------------------------------------------- 
+
+⚡ Performance Optimization Using Redis 
+
+- Role-to-permission mappings are cached in Redis 
+- Redis is used for fast lookup on every request 
+- Cache is refreshed or invalidated when role/permission updates occur 
+- Database remains the source of truth 
+
+This provides: 
+✔ Fast authorization checks   
+✔ Immediate permission updates   
+✔ Scalable performance   
+
+-------------------------------------------------------- 
+
+🛡 SecurityContext in This Architecture 
+
+SecurityContext is a Spring Security component that stores security-related 
+information for the current request. 
+
+In our updated flow: 
+
+After JWT validation: 
+- An Authentication object is created using user identity 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+- This object is stored in SecurityContext 
+- Roles/permissions are resolved dynamically during authorization 
+
+SecurityContext contains: 
+- Authenticated user identity 
+- Authentication status 
+- Security metadata 
+
+Roles and permissions are not blindly trusted from JWT; 
+they are validated dynamically before authorization checks. 
+
+Spring Security automatically: 
+- Creates SecurityContext at request start 
+- Populates it after authentication 
+- Clears it after request completion 
+
+-------------------------------------------------------- 
+
+FINAL SUMMARY 
+
+JWT → Used only for identity verification   
+Redis → Stores latest role-permission mappings   
+Database → Source of truth   
+AOP → Enforces permission checks   
+SecurityContext → Holds authenticated user for current request   
+
+This approach ensures centralized, dynamic, secure, and scalable authorization 
+with immediate reflection of role changes. 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Diagram 
+
+ 
+API created 
+
+ 
+@Async 
+
+ 
+@Async — History Service Summary 
+ 
+
+1) Purpose in History Service 
+------------------------------ 
+We use @Async in History Service to: 
+- Decouple audit/history persistence from main business flow 
+- Reduce API response time 
+- Prevent history failure from breaking main request 
+- Achieve eventual consistency 
+
+History is treated as non-blocking, secondary operation. 
+
+2) Basic Implementation 
+----------------------- 
+
+@EnableAsync   // required at configuration level 
+
+@Service 
+public class HistoryService { 
+
+    @Async("historyExecutor") 
+    public CompletableFuture<Void> saveAsync(HistoryEvent event) { 
+        try { 
+            historyRepository.save(event); 
+        } catch (Exception ex) { 
+            log.error("History persistence failed for {}", event.getId(), ex); 
+        } 
+        return CompletableFuture.completedFuture(null); 
+    } 
+} 
+
+3) How It Works Internally 
+-------------------------- 
+Caller Thread 
+     ↓ 
+Spring AOP Proxy 
+     ↓ 
+TaskExecutor.submit() 
+     ↓ 
+Separate background thread executes saveAsync() 
+
+Key Points: 
+- Runs in different thread 
+- Separate transaction context 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+- Exceptions do NOT propagate to caller 
+- Main request returns immediately 
+
+4) Ensuring Main Request Does Not Fail 
+-------------------------------------- 
+- Async method runs in separate thread 
+- Exceptions are caught inside method 
+- No exception bubbles back to controller 
+- History failure does not affect API response 
+
+5) Critical Data Consistency Requirement 
+----------------------------------------- 
+History must run ONLY after main transaction commits. 
+
+Correct pattern: 
+
+@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) 
+public void handle(TaskUpdatedEvent event) { 
+    historyService.saveAsync(event); 
+} 
+
+This ensures: 
+- No history written for rolled-back transactions 
+
+6) Retry for Transient Failures 
+-------------------------------- 
+
+@Async("historyExecutor") 
+@Retryable( 
+    value = { Exception.class }, 
+    maxAttempts = 3, 
+    backoff = @Backoff(delay = 2000) 
+) 
+public CompletableFuture<Void> saveAsync(HistoryEvent event) { 
+    historyRepository.save(event); 
+    return CompletableFuture.completedFuture(null); 
+} 
+
+Solves: 
+- Temporary DB failure 
+- Connection pool hiccups 
+- Deadlocks 
+
+7) Thread Pool Configuration 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+----------------------------- 
+
+@Bean(name = "historyExecutor") 
+public Executor historyExecutor() { 
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor(); 
+    executor.setCorePoolSize(5); 
+    executor.setMaxPoolSize(10); 
+    executor.setQueueCapacity(500); 
+    executor.initialize(); 
+    return executor; 
+} 
+
+Prevents: 
+- Blocking request threads 
+- Silent task dropping 
+- Thread exhaustion 
+
+8) Limitations of @Async for History 
+------------------------------------ 
+- In-memory execution (lost if app crashes) 
+- No durability guarantee 
+- No built-in retry unless added 
+- No delivery tracking 
+- No exactly-once guarantee 
+
+9) When @Async Is Acceptable for History 
+---------------------------------------- 
+- Audit is non-critical 
+- Minor data loss acceptable 
+- Low-to-moderate traffic 
+- Eventual consistency allowed 
+
+10) When @Async Is NOT Enough 
+----------------------------- 
+If history is: 
+- Compliance-critical 
+- Financially regulated 
+- Requires guaranteed persistence 
+- Needs high throughput 
+
+Better approach: 
+- Outbox Pattern 
+- Kafka-based event-driven architecture 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+11) Interview-Ready Summary 
+---------------------------- 
+In our system, History Service was executed asynchronously to prevent audit logging from increasing 
+API latency. The async method runs in a dedicated thread pool and is triggered only after the main 
+transaction commits using @TransactionalEventListener(AFTER_COMMIT). Failures are logged and 
+retried when necessary. Since @Async is thread-based and not crash-safe, stronger durability 
+guarantees would require an event-driven approach such as Kafka or the Outbox pattern. 
+
+ 
+END 
+ 
+
+ 
+ 
+StatusCodeExceptionHandling 
+
+ 
+Exception Handling Using @ResponseStatus 
+(Handling Specific HTTP Status Codes) 
+ 
+
+1) Purpose 
+---------- 
+@ResponseStatus is used to map a specific exception to a specific HTTP status code. 
+
+It allows: 
+- Clean separation of business logic and HTTP response logic 
+- Automatic HTTP status mapping 
+- Avoiding manual ResponseEntity creation everywhere 
+
+2) Basic Usage on Custom Exception 
+----------------------------------- 
+
+@ResponseStatus(HttpStatus.NOT_FOUND) 
+public class HistoryNotFoundException extends RuntimeException { 
+    public HistoryNotFoundException(String message) { 
+        super(message); 
+    } 
+} 
+
+When this exception is thrown: 
+
+throw new HistoryNotFoundException("History not found"); 
+
+Spring automatically returns: 
+
+HTTP 404 Not Found 
+
+3) With Custom Reason 
+--------------------- 
+
+@ResponseStatus( 
+    value = HttpStatus.BAD_REQUEST, 
+    reason = "Invalid history request" 
+) 
+public class InvalidHistoryRequestException extends RuntimeException { 
+} 
+
+Response: 
+HTTP 400 Bad Request 
+Body: 
+"Invalid history request" 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Note: 
+Using "reason" produces default error response body. 
+
+4) Using @ExceptionHandler (More Control) 
+------------------------------------------ 
+
+For structured JSON responses, prefer global exception handling: 
+
+@RestControllerAdvice 
+public class GlobalExceptionHandler { 
+
+    @ExceptionHandler(HistoryNotFoundException.class) 
+    @ResponseStatus(HttpStatus.NOT_FOUND) 
+    public ErrorResponse handleHistoryNotFound( 
+            HistoryNotFoundException ex) { 
+
+        return new ErrorResponse( 
+            404, 
+            ex.getMessage(), 
+            LocalDateTime.now() 
+        ); 
+    } 
+} 
+
+This gives: 
+- Custom JSON body 
+- Control over structure 
+- Consistent API contract 
+
+5) Handling Multiple Status Codes 
+---------------------------------- 
+
+Different exceptions → different status codes: 
+
+@ResponseStatus(HttpStatus.NOT_FOUND) 
+public class HistoryNotFoundException extends RuntimeException {} 
+
+@ResponseStatus(HttpStatus.BAD_REQUEST) 
+public class InvalidHistoryRequestException extends RuntimeException {} 
+
+@ResponseStatus(HttpStatus.CONFLICT) 
+public class DuplicateHistoryException extends RuntimeException {} 
+
+6) When Exception Is Thrown in Service 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--------------------------------------- 
+
+@Service 
+public class HistoryService { 
+
+    public History getHistory(Long id) { 
+        return historyRepository.findById(id) 
+            .orElseThrow(() -> 
+                new HistoryNotFoundException("History not found")); 
+    } 
+} 
+
+Spring automatically converts exception → HTTP status. 
+
+7) Difference: @ResponseStatus vs ResponseEntity 
+------------------------------------------------ 
+
+@ResponseStatus: 
+- Static mapping 
+- Cleaner 
+- Less boilerplate 
+- Good for simple APIs 
+
+ResponseEntity: 
+- Dynamic status 
+- Full response control 
+- Used when status depends on runtime condition 
+
+8) Limitations of @ResponseStatus 
+---------------------------------- 
+- Fixed HTTP status 
+- Harder to return dynamic error body 
+- Not ideal for complex error responses 
+- Does not handle validation errors automatically 
+
+9) Best Practice in Production 
+------------------------------- 
+For structured APIs: 
+
+Use: 
+- @RestControllerAdvice 
+- @ExceptionHandler 
+- Custom error response object 
+
+Avoid using "reason" in @ResponseStatus for REST APIs 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+because it limits response body customization. 
+
+10) Interview-Ready Summary 
+---------------------------- 
+@ResponseStatus allows mapping custom exceptions to specific HTTP status codes declaratively. 
+When the exception is thrown, Spring automatically converts it to the defined HTTP status. For more 
+structured error handling and custom JSON responses, it is recommended to use 
+@RestControllerAdvice with @ExceptionHandler instead of relying solely on @ResponseStatus. 
+
+ 
+END 
+ 
+
+ 
+How Exceptions Are Thrown & Detected in Spring Boot 
+ 
+
+1) Do We Need to Explicitly Throw Exceptions? 
+--------------------------------------------- 
+Yes — for custom business exceptions, you must explicitly throw them. 
+
+Example: 
+
+if (history == null) { 
+    throw new HistoryNotFoundException("History not found"); 
+} 
+
+Spring does NOT automatically throw your custom exceptions. 
+You define when business logic is violated. 
+
+2) Where Can Exceptions Be Thrown? 
+----------------------------------- 
+Exceptions can originate from: 
+
+• Controller layer 
+• Service layer 
+• Repository layer 
+• Validation layer 
+• Framework itself (Spring, Hibernate, Jackson, etc.) 
+
+Spring detects any unhandled exception that propagates up to the DispatcherServlet. 
+
+3) How Spring Detects Exceptions 
+--------------------------------- 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Flow: 
+
+Controller → Service → Repository 
+        ↓ 
+   Exception thrown 
+        ↓ 
+Bubbles up call stack 
+        ↓ 
+Spring DispatcherServlet catches it 
+        ↓ 
+Checks: 
+    - @ExceptionHandler 
+    - @RestControllerAdvice 
+    - @ResponseStatus 
+    - Default Exception Resolver 
+        ↓ 
+Converts to HTTP response 
+
+4) Example: Service Throws Exception 
+------------------------------------- 
+
+@Service 
+public class HistoryService { 
+
+    public History getHistory(Long id) { 
+        return historyRepository.findById(id) 
+            .orElseThrow(() -> 
+                new HistoryNotFoundException("History not found")); 
+    } 
+} 
+
+If not caught manually, 
+Spring automatically routes it to exception handlers. 
+
+5) Framework-Thrown Exceptions (Automatic) 
+------------------------------------------- 
+Some exceptions are thrown automatically by Spring: 
+
+• MethodArgumentNotValidException (validation failure) 
+• HttpMessageNotReadableException (invalid JSON) 
+• DataIntegrityViolationException (DB constraint violation) 
+• MissingServletRequestParameterException 
+
+You do NOT throw these manually. 
+Spring throws them internally. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+6) Can Spring Detect Exceptions From Anywhere? 
+----------------------------------------------- 
+Spring only handles exceptions that: 
+
+• Occur inside Spring-managed beans 
+• Happen during HTTP request processing 
+• Propagate to the DispatcherServlet 
+
+It will NOT detect: 
+• Exceptions caught and swallowed manually 
+• Exceptions inside separate threads unless handled properly 
+• Exceptions outside request lifecycle 
+
+7) What Happens If You Catch It? 
+--------------------------------- 
+
+try { 
+    historyRepository.save(entity); 
+} catch (Exception e) { 
+    log.error("Failed"); 
+} 
+
+If you catch and do NOT rethrow, 
+Spring never sees it. 
+
+To let Spring handle it: 
+
+catch (Exception e) { 
+    throw new HistorySaveException("Failed to save history"); 
+} 
+
+8) Async Case (Important) 
+-------------------------- 
+For @Async methods: 
+
+• Exception does NOT propagate to controller thread. 
+• Must handle inside async method. 
+• Or use CompletableFuture and handle via exceptionally(). 
+
+9) Summary 
+---------- 
+• Business exceptions must be explicitly thrown. 
+• Spring automatically catches uncaught exceptions. 
+• Exceptions bubble up the call stack. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+• @ExceptionHandler / @ResponseStatus decide HTTP response. 
+• If you catch and suppress exception, Spring cannot detect it. 
+• Async exceptions do not propagate to request thread. 
+
+ 
+END 
+ 
+
+ 
+ 
+Deployment Strategy 
+
+ 
+Rolling Update Deployment Strategy 
+ 
+
+1) Purpose 
+---------- 
+Rolling Update is a deployment strategy where: 
+- New version instances are deployed gradually 
+- Old version instances are terminated progressively 
+- System remains available during deployment 
+- No full downtime occurs 
+
+Used in: 
+- Microservices 
+- Kubernetes-based deployments 
+- High-availability systems 
+
+2) How It Works 
+--------------- 
+Instead of replacing all instances at once: 
+
+Old Version (v1): 
+Instance 1 
+Instance 2 
+Instance 3 
+Instance 4 
+
+Step-by-step process: 
+
+Step 1: 
+Terminate Instance 1 (v1) 
+Start Instance 1 (v2) 
+
+Step 2: 
+Terminate Instance 2 (v1) 
+Start Instance 2 (v2) 
+
+Continue until all are upgraded. 
+
+Traffic always flows to healthy instances. 
+
+3) Example in Kubernetes 
+------------------------- 
+
+spec: 
+  replicas: 4 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  strategy: 
+    type: RollingUpdate 
+    rollingUpdate: 
+      maxUnavailable: 1 
+      maxSurge: 1 
+
+Meaning: 
+- At most 1 pod can be unavailable 
+- At most 1 extra pod can be created temporarily 
+
+4) Key Parameters 
+----------------- 
+• maxUnavailable 
+  Number of old pods that can go down during update. 
+
+• maxSurge 
+  Extra pods allowed above desired replica count. 
+
+• Readiness Probe 
+  Ensures traffic only goes to healthy pods. 
+
+• Liveness Probe 
+  Restarts unhealthy pods. 
+
+5) Traffic Flow During Deployment 
+---------------------------------- 
+Load Balancer 
+      ↓ 
+Healthy Pods Only 
+      ↓ 
+Old + New versions coexist temporarily 
+
+Once new pod is Ready: 
+- It starts receiving traffic 
+- Old pod is removed 
+
+6) Advantages 
+------------- 
+• Zero downtime 
+• No traffic interruption 
+• Safe gradual rollout 
+• No duplicate environments required 
+• Resource-efficient 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+7) Limitations 
+-------------- 
+• Old and new versions coexist → must be backward compatible 
+• DB schema changes must be handled carefully 
+• Slower rollout compared to recreate strategy 
+
+8) Data Consistency Considerations 
+----------------------------------- 
+When doing rolling update: 
+
+✔ Use backward-compatible APIs   
+✔ Avoid breaking DB changes   
+✔ Use feature flags if needed   
+✔ Apply DB migrations before deployment   
+
+Bad Example: 
+- New code expects new DB column 
+- Old pods still running → may break 
+
+9) Comparison With Other Strategies 
+------------------------------------ 
+
+Rolling Update: 
+- Gradual replacement 
+- No downtime 
+- Mixed versions temporarily 
+
+Blue-Green: 
+- Two separate environments 
+- Instant switch 
+- Higher infrastructure cost 
+
+Canary: 
+- Small % traffic to new version 
+- Risk-controlled rollout 
+
+10) Failure Handling 
+-------------------- 
+If new pod fails readiness: 
+
+- Kubernetes stops rollout 
+- Old pods continue serving traffic 
+- Rollback can be triggered 
+
+Deployment does NOT take down entire system. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+11) When To Use 
+--------------- 
+✔ Stateless services   
+✔ High-availability APIs   
+✔ Microservices   
+✔ Kubernetes environments   
+
+Avoid if: 
+✖ Breaking schema changes 
+✖ Major incompatible changes 
+
+12) Interview-Ready Summary 
+---------------------------- 
+Rolling Update is a zero-downtime deployment strategy where instances are gradually replaced with 
+newer versions while keeping the service available. Traffic is routed only to healthy pods using 
+readiness checks. It requires backward compatibility since old and new versions coexist temporarily. 
+Kubernetes manages rollout using parameters like maxUnavailable and maxSurge, ensuring 
+controlled and safe deployment. 
+
+ 
+END 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Response code 
+
+ 
+Important HTTP Response Codes & Meaning 
+ 
+
+1) Purpose 
+---------- 
+HTTP response codes indicate: 
+- Whether request succeeded 
+- Whether client made an error 
+- Whether server failed 
+- What action client should take next 
+
+Format: 
+HTTP Status Code = 3-digit number 
+
+2) Status Code Categories 
+-------------------------- 
+
+1xx → Informational   
+2xx → Success   
+3xx → Redirection   
+4xx → Client Error   
+5xx → Server Error   
+
+ 
+2xx — Success Codes 
+ 
+
+200 OK 
+------- 
+Request succeeded. 
+Most common success response. 
+
+Used for: 
+✔ GET successful 
+✔ PUT successful 
+✔ General success 
+
+201 Created 
+------------ 
+Resource successfully created. 
+
+Used for: 
+✔ POST that creates new resource 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Example: 
+POST /history → returns 201 
+
+204 No Content 
+-------------- 
+Request successful but no response body. 
+
+Used for: 
+✔ DELETE 
+✔ Successful update with no return payload 
+
+ 
+3xx — Redirection Codes 
+ 
+
+301 Moved Permanently 
+---------------------- 
+Resource permanently moved. 
+
+302 Found 
+--------- 
+Temporary redirect. 
+
+(Used mostly in browser-based apps) 
+
+ 
+4xx — Client Error Codes 
+ 
+
+400 Bad Request 
+---------------- 
+Client sent invalid input. 
+
+Examples: 
+✔ Invalid JSON 
+✔ Validation failure 
+✔ Missing fields 
+
+401 Unauthorized 
+----------------- 
+Authentication required or invalid token. 
+
+Meaning: 
+User not authenticated. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+403 Forbidden 
+-------------- 
+User authenticated but not allowed. 
+
+Meaning: 
+Access denied. 
+
+404 Not Found 
+-------------- 
+Requested resource does not exist. 
+
+Example: 
+History ID not found. 
+
+405 Method Not Allowed 
+----------------------- 
+Wrong HTTP method used. 
+
+Example: 
+Sending POST on GET-only endpoint. 
+
+409 Conflict 
+------------ 
+Conflict with current state. 
+
+Example: 
+Duplicate resource creation. 
+
+422 Unprocessable Entity 
+------------------------- 
+Request is syntactically correct but semantically invalid. 
+(Common in validation-heavy APIs) 
+
+ 
+5xx — Server Error Codes 
+ 
+
+500 Internal Server Error 
+-------------------------- 
+Unexpected server failure. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Used for: 
+✔ Unhandled exceptions 
+✔ Unknown runtime errors 
+
+502 Bad Gateway 
+--------------- 
+Upstream service failure. 
+
+Example: 
+Microservice dependency failure. 
+
+503 Service Unavailable 
+------------------------ 
+Service temporarily unavailable. 
+
+Example: 
+Server overload 
+Maintenance mode 
+
+504 Gateway Timeout 
+-------------------- 
+Upstream service timed out. 
+
+ 
+Most Important Codes for Interviews 
+ 
+
+Must Remember: 
+
+200 → Success   
+201 → Created   
+204 → No Content   
+400 → Bad Request   
+401 → Unauthorized   
+403 → Forbidden   
+404 → Not Found   
+409 → Conflict   
+500 → Internal Server Error   
+503 → Service Unavailable   
+
+ 
+Difference Between Commonly Confused Codes 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+401 vs 403 
+----------- 
+401 → Not authenticated   
+403 → Authenticated but not authorized   
+
+400 vs 422 
+----------- 
+400 → Malformed request   
+422 → Validation/business rule failure   
+
+404 vs 403 
+----------- 
+404 → Resource doesn't exist   
+403 → Exists but no access   
+
+ 
+How Spring Sets Response Codes 
+ 
+
+Using @ResponseStatus: 
+
+@ResponseStatus(HttpStatus.NOT_FOUND) 
+
+Using ResponseEntity: 
+
+return ResponseEntity.status(404).body(...); 
+
+Using ExceptionHandler: 
+
+@ExceptionHandler(...) 
+@ResponseStatus(HttpStatus.BAD_REQUEST) 
+
+ 
+Interview-Ready Summary 
+ 
+HTTP response codes are standardized 3-digit numbers that indicate the outcome of an HTTP 
+request. They are grouped into 1xx informational, 2xx success, 3xx redirection, 4xx client errors, and 
+5xx server errors. Proper use of status codes improves API clarity, debugging, and contract 
+correctness in distributed systems. 
+
+ 
+END 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Service Boundry 
+
+## Service Boundary – Brief Summary 
+
+A **service boundary** defines what responsibilities, data, and business capability belong inside a 
+microservice. 
+
+### Key Principles 
+
+- **Business Capability Based** 
+  - Each service represents one clear business function. 
+
+- **Owns Its Data** 
+  - A service has its own database. 
+  - No direct DB access from other services. 
+
+- **High Cohesion** 
+  - All functionalities inside the service are closely related. 
+
+- **Low Coupling** 
+  - Avoid excessive synchronous calls between services. 
+
+- **Independent Deployment** 
+  - Services should be deployable without coordinating with others. 
+
+- **Change Isolation** 
+  - Features that change together → same service. 
+  - Features that evolve independently → separate services. 
+
+- **Transaction Boundary** 
+  - Avoid frequent distributed transactions. 
+  - Prefer eventual consistency (Saga pattern). 
+
+--- 
+
+### One-Line Definition 
+
+> A service boundary defines the scope of responsibility and data ownership of a microservice to 
+ensure high cohesion, low coupling, and independent scalability. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Custom Aspect 
+
+ 
+  
+ 
+JDBC 
+
+ 
+Dynamic rules engine 
+
+# Dynamic Rule Engine (Teammate+) – Complete Interview Explanation 
+
+## 1. Overview 
+
+In Teammate+, a **dynamic rule engine** is implemented to allow business logic to be configured 
+without modifying application code. Instead of hardcoding conditions in Java services, rules are 
+created through an **admin UI page**, stored in the **database**, and evaluated dynamically at 
+runtime. 
+
+This design enables business teams or admuinistrators to change system behavior without 
+redeploying the application. 
+
+Typical use cases: 
+
+- Assessment validation rules 
+- Risk classification based on score 
+- Conditional workflow triggers 
+- Approval requirements 
+- Dynamic scoring logic 
+- Conditional notifications 
+- Role-based workflow actions 
+
+--- 
+
+## 2. Problem With Hardcoded Business Logic 
+
+Without a rule engine, business logic is embedded directly in code. 
+
+Example: 
+
+```java 
+if(score < 40){ 
+    assessment.setRiskLevel("HIGH"); 
+} 
+``` 
+
+Problems with this approach: 
+
+- Requires code changes for every rule update 
+- Requires deployment 
+- Business users cannot manage logic 
+- Difficult to scale rule complexity 
+
+A dynamic rule engine externalizes this logic into the database. 
+
+--- 
+
+## 3. Core Idea of Dynamic Rule Engine 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Rules are stored as **data instead of code**. 
+
+Example rule stored in DB: 
+
+| rule_name | condition_expression | action_expression | 
+|-----------|---------------------|------------------| 
+| HIGH_RISK_RULE | score < 40 | setRiskLevel("HIGH") | 
+
+At runtime:
+
+==== 112_3_If_the_condition_is_true_the_action_is_executed_.txt ====
+
+3. If the condition is true, the action is executed 
+
+--- 
+
+## 4. High Level Architecture 
+
+Admin UI   
+↓   
+Rule Management API   
+↓   
+Database (Rules Table)   
+↓   
+Rule Engine Service   
+↓   
+Load Rules   
+↓   
+Evaluate Conditions   
+↓   
+Execute Actions   
+↓   
+Return Modified Entity 
+
+--- 
+
+## 5. Rule Creation Flow 
+
+### Step 1 — Admin Creates Rule From UI 
+
+| Field | Value | 
+|------|------| 
+| Rule Name | High Risk Assessment | 
+| Entity Type | Assessment | 
+| Condition | score < 40 | 
+| Action | setRiskLevel("HIGH") | 
+| Priority | 10 | 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+| Active | true | 
+
+--- 
+
+### Step 2 — Rule Stored In Database 
+
+Example table: 
+
+```sql 
+CREATE TABLE rules ( 
+    id BIGINT PRIMARY KEY, 
+    rule_name VARCHAR(255), 
+    entity_type VARCHAR(100), 
+    condition_expression TEXT, 
+    action_expression TEXT, 
+    priority INT, 
+    is_active BOOLEAN, 
+    created_at TIMESTAMP, 
+    updated_at TIMESTAMP 
+); 
+``` 
+
+Example record: 
+
+| id | rule_name | entity_type | condition_expression | action_expression | priority | is_active | 
+|----|-----------|-------------|---------------------|------------------|----------|-----------| 
+| 1 | HIGH_RISK_RULE | ASSESSMENT | score < 40 | setRiskLevel("HIGH") | 10 | true | 
+
+--- 
+
+## 6. Rule Execution Flow 
+
+When an event occurs (example: assessment submission): 
+
+Assessment Submitted   
+↓   
+Rule Engine Service   
+↓   
+Fetch Active Rules From Database   
+↓   
+Filter Rules By Entity Type   
+↓   
+Sort Rules By Priority   
+↓   
+Evaluate Condition   
+↓   
+Execute Action   
+↓   
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Return Updated Object 
+
+--- 
+
+## 7. Core Components 
+
+### Rule Entity 
+
+```java 
+public class Rule { 
+
+    private Long id; 
+    private String ruleName; 
+    private String entityType; 
+    private String conditionExpression; 
+    private String actionExpression; 
+    private Integer priority; 
+    private Boolean active; 
+} 
+``` 
+
+--- 
+
+### Rule Repository 
+
+```java 
+@Repository 
+public interface RuleRepository extends JpaRepository<Rule, Long> { 
+
+    List<Rule> findByEntityTypeAndActiveTrueOrderByPriorityDesc(String entityType); 
+} 
+``` 
+
+Ensures: 
+
+- Only active rules are loaded 
+- Rules executed in priority order 
+
+--- 
+
+### Rule Engine Service 
+
+```java 
+@Service 
+public class RuleEngineService { 
+
+    @Autowired 
+    private RuleRepository ruleRepository; 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    public void evaluateRules(Assessment assessment){ 
+
+        List<Rule> rules = ruleRepository 
+                .findByEntityTypeAndActiveTrueOrderByPriorityDesc("ASSESSMENT"); 
+
+        for(Rule rule : rules){ 
+
+            if(evaluateCondition(rule.getConditionExpression(), assessment)){ 
+                executeAction(rule.getActionExpression(), assessment); 
+            } 
+        } 
+    } 
+} 
+``` 
+
+--- 
+
+## 8. Condition Evaluation 
+
+Conditions stored as expressions. 
+
+Examples: 
+
+``` 
+score < 40 
+department == 'Finance' 
+riskScore > 80 
+assessmentType == 'INTERNAL' 
+``` 
+
+Evaluated using **Spring Expression Language (SpEL)**. 
+
+```java 
+private boolean evaluateCondition(String expression, Assessment assessment){ 
+
+    ExpressionParser parser = new SpelExpressionParser(); 
+
+    EvaluationContext context = new StandardEvaluationContext(assessment); 
+
+    Boolean result = parser.parseExpression(expression).getValue(context, Boolean.class); 
+
+    return Boolean.TRUE.equals(result); 
+} 
+``` 
+
+--- 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+## 9. Action Execution 
+
+Actions executed when condition is satisfied. 
+
+Examples: 
+
+``` 
+setRiskLevel("HIGH") 
+setApprovalRequired(true) 
+assignReviewer("RISK_TEAM") 
+sendNotification("ADMIN") 
+``` 
+
+Example implementation: 
+
+```java 
+private void executeAction(String action, Assessment assessment){ 
+
+    if(action.contains("setRiskLevel")){ 
+        assessment.setRiskLevel("HIGH"); 
+    } 
+
+    if(action.contains("setApprovalRequired")){ 
+        assessment.setApprovalRequired(true); 
+    } 
+} 
+``` 
+
+In advanced systems actions use **strategy pattern or handler classes**. 
+
+--- 
+
+## 10. Rule Caching 
+
+Fetching rules from the database every request is inefficient. 
+
+Rules are cached in memory. 
+
+Application Startup   
+↓   
+Load Rules From Database   
+↓   
+Store In Memory Cache   
+↓   
+Runtime Rule Evaluation 
+
+Example cache: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+``` 
+Map<String, List<Rule>> ruleCache 
+``` 
+
+Example: 
+
+``` 
+ASSESSMENT -> [Rule1, Rule2, Rule3] 
+SURVEY -> [Rule4, Rule5] 
+``` 
+
+Cache refresh strategies: 
+
+- Scheduled refresh 
+- Event-based refresh 
+- Manual refresh 
+
+--- 
+
+## 11. Rule Priority Handling 
+
+Multiple rules may apply. 
+
+| Rule | Condition | Action | 
+|-----|-----------|--------| 
+| HIGH_RISK_RULE | score < 40 | setRiskLevel("HIGH") | 
+| CRITICAL_RISK_RULE | score < 30 | setRiskLevel("CRITICAL") | 
+
+Priority: 
+
+| Rule | Priority | 
+|-----|---------| 
+| CRITICAL_RISK_RULE | 20 | 
+| HIGH_RISK_RULE | 10 | 
+
+Higher priority executes first. 
+
+--- 
+
+## 12. Rule Versioning 
+
+Track rule updates. 
+
+```sql 
+CREATE TABLE rule_versions ( 
+    id BIGINT PRIMARY KEY, 
+    rule_id BIGINT, 
+    version INT, 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    condition_expression TEXT, 
+    action_expression TEXT, 
+    created_at TIMESTAMP 
+); 
+``` 
+
+Benefits: 
+
+- Audit history 
+- Rollback capability 
+- Track rule evolution 
+
+--- 
+
+## 13. Rule Execution Logging 
+
+```sql 
+CREATE TABLE rule_execution_log ( 
+    id BIGINT PRIMARY KEY, 
+    rule_id BIGINT, 
+    entity_id BIGINT, 
+    result VARCHAR(50), 
+    executed_at TIMESTAMP 
+); 
+``` 
+
+Example log: 
+
+| rule_id | entity_id | result | 
+|--------|-----------|--------| 
+| 1 | 4521 | SUCCESS | 
+
+--- 
+
+## 14. Example End-to-End Scenario 
+
+Input: 
+
+``` 
+score = 35 
+department = Finance 
+``` 
+
+Rules: 
+
+| Rule | Condition | Action | 
+|-----|-----------|--------| 
+| Rule1 | score < 40 | setRiskLevel("HIGH") | 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+| Rule2 | department == 'Finance' | setApprovalRequired(true) | 
+
+Execution: 
+
+``` 
+Rule1 triggered → riskLevel = HIGH 
+Rule2 triggered → approvalRequired = true 
+``` 
+
+Final result: 
+
+``` 
+riskLevel = HIGH 
+approvalRequired = true 
+``` 
+
+--- 
+
+## 15. Advantages 
+
+- Dynamic business logic 
+- No deployment required 
+- Business-friendly configuration 
+- Centralized rule management 
+- Extensible architecture 
+
+--- 
+
+## 16. Limitations 
+
+- Complex debugging 
+- Rule conflicts 
+- Performance concerns for large rule sets 
+
+--- 
+
+## 17. Interview Summary Answer 
+
+In Teammate+, a dynamic rule engine externalizes business logic from application code. 
+Administrators create rules via a UI where each rule contains a condition and action. These rules are 
+stored in the database and evaluated dynamically at runtime using Spring Expression Language. The 
+rule engine loads active rules, evaluates conditions, executes actions, and applies them to entities. 
+Rules are prioritized and cached in memory to improve performance. This allows business logic to 
+change without modifying code or redeploying the application. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Authorisation 
+
+Authorisation  
+
+Previous rbac 
+
+ 
+PREVIOUS AUTHORIZATION SETUP 
+(Static / Hard-coded Roles) 
+ 
+
+1) PREDEFINED ROLES IN THE SYSTEM 
+
+The application had predefined roles already configured in the backend code. 
+These roles were fixed and could NOT be modified by the admin. 
+
+Example predefined roles: 
+
+    ADMIN 
+    AUDITOR 
+    REVIEWER 
+    OBSERVER 
+
+Internally Spring Security stores roles with prefix ROLE_ : 
+
+    ROLE_ADMIN 
+    ROLE_AUDITOR 
+    ROLE_REVIEWER 
+    ROLE_OBSERVER 
+
+-------------------------------------------------- 
+
+2) ADMIN CREATES USER AND ASSIGNS ROLE 
+
+Admin could create a new user and assign one of the predefined roles. 
+
+Example: 
+
+    User      Assigned Role 
+    ----------------------- 
+    Tejas     ADMIN 
+    Rahul     AUDITOR 
+    Priya     REVIEWER 
+
+Example DB record: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    username : rahul 
+    role     : ROLE_AUDITOR 
+
+-------------------------------------------------- 
+
+3) PROTECTING APIs USING @PreAuthorize 
+
+To restrict access to APIs we used Spring Security annotation 
+@PreAuthorize. 
+
+Example: 
+
+    @PreAuthorize("hasRole('ADMIN')") 
+    public void deleteAudit(Long id){ 
+        auditRepository.deleteById(id); 
+    } 
+
+Meaning: 
+
+    Only users with ADMIN role can execute this method. 
+
+-------------------------------------------------- 
+
+4) HOW @PreAuthorize CHECKS ROLE 
+
+When request comes: 
+
+    Client Request 
+         ↓ 
+    JWT Token Validated 
+         ↓ 
+    Roles extracted from token 
+         ↓ 
+    Authentication object created 
+         ↓ 
+    Stored inside SecurityContext 
+
+Example SecurityContext: 
+
+    User : rahul 
+    Authorities : [ROLE_AUDITOR] 
+
+Now Spring evaluates: 
+
+    @PreAuthorize("hasRole('ADMIN')") 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Spring internally converts this to: 
+
+    ROLE_ADMIN 
+
+Then it checks: 
+
+    Does ROLE_ADMIN exist in authentication authorities? 
+
+-------------------------------------------------- 
+
+5) FINAL AUTHORIZATION DECISION 
+
+CASE 1 : ROLE PRESENT 
+
+    Authorities : [ROLE_ADMIN] 
+    Required    : ROLE_ADMIN 
+
+    Result → Access Granted 
+    Method executes 
+
+CASE 2 : ROLE NOT PRESENT 
+
+    Authorities : [ROLE_AUDITOR] 
+    Required    : ROLE_ADMIN 
+
+    Result → AccessDeniedException 
+    HTTP 403 Forbidden 
+    Method execution blocked 
+
+SHORT SUMMARY 
+
+    • Roles were predefined in the system 
+    • Admin could only assign roles to users 
+    • APIs were protected using @PreAuthorize 
+    • Spring fetched roles from SecurityContext 
+    • If role matched → method executed 
+    • If role missing → access denied 
+
+ 
+Circuit breaker config  
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+RESILIENCE4J CIRCUIT BREAKER - SETUP NOTES 
+ 
+
+PURPOSE 
+------- 
+Circuit Breaker protects an application from repeatedly calling a failing service. 
+If a service fails frequently, the circuit opens and prevents further calls, 
+redirecting requests to a fallback method. 
+
+Example: 
+Primary Service : Redis 
+Fallback Service: Database 
+
+--------------------------------------------------
+
+==== 116_4_APPLICATIONYML_CONFIGURATION_.txt ====
+
+4. APPLICATION.YML CONFIGURATION 
+-------------------------------------------------- 
+
+server: 
+  port: 8081 
+
+spring: 
+  application: 
+    name: resilience4j-demo 
+
+management: 
+  endpoints: 
+    web: 
+      exposure: 
+        include: '*' 
+
+  endpoint: 
+    health: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+      show-details: always 
+
+  health: 
+    circuitbreakers: 
+      enabled: true 
+
+resilience4j: 
+  circuitbreaker: 
+    configs: 
+      default: 
+
+        registerHealthIndicator: true 
+
+        slidingWindowSize: 10 
+        minimumNumberOfCalls: 5 
+
+        permittedNumberOfCallsInHalfOpenState: 3 
+
+        automaticTransitionFromOpenToHalfOpenEnabled: true 
+
+        waitDurationInOpenState: 30s 
+
+        failureRateThreshold: 50 
+
+        eventConsumerBufferSize: 10 
+
+--------------------------------------------------
+
+==== 146_7_System_Outcome_.txt ====
+
+7. System Outcome 
+
+The platform enabled: 
+- Semantic search across historical audit risks 
+- AI-generated risk discovery 
+- Automated control recommendations 
+
+This significantly improved the efficiency of risk analysis and audit preparation, which led to the 
+project winning **1st place in the ESG category at the Code Games 2024 hackathon**. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Kafka 
+
+topics  
+
+1) DLQueue 
+2) retry mechanisam 
+3) fan out 
+
+ 
+KAFKA SHORT NOTES 
+ 
+
+1) TOPICS AND THEIR USE 
+----------------------- 
+
+- Topic = Logical category where messages are stored. 
+- Producer publishes to a topic. 
+- Consumer subscribes to a topic. 
+- Topic is divided into partitions. 
+
+Example: 
+  order.created 
+  order.payment.completed 
+
+Use: 
+  - Decouple services 
+  - Enable async communication 
+  - Event-driven architecture 
+
+2) PUBLISHER SMALL SETUP (SPRING BOOT) 
+--------------------------------------- 
+
+application.properties 
+
+spring.kafka.bootstrap-servers=localhost:9092 
+
+Producer Service 
+
+@Autowired 
+private KafkaTemplate<String, Object> kafkaTemplate; 
+
+public void publishOrder(Order order) { 
+    kafkaTemplate.send("order.created", order); 
+} 
+
+Flow: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  Order Object 
+     ↓ 
+  JsonSerializer 
+     ↓ 
+  Kafka Broker 
+     ↓ 
+  Stored in Topic Partition 
+
+3) CONSUMER SMALL SETUP (SPRING BOOT) 
+-------------------------------------- 
+
+application.properties 
+
+spring.kafka.bootstrap-servers=localhost:9092 
+
+Consumer Listener 
+
+@KafkaListener( 
+    topics = "order.created", 
+    groupId = "payment-group" 
+) 
+public void consumeOrder(Order order) { 
+    System.out.println(order); 
+} 
+
+Flow: 
+  Consumer joins group 
+     ↓ 
+  Kafka assigns partition 
+     ↓ 
+  Polls messages 
+     ↓ 
+  Processes message 
+     ↓ 
+  Commits offset 
+
+4) PARTITIONING AND OFFSET 
+-------------------------- 
+
+Partition: 
+  - Topic is divided into partitions. 
+  - Enables parallel processing. 
+  - Ordering guaranteed only inside one partition. 
+
+Example: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  Topic: order.created 
+
+  Partition 0: 
+    Offset 0 → Order1 
+    Offset 1 → Order4 
+
+  Partition 1: 
+    Offset 0 → Order2 
+    Offset 1 → Order5 
+
+Offset: 
+  - Sequential number inside partition. 
+  - Tracks consumer progress. 
+  - Stored per (Consumer Group + Partition). 
+
+Rule: 
+  Next read = Last committed offset + 1 
+
+5) SMALL END-TO-END FLOW 
+------------------------ 
+
+User places order 
+    ↓ 
+Order Service 
+    ↓ 
+Publish → order.created topic 
+    ↓ 
+Kafka stores message in Partition 
+    ↓ 
+Payment Service consumes 
+    ↓ 
+Payment successful 
+    ↓ 
+Publish → order.payment.completed 
+    ↓ 
+Delivery Service consumes 
+
+6) ZOOKEEPER AND KAFKA SERVER (LOCAL) 
+-------------------------------------- 
+
+Old Setup: 
+  ZooKeeper + Kafka Broker 
+
+ZooKeeper: 
+  - Managed metadata 
+  - Leader election 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  - Broker coordination 
+
+Kafka Broker: 
+  - Stores messages 
+  - Handles partitions 
+  - Serves producers & consumers 
+
+Modern Setup (Recommended): 
+  Kafka in KRaft mode (No ZooKeeper) 
+
+Local: 
+  - Run Kafka via Docker 
+  - Expose port 9092 
+  - Connect via localhost:9092 
+
+ 
+KEY FORMULA 
+ 
+
+Partition → Parallelism 
+Consumer Group → Load balancing 
+Offset → Progress tracking 
+Kafka → Event backbone 
+ 
+
+ 
+1) RETRY MECHANISM IN KAFKA 
+ 
+
+Retry is used when message processing fails temporarily  
+(DB issue, API failure, network error). 
+
+Instead of losing the message, the consumer retries processing. 
+
+Flow: 
+
+Producer 
+   ↓ 
+Kafka Topic 
+   ↓ 
+Consumer reads message 
+   ↓ 
+Processing fails 
+   ↓ 
+Retry message 
+   ↓ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+If retry limit reached → DLQ 
+
+Common Retry Approaches 
+
+1) Immediate Retry 
+   - Retry inside consumer code. 
+   - Not recommended for heavy workloads. 
+
+2) Retry Topics (Production Pattern) 
+
+order.created 
+     ↓ fail 
+order.created.retry.5s 
+     ↓ fail 
+order.created.retry.1m 
+     ↓ fail 
+order.created.dlq 
+
+3) Spring Kafka Retry 
+
+@RetryableTopic( 
+  attempts = 3, 
+  backoff = @Backoff(delay = 5000) 
+) 
+
+Used when failures are temporary. 
+
+ 
+2) OFFSET COMMITTING 
+ 
+
+Offset = position of a message inside a partition. 
+
+Kafka uses offset to track which messages a consumer has processed. 
+
+Structure: 
+
+Consumer Group + Partition + Offset 
+
+Example: 
+
+Partition 0 
+
+Offset 0 → Order1 
+Offset 1 → Order2 
+Offset 2 → Order3 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+If offset 1 committed → next read starts from offset 2. 
+
+Types of Offset Commit 
+
+1) Auto Commit 
+
+enable.auto.commit=true 
+
+Kafka automatically commits offsets periodically. 
+
+Risk: 
+Message may be lost if processing fails after commit. 
+
+2) Manual Commit (Recommended) 
+
+Process message 
+       ↓ 
+Commit offset 
+
+Spring Example: 
+
+ack.acknowledge() 
+
+Ensures message processed before committing offset. 
+
+ 
+3) DLQ (DEAD LETTER QUEUE) 
+ 
+
+DLQ stores messages that cannot be processed  
+even after multiple retries. 
+
+Purpose: 
+- Prevent message loss 
+- Allow debugging 
+- Prevent blocking consumer 
+
+Flow: 
+
+order.created 
+      ↓ fail 
+Retry Topic 
+      ↓ fail 
+Retry Topic 
+      ↓ fail 
+order.created.dlq 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+DLQ message usually contains: 
+
+- original event 
+- error reason 
+- retry count 
+- timestamp 
+
+Engineers later inspect DLQ and decide to: 
+
+- reprocess 
+- fix data 
+- discard message 
+
+ 
+4) EVENT ID IN KAFKA 
+ 
+
+Event ID is a unique identifier for each message. 
+
+Kafka itself does NOT generate event IDs. 
+The producer service generates them. 
+
+Usually generated using: 
+
+UUID.randomUUID() 
+
+Example event: 
+
+{ 
+  "eventId": "a1b2c3", 
+  "orderId": "ORD123", 
+  "status": "CREATED" 
+} 
+
+Purpose: 
+
+- prevent duplicate processing 
+- track events 
+- enable idempotency 
+
+ 
+5) DUPLICATE EVENT ID HANDLING 
+ 
+
+Kafka can sometimes deliver duplicate messages due to: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+- consumer retry 
+- network failure 
+- rebalance 
+- producer retry 
+
+To avoid processing duplicates, consumers implement 
+IDEMPOTENCY. 
+
+Approach: 
+
+Before processing event: 
+
+Check if eventId already processed. 
+
+Flow: 
+
+Consumer receives event 
+        ↓ 
+Check eventId in storage 
+        ↓ 
+If exists → ignore 
+If not exists → process event 
+        ↓ 
+Store eventId 
+
+Where eventId is stored: 
+
+1) Database table 
+
+processed_events 
+---------------- 
+event_id 
+processed_at 
+
+2) Redis (for high throughput) 
+
+key = processed_event:{eventId} 
+TTL = 24 hours 
+
+Example logic: 
+
+if(eventId exists) 
+    skip processing 
+else 
+    process event 
+    store eventId 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+SUMMARY 
+ 
+
+Retry → handle temporary failures 
+Offset → track consumer progress 
+DLQ → store permanently failed messages 
+Event ID → uniquely identify event 
+Duplicate handling → ensure idempotent processing 
+
+ 
+ 
+CI/CD 
+
+ 
+Docker 
+
+ 
+Kubernetes 
+
+ 
+Local Development 
+
+MICROSERVICE LOCAL RUN SETUP (SHORT NOTES) 
+
+PROJECT STRUCTURE 
+----------------- 
+repo/ 
+ ├── services/ 
+ │     ├── user-service/ 
+ │     ├── order-service/ 
+ │     └── payment-service/ 
+ │ 
+ ├── k8s/ 
+ │     ├── user-service/ 
+ │     ├── order-service/ 
+ │     └── payment-service/ 
+ │ 
+ └── start-local.ps1 
+
+WHAT HAPPENS AFTER GIT PULL 
+---------------------------
+
+==== 152_1__PROJECT_STRUCTURE_.txt ====
+
+1.  PROJECT STRUCTURE 
+
+Typical layered architecture used in Spring Boot applications. 
+
+controller → Handles HTTP requests 
+service → Business logic 
+repository → Database interaction 
+entity → JPA entities mapped to DB tables 
+dto → Objects used for API request/response 
+mapper → Converts Entity ↔ DTO 
+
+Example package structure: 
+
+com.studentapp 
+├── controller 
+│ └── StudentController 
+├── service 
+│ ├── StudentService (interface) 
+│ └── StudentServiceImpl 
+├── repository 
+│ └── StudentRepository 
+├── entity 
+│ └── Student 
+├── dto 
+│ ├── StudentPersonalDTO 
+│ └── StudentCourseDTO 
+└── mapper 
+└── StudentMapper
+
+==== 158_8__WHY_WE_USE_STREAM_MAPPING_.txt ====
+
+8.  WHY WE USE STREAM MAPPING 
+
+Instead of manual loops, Java Streams provide a functional and cleaner way. 
+
+Traditional approach 
+
+for(Student s : students){ 
+dtoList.add(convertToDTO(s)); 
+} 
+
+Stream approach 
+
+students.stream() 
+.map(StudentMapper::toDTO) 
+.collect(Collectors.toList()); 
+
+Advantages 
+
+• Cleaner and more readable code 
+• Functional programming style 
+• Easy transformation (Entity → DTO) 
+• Supports parallel processing 
+
+ 
+ 
+ 
+ 
+ 
+• Reduces boilerplate loops 
+• Commonly used in microservice applications
+
+==== 160_10_WHY_DTO_IS_USED_.txt ====
+
+10. WHY DTO IS USED 
+
+• Avoid exposing entity directly 
+• Control API response structure 
+• Improve security 
+• Reduce unnecessary data transfer 
+• Maintain separation between DB and API layer 
+
+ 
+ 
+ 
+Optimistic vs pesimistic lock 
+
+OPTIMISTIC LOCKING (JPA / HIBERNATE) 
+
+Definition 
+Optimistic locking is a concurrency control mechanism used to prevent lost updates when multiple 
+transactions try to update the same database row simultaneously. It assumes conflicts are rare 
+and detects them during update instead of locking the row. 
+
+How It Works 
+Optimistic locking uses a VERSION column in the table. Every time the row is updated, the version 
+value is incremented. During update, Hibernate checks if the version in DB matches the version 
+read earlier. 
+
+If version mismatch occurs → OptimisticLockException is thrown. 
+
+ENTITY EXAMPLE 
+
+@Entity 
+public class Student { 
+
+    @Id 
+    private Long id; 
+
+    private String name; 
+
+    private int marks; 
+
+    @Version 
+    private Integer version; 
+} 
+
+DATABASE TABLE 
+
+student 
+-------------------------------- 
+id | name  | marks | version 
+-------------------------------- 
+1  | Tejas | 80    | 1 
+
+INTERNAL SQL GENERATED BY HIBERNATE 
+
+UPDATE student 
+SET marks = ?, version = version + 1 
+WHERE id = ? AND version = ? 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+CONCURRENT UPDATE SCENARIO 
+
+Step 1 
+Thread A reads version = 1 
+Thread B reads version = 1 
+
+Step 2 
+Thread A updates record 
+version becomes 2 
+
+Step 3 
+Thread B tries update with version = 1 
+
+UPDATE student 
+SET marks = 90 
+WHERE id = 1 AND version = 1 
+
+No rows updated → Hibernate throws OptimisticLockException 
+
+JDBC LEVEL INTERNAL FLOW 
+
+executeUpdate() 
+↓ 
+if rowsUpdated == 0 
+↓ 
+OptimisticLockException 
+
+KEY CHARACTERISTICS 
+
+• Uses VERSION column in database 
+• No row-level database locking 
+• Multiple reads allowed 
+• Conflict detected during update 
+• Prevents lost update problem 
+• Improves performance in high-read systems 
+
+WHEN TO USE 
+
+• Read-heavy applications 
+• Systems with low conflict probability 
+• Microservices and enterprise applications 
+• Audit systems, order systems, inventory updates 
+
+INTERVIEW ONE-LINE ANSWER 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Optimistic locking prevents concurrent update conflicts using a version column. During update, 
+Hibernate checks the version value in the WHERE clause, and if the version has changed since it 
+was read, an OptimisticLockException is thrown. 
+
+PESSIMISTIC LOCKING (JPA / DATABASE) 
+
+Definition 
+Pessimistic locking is a concurrency control mechanism where the database row 
+is locked when it is read so that other transactions cannot modify it until 
+the current transaction completes. 
+
+It assumes conflicts are likely, so the system locks the data immediately. 
+
+--------------------------------------------------------------------- 
+
+WHERE WE APPLY IT 
+
+In Spring Boot / JPA it is applied in the repository layer using @Lock 
+annotation and works inside a transaction. 
+
+Example Repository 
+
+@Repository 
+public interface StudentRepository extends JpaRepository<Student, Long> { 
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE) 
+    @Query("select s from Student s where s.id = :id") 
+    Student findStudentForUpdate(Long id); 
+} 
+
+--------------------------------------------------------------------- 
+
+SERVICE LAYER 
+
+@Transactional 
+public void updateMarks(Long id){ 
+
+    Student s = repo.findStudentForUpdate(id); 
+
+    s.setMarks(90); 
+} 
+
+Transaction Flow 
+
+Transaction start 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+↓ 
+SELECT query with lock 
+↓ 
+Row gets locked 
+↓ 
+Update happens 
+↓ 
+Transaction commit 
+↓ 
+Lock released 
+
+--------------------------------------------------------------------- 
+
+SQL GENERATED BY DATABASE 
+
+SELECT * FROM student WHERE id = ? FOR UPDATE 
+
+This locks the selected row until the transaction finishes. 
+
+--------------------------------------------------------------------- 
+
+ROW LEVEL LOCKING 
+
+Pessimistic locking locks only the selected row, not the entire table. 
+
+Example 
+
+Thread A locks row id=1 
+Thread B can still update row id=2 
+
+--------------------------------------------------------------------- 
+
+TYPES OF PESSIMISTIC LOCK
+
+==== 174_6_Implement_retry_mechanism_if_deadlock_occurs_.txt ====
+
+6. Implement retry mechanism if deadlock occurs. 
+
+Common Exception in Spring 
+
+org.springframework.dao.DeadlockLoserDataAccessException 
+
+ 
+ 
+ 
+ 
+Sonarqube 
+
+ 
+SONARQUBE – COMPLETE NOTES (REAL PROJECT) 
+ 
+
+1) WHAT IS SONARQUBE 
+-------------------- 
+
+SonarQube is a Static Code Analysis tool used to continuously inspect 
+code quality, security vulnerabilities, bugs, and maintainability issues. 
+
+It scans the source code without executing the application. 
+
+Goal: 
+Improve code quality and prevent bad code from reaching production. 
+
+Main capabilities: 
+
+• Detect Bugs 
+• Detect Security Vulnerabilities 
+• Detect Code Smells 
+• Measure Code Coverage 
+• Detect Code Duplication 
+• Calculate Technical Debt 
+• Enforce Quality Gates 
+• Integrate with CI/CD pipelines 
+
+Example technologies supported: 
+
+Java 
+Spring Boot 
+Python 
+JavaScript 
+TypeScript 
+C# 
+C++ 
+Go 
+
+-------------------------------------------------- 
+
+2) SONARQUBE ARCHITECTURE (REAL APPLICATION) 
+-------------------------------------------- 
+
+Main components: 
+
+1) SonarQube Server 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+2) Sonar Scanner 
+3) SonarQube Database 
+4) Web Dashboard 
+
+Architecture Flow 
+
+Developer Code 
+      │ 
+      ▼ 
+Sonar Scanner (Maven/Gradle) 
+      │ 
+      ▼ 
+SonarQube Server 
+      │ 
+      ▼ 
+SonarQube Database 
+      │ 
+      ▼ 
+SonarQube Dashboard 
+
+Components explanation 
+
+Sonar Scanner 
+------------- 
+Tool that scans the source code. 
+
+Examples: 
+sonar-scanner 
+mvn sonar:sonar 
+gradle sonarqube 
+
+SonarQube Server 
+---------------- 
+Processes analysis results and applies rules. 
+
+SonarQube Database 
+------------------ 
+Stores: 
+
+• issues 
+• metrics 
+• coverage 
+• technical debt 
+• history 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Dashboard 
+--------- 
+Web UI used by developers to see issues. 
+
+-------------------------------------------------- 
+
+3) HOW SONARQUBE IS CONFIGURED IN REAL PROJECT 
+----------------------------------------------- 
+
+Step 1 – Install SonarQube Server 
+
+Download SonarQube from 
+
+https://www.sonarqube.org/ 
+
+Run server: 
+
+bin/windows-x86-64/StartSonar.bat 
+
+Server runs on: 
+
+http://localhost:9000 
+
+Default login 
+
+username: admin 
+password: admin 
+
+-------------------------------------------------- 
+
+Step 2 – Install Sonar Scanner 
+
+Download: 
+
+https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/scanners/sonarscanner/ 
+
+Add to PATH 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+-------------------------------------------------- 
+
+Step 3 – Configure project (Maven Example) 
+
+pom.xml 
+
+<plugin> 
+  <groupId>org.sonarsource.scanner.maven</groupId> 
+  <artifactId>sonar-maven-plugin</artifactId> 
+  <version>3.9.1</version> 
+</plugin> 
+
+-------------------------------------------------- 
+
+Step 4 – Create sonar-project.properties 
+
+sonar.projectKey=my-project 
+sonar.projectName=MyProject 
+sonar.projectVersion=1.0 
+
+sonar.sources=src/main/java 
+sonar.tests=src/test/java 
+
+sonar.java.binaries=target/classes 
+
+sonar.host.url=http://localhost:9000 
+sonar.login=SONAR_TOKEN 
+
+-------------------------------------------------- 
+
+Step 5 – Run analysis 
+
+mvn clean verify sonar:sonar 
+
+OR 
+
+sonar-scanner 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+After execution results appear in SonarQube dashboard. 
+
+-------------------------------------------------- 
+
+4) TYPES OF ISSUES DETECTED BY SONARQUBE 
+---------------------------------------- 
+
+SonarQube categorizes issues into 4 types. 
+
+1) BUG 
+
+Definition 
+
+Code that may cause runtime failure. 
+
+Example 
+
+String name = null; 
+System.out.println(name.length()); 
+
+Issue detected 
+
+Possible NullPointerException 
+
+-------------------------------------------------- 
+
+2) VULNERABILITY (Security Issues) 
+
+Definition 
+
+Security weakness in code. 
+
+Example 
+
+String query = 
+"SELECT * FROM users WHERE id=" + userId; 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Issue 
+
+SQL Injection 
+
+Fix 
+
+Use PreparedStatement 
+
+-------------------------------------------------- 
+
+3) CODE SMELL 
+
+Definition 
+
+Bad coding practice that affects maintainability. 
+
+Example 
+
+if(isValid == true) 
+
+Better 
+
+if(isValid) 
+
+Another example 
+
+public void method() { 
+
+    if(a==1) { 
+        if(b==2) { 
+            if(c==3) { 
+                if(d==4) { 
+                } 
+            } 
+        } 
+    } 
+
+} 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Issue 
+
+High Cyclomatic Complexity 
+
+-------------------------------------------------- 
+
+4) SECURITY HOTSPOTS 
+
+Definition 
+
+Code that may be risky and requires manual review. 
+
+Example 
+
+File file = new File(userInputPath); 
+
+Risk 
+
+Path Traversal 
+
+-------------------------------------------------- 
+
+5) METRICS SHOWN IN SONARQUBE DASHBOARD 
+--------------------------------------- 
+
+Main metrics: 
+
+Bugs 
+---- 
+Real defects. 
+
+Vulnerabilities 
+--------------- 
+Security problems. 
+
+Code Smells 
+----------- 
+Maintainability issues. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Coverage 
+-------- 
+Unit test coverage. 
+
+Duplication 
+----------- 
+Repeated code blocks. 
+
+Technical Debt 
+-------------- 
+Estimated time required to fix issues. 
+
+Example dashboard 
+
+Bugs: 2 
+Vulnerabilities: 1 
+Code Smells: 15 
+Coverage: 68% 
+Duplications: 4% 
+
+-------------------------------------------------- 
+
+6) CODE COVERAGE IN SONARQUBE 
+----------------------------- 
+
+SonarQube itself does NOT generate coverage. 
+
+It reads coverage reports from tools like: 
+
+Jacoco 
+Cobertura 
+
+Example Jacoco integration 
+
+<plugin> 
+    <groupId>org.jacoco</groupId> 
+    <artifactId>jacoco-maven-plugin</artifactId> 
+</plugin> 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+-------------------------------------------------- 
+
+7) WHAT IS QUALITY GATE 
+----------------------- 
+
+Quality Gate is a set of rules that determines 
+whether the code is good enough to deploy. 
+
+Example Quality Gate 
+
+Condition 
+
+Coverage < 80% → FAIL 
+Bugs > 0 → FAIL 
+Vulnerabilities > 0 → FAIL 
+Duplications > 5% → FAIL 
+
+If conditions fail 
+
+Build fails. 
+
+-------------------------------------------------- 
+
+8) SONARQUBE IN CI/CD PIPELINE 
+------------------------------ 
+
+Typical CI/CD pipeline 
+
+Developer Push Code 
+        │ 
+        ▼ 
+Git Repository 
+        │ 
+        ▼ 
+CI Tool (Jenkins / GitLab / GitHub Actions) 
+        │ 
+        ▼ 
+Build Stage 
+mvn clean install 
+        │ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+        ▼ 
+Unit Tests 
+        │ 
+        ▼ 
+SonarQube Analysis 
+        │ 
+        ▼ 
+Quality Gate Check 
+        │ 
+ ┌──────┴───────┐ 
+ │ PASS         │ FAIL 
+ ▼              ▼ 
+Deploy       Fix Issues 
+
+-------------------------------------------------- 
+
+9) IN WHICH PHASE SONARQUBE RUNS 
+-------------------------------- 
+
+Typically executed in 
+
+Build / Code Quality phase 
+
+Example Jenkins pipeline 
+
+Stage 1 
+
+Compile 
+
+Stage 2 
+
+Unit Tests 
+
+Stage 3 
+
+SonarQube Analysis 
+
+Stage 4 
+
+Quality Gate 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Stage 5 
+
+Deploy 
+
+Example command 
+
+mvn clean verify sonar:sonar 
+
+-------------------------------------------------- 
+
+10) COMMON ISSUES DETECTED IN REAL PROJECTS 
+------------------------------------------- 
+
+1) Hardcoded password 
+
+String password = "admin123"; 
+
+Security vulnerability 
+
+-------------------------------------------------- 
+
+2) System.out.println 
+
+System.out.println("User created"); 
+
+Bad practice 
+
+Fix 
+
+Use Logger 
+
+-------------------------------------------------- 
+
+3) Empty catch block 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+try { 
+    service.call(); 
+} 
+catch(Exception e) { 
+} 
+
+Issue 
+
+Exception ignored 
+
+-------------------------------------------------- 
+
+4) Duplicated code 
+
+Same method written multiple times. 
+
+-------------------------------------------------- 
+
+5) Unused variables 
+
+int count = 0; 
+
+Never used. 
+
+-------------------------------------------------- 
+
+11) SONARQUBE RULES 
+------------------- 
+
+Rules define how code is analyzed. 
+
+Example rule categories 
+
+Reliability 
+Security 
+Maintainability 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Example Java rule 
+
+S106 
+
+Avoid using System.out 
+
+-------------------------------------------------- 
+
+12) SONARQUBE QUALITY PROFILES 
+------------------------------ 
+
+Quality Profile = Set of rules applied to project. 
+
+Example 
+
+Java Quality Profile 
+
+contains 1000+ rules. 
+
+Companies often create custom profiles. 
+
+-------------------------------------------------- 
+
+13) TECHNICAL DEBT 
+------------------ 
+
+Technical debt = Time required to fix issues. 
+
+Example 
+
+Issue 
+
+Large method 
+
+Estimated fix time 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+30 minutes 
+
+Total project technical debt 
+
+2 days 
+
+-------------------------------------------------- 
+
+14) SONARQUBE PULL REQUEST ANALYSIS 
+----------------------------------- 
+
+When developer creates PR 
+
+SonarQube analyzes only changed code. 
+
+Example 
+
+GitHub PR 
+
+Shows 
+
+New bugs 
+New vulnerabilities 
+Coverage drop 
+
+Helps prevent bad code merging. 
+
+-------------------------------------------------- 
+
+15) BEST PRACTICES IN REAL PROJECTS 
+----------------------------------- 
+
+1) Fix issues before merge 
+
+2) Maintain coverage > 80% 
+
+3) Avoid code duplication 
+
+4) Follow coding standards 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+5) Enforce Quality Gates 
+
+-------------------------------------------------- 
+
+16) INTERVIEW ONE-LINE ANSWER 
+----------------------------- 
+
+SonarQube is a static code analysis platform that 
+analyzes source code during the build process to detect 
+bugs, security vulnerabilities, code smells, duplication, 
+and enforce quality gates to maintain high code quality. 
+
+-------------------------------------------------- 
+
+17) REAL PROJECT FLOW SUMMARY 
+----------------------------- 
+
+Developer writes code 
+        │ 
+        ▼ 
+Push to Git 
+        │ 
+        ▼ 
+CI Pipeline runs 
+        │ 
+        ▼ 
+Build + Unit Tests 
+        │ 
+        ▼ 
+SonarQube Analysis 
+        │ 
+        ▼ 
+Quality Gate Check 
+        │ 
+        ▼ 
+If PASS → Deployment 
+If FAIL → Developer fixes issues 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+unit and Integration testing 
+
+ 
+Scenario based 
+
+1 ) Self Invocation Problem in Spring @Transactional 
+
+Problem 
+------- 
+When a method annotated with @Transactional is called from another method  
+within the same class, the transaction may not be applied. 
+
+Example 
+------- 
+
+@Service 
+public class PaymentService { 
+
+    @Transactional 
+    public void methodA() { 
+        // DB operation 
+    } 
+
+    public void methodB() { 
+        methodA();   // internal call 
+    } 
+} 
+
+If methodB() is called, the transaction on methodA() will NOT start. 
+
+Reason 
+------ 
+Spring implements @Transactional using proxy-based AOP. 
+
+When a method is called from outside the bean: 
+
+Client → Spring Proxy → Target Method 
+
+The proxy intercepts the call and starts the transaction. 
+
+But when a method inside the same class calls another method: 
+
+methodB() → this.methodA() 
+
+The call bypasses the proxy and directly invokes the method. 
+Since the proxy is skipped, Spring cannot apply transactional logic. 
+
+Solution 
+--------
+
+==== 179_3_Transactional_.txt ====
+
+3. @Transactional 
+Keep the Hibernate session open so lazy properties can be loaded 
+within the transaction. 
+
+Best Practice 
+------------- 
+In production systems, DTO projection or JOIN FETCH is preferred to avoid 
+lazy loading issues and unnecessary database queries. 
+
+4) Memory Leak in Spring Boot 
+
+Scenario 
+-------- 
+Application memory usage keeps increasing over time and does not decrease 
+even after requests are completed. Eventually the application may crash with 
+OutOfMemoryError. 
+
+Example Error 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+------------- 
+java.lang.OutOfMemoryError: Java heap space 
+
+A memory leak happens when objects are no longer needed but are still being 
+referenced, so the JVM Garbage Collector cannot free them. 
+
+----------------------------------------------------------------
+
+==== 181_2_Static_Collections_.txt ====
+
+2. Static Collections 
+
+Problem 
+--------- 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Static variables live for the entire lifecycle of the application. 
+
+Example: 
+
+public class UserStore { 
+
+    static List<User> users = new ArrayList<>(); 
+
+} 
+
+If the application keeps adding users: 
+
+users.add(newUser); 
+
+The list keeps growing and objects are never removed. 
+
+Result 
+------ 
+Garbage Collector cannot remove these objects because static references still 
+exist. 
+
+Solution 
+-------- 
+Avoid static collections for storing runtime data. 
+Use proper cache frameworks with eviction policies. 
+
+----------------------------------------------------------------
+
+==== 184_5_Unclosed_Resources_.txt ====
+
+5. Unclosed Resources 
+
+Problem 
+------- 
+Not closing resources like streams, files, or DB connections can also 
+increase memory usage. 
+
+Example: 
+
+InputStream input = new FileInputStream(file); 
+
+If not closed, resources remain allocated. 
+
+Solution 
+-------- 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Use try-with-resources. 
+
+Example: 
+
+try(InputStream input = new FileInputStream(file)) { 
+    // process 
+} 
+
+---------------------------------------------------------------- 
+
+Interview Summary 
+----------------- 
+Memory leak in Spring Boot occurs when objects remain referenced and cannot be 
+garbage collected. Common causes include unbounded caching, static collections, 
+unclosed thread pools, large session objects, and unclosed resources. 
+Proper resource management and cache eviction strategies help prevent it. 
+
+5) N+1 Query Problem (Hibernate / JPA) 
+
+Definition 
+---------- 
+The N+1 query problem occurs when an application executes 1 query to fetch 
+parent records and then executes additional queries (one per record) to fetch 
+related entities. 
+
+This results in excessive database calls and poor performance. 
+
+--------------------------------------------------------------- 
+
+Example Scenario 
+
+Entities: 
+
+@Entity 
+class Customer { 
+
+    @Id 
+    Long id; 
+
+    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY) 
+    List<Order> orders; 
+} 
+
+@Entity 
+class Order { 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    @Id 
+    Long id; 
+
+    @ManyToOne 
+    Customer customer; 
+} 
+
+--------------------------------------------------------------- 
+
+Code Example 
+
+Repository: 
+
+List<Customer> customers = customerRepository.findAll(); 
+
+Then accessing orders: 
+
+for(Customer c : customers){ 
+    System.out.println(c.getOrders().size()); 
+} 
+
+--------------------------------------------------------------- 
+
+What Happens Internally 
+
+Step 1: Hibernate loads all customers 
+
+SQL Query 1 
+
+SELECT * FROM customer; 
+
+Suppose there are 5 customers. 
+
+Step 2: When orders are accessed for each customer 
+
+Hibernate executes additional queries: 
+
+SELECT * FROM orders WHERE customer_id = 1 
+SELECT * FROM orders WHERE customer_id = 2 
+SELECT * FROM orders WHERE customer_id = 3 
+SELECT * FROM orders WHERE customer_id = 4 
+SELECT * FROM orders WHERE customer_id = 5 
+
+Total queries executed: 
+
+1 + 5 = 6 queries 
+
+This is called the N+1 query problem. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--------------------------------------------------------------- 
+
+Why It Happens 
+
+Because of lazy loading. Hibernate loads related entities only when they are 
+accessed, so each access triggers a new database query. 
+
+--------------------------------------------------------------- 
+
+Performance Impact 
+
+If there are 1000 customers: 
+
+1 query for customers 
+1000 queries for orders 
+
+Total queries = 1001 
+
+This causes: 
+
+- high database load 
+- slow API responses 
+- poor scalability 
+
+--------------------------------------------------------------- 
+
+Solution 1: JOIN FETCH 
+
+Load parent and child entities in a single query. And call this method from service 
+
+@Query("SELECT c FROM Customer c JOIN FETCH c.orders") 
+List<Customer> findCustomersWithOrders(); 
+
+SQL generated: 
+
+SELECT c.*, o.* 
+FROM customer c 
+JOIN orders o ON c.id = o.customer_id 
+
+--------------------------------------------------------------- 
+
+Solution 2: DTO Projection 
+
+Fetch only required fields. 
+
+@Query(""" 
+SELECT new com.example.CustomerDTO(c.id, c.name, o.id) 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+FROM Customer c 
+JOIN c.orders o 
+""") 
+
+This avoids entity loading and improves performance. 
+
+--------------------------------------------------------------- 
+
+Solution 3: EntityGraph 
+
+@EntityGraph(attributePaths = {"orders"}) 
+List<Customer> findAll(); 
+
+This tells Hibernate to fetch the orders along with customers. 
+
+--------------------------------------------------------------- 
+
+Interview Summary 
+----------------- 
+N+1 query problem occurs when one query fetches parent records and additional 
+queries are executed for each related entity due to lazy loading. 
+
+Solutions include JOIN FETCH, DTO projections, and EntityGraph to load related 
+data efficiently in fewer queries. 
+
+6) Using Retry and Circuit Breaker Together in Microservices 
+
+Scenario 
+----------- 
+In a microservice architecture, Service A may call another service (Service B). 
+If Service B is temporarily unavailable or slow, the request may fail. 
+
+To make the system more resilient, we can apply both Retry and Circuit Breaker 
+from Resilience4j on the same method. 
+
+Retry 
+----- 
+Retry attempts the request again if the first attempt fails. This helps handle 
+temporary failures such as network issues or short service downtime. 
+
+Circuit Breaker 
+--------------- 
+Circuit breaker monitors failures. If failures exceed a threshold, the circuit 
+opens and stops further calls to the failing service. Instead, a fallback 
+response is returned. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Using both together ensures: 
+- Retry handles temporary failures. 
+- Circuit breaker protects the system from repeated failures. 
+
+Execution Flow 
+-------------- 
+
+Client 
+  ↓ 
+Service A 
+  ↓ 
+Retry attempts (multiple calls if failure) 
+  ↓ 
+Circuit breaker monitors failure rate 
+  ↓ 
+If failure threshold exceeded → circuit opens 
+  ↓ 
+Fallback method executed 
+
+Example Code 
+------------ 
+
+@Service 
+public class PaymentService { 
+
+    @Retry(name = "paymentService") 
+    @CircuitBreaker(name = "paymentService", fallbackMethod = "fallbackPayment") 
+    public Payment getPayment(Long id) { 
+        return paymentClient.getPayment(id); 
+    } 
+
+    public Payment fallbackPayment(Long id, Exception ex) { 
+        return new Payment("Payment service temporarily unavailable"); 
+    } 
+} 
+
+In this example: 
+- Retry will attempt the request multiple times. 
+- If failures continue, the circuit breaker may open. 
+- If the circuit is open, the fallback method will execute. 
+
+Configuration (application.yml) 
+------------------------------- 
+
+resilience4j: 
+  retry: 
+    instances: 
+      paymentService: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+        maxAttempts: 3 
+        waitDuration: 1s 
+
+  circuitbreaker: 
+    instances: 
+      paymentService: 
+        failureRateThreshold: 50 
+        slidingWindowSize: 10 
+        waitDurationInOpenState: 10s 
+
+Configuration Meaning 
+--------------------- 
+
+Retry Configuration 
+- maxAttempts: Maximum number of retry attempts. 
+- waitDuration: Time delay between retry attempts. 
+
+Circuit Breaker Configuration 
+- failureRateThreshold: Percentage of failures that will open the circuit. 
+- slidingWindowSize: Number of calls used to calculate failure rate. 
+- waitDurationInOpenState: Time the circuit remains open before trying again. 
+
+Benefits 
+-------- 
+- Improves fault tolerance in microservices. 
+- Prevents cascading failures. 
+- Provides fallback responses when services are unavailable. 
+
+Best Practice 
+------------- 
+In production microservices systems, resilience patterns often combine: 
+
+Timeout + Retry + Circuit Breaker + Fallback 
+
+to ensure stable and reliable service communication. 
+
+7) REST API Design Issue 
+
+Problem: 
+API returns HTTP 200 OK even when an error occurs. This is incorrect REST design because HTTP 
+status codes should represent the result of the request. 
+
+Reason: 
+Spring Boot returns 200 by default if the controller method completes successfully and no exception is 
+thrown. Some developers also manually return ResponseEntity.ok() even in error cases. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Solution: 
+Use proper HTTP status codes. 
+
+400 Bad Request → Invalid client input 
+404 Not Found → Resource not found 
+500 Internal Server Error → Server failure 
+
+Use @ControllerAdvice to implement global exception handling and return consistent error responses 
+across the application. 
+
+8) Production Debugging Scenario – Random 500 Errors 
+
+Problem: 
+API randomly returns HTTP 500 Internal Server Error in production. 
+
+Possible causes: 
+Database issues, external service failures, infrastructure problems, or code exceptions. 
+
+Debugging steps:
+
+==== 185_1_Check_application_logs_to_identify_stack_trace_and_error.txt ====
+
+1. Check application logs to identify stack trace and error.
+
+==== 191_1_What_happens_internally_when_a_Spring_Boot_application_starts_.txt ====
+
+1. What happens internally when a Spring Boot application starts? 
+
+Flow: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+SpringApplication.run() 
+   | 
+Create Application Context 
+   | 
+Component Scan 
+   | 
+Bean Creation 
+   | 
+AutoConfiguration 
+   | 
+Embedded Server Start (Tomcat)
+
+==== 194_4_SpringBootApplication_internally_.txt ====
+
+4. @SpringBootApplication internally 
+
+@SpringBootApplication = 
+    @Configuration 
+    @EnableAutoConfiguration 
+    @ComponentScan
+
+==== 197_7_applicationproperties_vs_applicationyml_.txt ====
+
+7. application.properties vs application.yml 
+
+properties 
+
+server.port=8080 
+spring.datasource.url=jdbc:mysql:// 
+
+yaml 
+
+server: 
+  port: 8080 
+spring: 
+  datasource: 
+    url: jdbc:mysql://
+
+==== 198_8_Component_Scanning_.txt ====
+
+8. Component Scanning 
+
+Spring scans packages from main class package. 
+
+@SpringBootApplication 
+   | 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+scan base package 
+   | 
+create beans for annotated classes 
+
+-------------------------------------------------------- 
+
+BEAN LIFECYCLE
+
+==== 236_6_Chat_Application_.txt ====
+
+6. Chat Application 
+
+Client 
+  | 
+WebSocket Server 
+  | 
+Message Broker 
+  | 
+Database
+
+==== 237_7_Logging_System_.txt ====
+
+7. Logging System 
+
+Application 
+  | 
+Logstash 
+  | 
+Elasticsearch 
+  | 
+Kibana
+
+==== 239_9_Audit_Logging_.txt ====
+
+9. Audit Logging 
+
+Application 
+  | 
+Kafka 
+  | 
+Audit Service 
+  | 
+Audit DB
+
+==== 245_15_Multi_Tenant_Architecture_.txt ====
+
+15. Multi Tenant Architecture 
+
+Shared database 
+Schema per tenant 
+Database per tenant 
+
+ 
+SECTION 3 — REAL DEBUGGING STORIES 
+ 
+
+Story 1 — Slow API 
+
+Situation 
+API response time increased to 4 seconds. 
+
+Investigation 
+Checked logs and DB queries. 
+
+Root Cause 
+Missing index. 
+
+Fix 
+
+CREATE INDEX idx_user_id 
+ON orders(user_id) 
+
+Result 
+API response reduced to 150ms. 
+
+-------------------------------------------------------- 
+
+Story 2 — Memory Leak 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Situation 
+Memory usage increasing continuously. 
+
+Root Cause 
+Large objects cached in static map. 
+
+Fix 
+Used Redis with TTL. 
+
+Result 
+Memory stabilized. 
+
+-------------------------------------------------------- 
+
+Story 3 — Connection Pool Exhausted 
+
+Error 
+
+HikariPool - Connection not available 
+
+Root Cause 
+Slow DB queries. 
+
+Fix 
+
+- optimized query 
+- increased pool size 
+- added proper transaction handling 
+
+-------------------------------------------------------- 
+
+Story 4 — Kafka Duplicate Processing 
+
+Situation 
+Orders processed twice. 
+
+Root Cause 
+Consumer retry. 
+
+Fix 
+
+Idempotent consumer. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Store processed eventId. 
+
+-------------------------------------------------------- 
+
+Story 5 — Circular Dependency 
+
+ServiceA → ServiceB 
+ServiceB → ServiceA 
+
+Fix 
+
+Refactored to 
+
+ServiceA 
+ServiceB 
+CommonService 
+
+-------------------------------------------------------- 
+
+Story 6 — Production 500 Errors 
+
+Situation 
+Random failures. 
+
+Investigation 
+
+Logs 
+Metrics 
+External API latency 
+
+Fix 
+
+Added 
+
+Circuit Breaker 
+Retry 
+Timeout 
+
+ 
+BEST WAY TO ANSWER DEBUGGING QUESTIONS 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1 Identify the issue 
+2 Check logs and metrics 
+3 Find root cause 
+4 Fix problem 
+5 Prevent future occurrence 
+
+ 
+END OF NOTES 
+ 
+
+ 
+ 
+ 
+maven 
+
+Maven Command 
+
+What It Does 
+
+What Happens Internally 
+
+Output 
+
+mvn clean 
+
+Deletes previous 
+build files 
+
+Removes target/ 
+directory 
+
+Fresh build 
+environment 
+
+mvn validate 
+
+Checks project 
+structure 
+
+Validates pom.xml and 
+project configuration 
+
+Ensures project is 
+correct 
+
+mvn compile 
+
+Compiles source 
+code 
+
+Converts .java → 
+.class 
+
+target/classes 
+
+mvn test 
+
+Runs unit tests 
+
+Executes tests using JUnit 
+/ Surefire plugin 
+
+Test reports 
+
+mvn package 
+
+Packages 
+application 
+
+Compiles + tests + creates 
+artifact 
+
+.jar / .war in 
+target/ 
+
+mvn verify 
+
+Runs additional 
+checks 
+
+Integration tests, quality 
+checks 
+
+Verified build 
+
+mvn install 
+
+Installs artifact 
+locally 
+
+Copies artifact to local 
+Maven repo 
+
+~/.m2/repositor
+y 
+
+mvn deploy 
+
+Deploys artifact to 
+remote repo 
+
+Uploads JAR to 
+Nexus/Artifactory 
+
+Available for other 
+projects 
+
+mvn 
+spring-boot:run 
+
+Runs Spring Boot 
+application 
+
+Starts embedded server 
+
+Application starts 
+
+mvn 
+dependency:tree 
+
+Shows dependency 
+hierarchy 
+
+Displays all project 
+dependencies 
+
+Dependency graph 
+
+mvn 
+
+dependency:anal
+yze 
+
+Finds unused 
+dependencies 
+
+Detects redundant libraries  Optimization info 
+
+mvn sonar:sonar  Runs SonarQube 
+
+analysis 
+
+Checks bugs, code smells, 
+coverage 
+
+Sonar dashboard 
+report 
+
+mvn clean 
+install 
+
+mvn clean 
+package 
+
+Clean + build + 
+install 
+
+Deletes old build and 
+installs new artifact 
+
+Local repository 
+artifact 
+
+Clean + build jar 
+
+Rebuilds project 
+completely 
+
+Executable jar 
+
+ 
+ 
+microservice scenario 
+
+ 
+how we implement rate limiting for particular user 
+ 
+
+redis rate limiter config in properties 
+bucket 4j  
+
+ 
+Micro vs mono arch: 
+ 
+
+1) Architecture (as per business function they divide in module in micro ) 
+2) tech stack  (each module can have its own diff stack) 
+3) deployment  (independently deploy ) 
+4) use case     (smaller app use mono,large complex flexible move toward micro) 
+5) scalability (vertical in mono ,horizontal in micro) 
+
+ 
+keyy feature of microservice 
+ 
+
+1) independent deployement 
+2) fault isolation 
+3) scalibility  
+
+ 
+compopnent of micorservices 
+ 
+
+core char:: 
+
+1) service independence 
+2) domain driven dessign (DDD) 
+3) API communication 
+4) Technology Diversity 
+
+service registry and discovery: 
+
+1) Api gateway 
+2) load balancer 
+3) data management 
+4) monitoring and logging 
+5) ci/cd pipeline 
+
+ 
+API gateway  
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1) centralise entrypoint for managing client interaction.It simplifies communication 
+by routing. 
+2) load balancing  
+3) authentication and authorization  
+
+ 
+service discovery 
+ 
+-> enable microservices to dynamically locate and communicate with each other within 
+a distributed system 
+-> connect each other services witout hard coded 
+
+ 
+what is container 
+ 
+lightweight,standalone unit that bundles an app along with its 
+dependencies,including libraries,cofig and runtime 
+
+ 
+how do microservice communicate with each other 
+ 
+1) msg queue  -> awssqs ,kafka , rabitmq 
+2) grpc 
+3) syncronise -> rest 
+
+how would you handle microservice failure 
+ 
+
+-> one failure lead to cascade failure 
+-> circuit breaker 
+-> retries and fallback 
+-> centralize logging  
+
+how can you ensure backword compability  
+ 
+
+1) api versioning 
+2) semantic versioning principles 
+
+what is Oauth and why it is used ? 
+ 
+
+what is cqrs pattern in microservices ? what prob it solve? 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+compare api gateway and load balancer in microservices? 
+ 
+
+What are some common design principles? 
+ 
+
+1) high cohesion 
+2) autonomous 
+3) business domain centric 
+4) resilience 
+5) observable 
+6) automation 
+
+how do ensure security in microservices 
+ 
+
+1) secure the communication 
+2) authentication and authorization 
+3) service level isolation 
+
+what are the few way to achive synchronous and asynchronous communication between 
+microservice? 
+
+ 
+
+sync -> rest api calls,grpc,graphQL api  
+
+how do you implement rate limiting in microservices? 
+ 
+
+-> token bucket algoritham  
+-> API gateway  
+
+What is an event driven arch in microservices? 
+ 
+
+microservice communicate on event msgs 
+
+what is idempotency and why it is imp in microservices 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+-> multiple request  -> same type of response 
+
+what is database sharding and why used it is used in microservices? 
+ 
+
+-> large databse are divided into smaller more manageable pieces called "shard". 
+
+how do you handle data consistency in microservices 
+ 
+
+1) saga pattern 
+2) event sourcing  
+3) distributed transaction 
+
+what is canary deployment in microservices? 
+ 
+
+how would you monitor the microservices? 
+ 
+
+1) distribution tracing  
+2) metrics collection  (promithius) 
+3) visualization and alerting (graphana and kibana) 
+
+what are DDD principles ? 
+ 
+
+1) bounded context  
+2) ubiquitous languages 
+3) aggregates 
+
+how do you design for scalability in microservices? 
+ 
+
+1) horizontal scaling 
+2) database partitioning (sharding) 
+3) catching  
+4) load balancing  
+5) asynchronous processing  
+6) service mesh  
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+what is chaos engineering and hwow is it applied in microservice ? 
+ 
+
+how do you perform logging in a distributed microservices system? 
+ 
+
+1) centralized loging  
+2) structured logging 
+3) trace ids 
+4) log levels 
+5) security 
+
+what is the purpose of retry pattern in microservices 
+ 
+
+what are sidecars in microservices? 
+ 
+
+what are the best practices to deploy microservices in prod ? 
+ 
+1) containerisatiion  
+2) ci/cd 
+3) deployment strategies 
+4) monitoring and observalibility 
+5) service discovery  
+6) security 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+java classic 
+
+we have two employee class which has two object both have same id and name ,now we have one 
+set,now we want only unique employee elements to be stored in set  
+
+Employee e1 = new Employee(1, "Tejas"); 
+Employee e2 = new Employee(1, "Tejas"); 
+
+Set<Employee> set = new HashSet<>(); 
+set.add(e1); 
+set.add(e2); 
+
+System.out.println(set.size()); 
+
+class Employee { 
+    private int id; 
+    private String name; 
+
+    public Employee(int id, String name) { 
+        this.id = id; 
+        this.name = name; 
+    } 
+
+    // 1. Override equals 
+    @Override 
+    public boolean equals(Object o) { 
+        if (this == o) return true; 
+        if (!(o instanceof Employee)) return false; 
+
+        Employee e = (Employee) o; 
+        return id == e.id && 
+               Objects.equals(name, e.name); 
+    } 
+
+    // 2. Override hashCode 
+    @Override 
+    public int hashCode() { 
+        return Objects.hash(id, name); 
+    } 
+} 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Used_in_project 
+
+1)  Component used in project 
+2)  Config classes  
+3)  Service  
+4)  Repo 
+5)   
+
+Prod Defect 
+
+In our application, we use a pipeline-based design pattern where business logic is executed 
+through a sequence of processing steps. A key part of this pipeline is a mapper layer, where we 
+maintain precomputed logic for calculating risk scores. These risk calculations can be triggered from 
+multiple entry points depending on the flow (e.g., assessment, self-assessment, etc.). 
+
+Problem: 
+Recently, a defect was introduced when an additional validation was added to ensure that 
+pre-calculation of risk should only be executed in an “assessment” context. 
+
+However, this change unintentionally blocked the risk pre-calculation when the flow originated from 
+the self-assessment module. As a result: 
+
+●  After submitting a self-assessment, expected risk calculations were not triggered. 
+●  This caused incorrect or missing risk scores for certain business rules. 
+
+Root Cause: 
+The newly added context check was too restrictive and did not account for the self-assessment flow, 
+even though it also required the same pre-calculation logic. 
+
+Solution: 
+To fix this: 
+
+I updated the service layer (adapter class) where the pipeline is orchestrated. 
+Introduced conditional checks to correctly identify when recalculation should happen. 
+
+● 
+● 
+●  Explicitly invoked the mapper’s pre-calculation logic for the self-assessment flow by passing 
+
+the appropriate context. 
+
+●  Ensured that the logic remains reusable and does not violate the original design constraints. 
+
+Outcome: 
+
+●  Risk calculation now correctly triggers for both assessment and self-assessment flows. 
+●  No regression in existing assessment behavior. 
+●  Maintained separation of concerns by handling context-specific logic at the adapter/service 
+
+layer instead of modifying core mapper logic. 
+
+Key Takeaways (for interview emphasis): 
+
+●  Careful handling of context-driven logic in pipeline systems. 
+● 
+●  Fix applied at the right abstraction layer to avoid breaking existing design. 
+
+Importance of identifying side effects of restrictive conditions.
+
+==== 24_3_API_Gateway__Traffic_Management_.txt ====
+
+3. API Gateway & Traffic Management 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ Have you used an API Gateway? 
+
+Yes, we use a dedicated API Gateway service in our microservices architecture. 
+
+Instead of the monolith acting as the entry point, we implemented a separate API Gateway layer that 
+serves as the single entry point for all client requests. 
+
+The API Gateway is responsible for: 
+
+●  Routing requests to appropriate backend microservices 
+
+●  Authentication and JWT validation 
+
+●  Authorization enforcement 
+
+●  Centralized logging and monitoring 
+
+●  Request validation 
+
+●  Rate limiting and throttling 
+
+●  Handling cross-cutting concerns 
+
+This separation improves: 
+
+●  Scalability 
+
+●  Security 
+
+●  Maintainability 
+
+●  Clear separation of concerns 
+
+It also allows backend services to remain lightweight and focused only on business logic. 
+
+✅ How does the API Gateway manage load? 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+The API Gateway acts as a centralized traffic controller. 
+
+1⃣ Load Balancing 
+
+● 
+● 
+
+It routes incoming traffic to multiple instances of backend services. 
+In Kubernetes deployment, it works with Kubernetes Services and kube-proxy for load 
+balancing. 
+
+●  Only healthy pods receive traffic (health checks enabled). 
+
+2⃣ Rate Limiting 
+
+Rate limiting restricts how many requests a client can send within a specific time window. 
+
+Purpose: 
+
+●  Prevent abuse 
+
+●  Avoid DDoS-style traffic spikes 
+
+●  Ensure fair usage among clients 
+
+Example: 
+
+●  100 requests per minute per user 
+
+If limit exceeds → 429 Too Many Requests 
+
+3⃣ Throttling 
+
+Throttling controls request processing speed when traffic exceeds thresholds. 
+
+Instead of rejecting immediately: 
+
+● 
+
+It slows down request processing 
+
+●  Protects backend services 
+
+●  Maintains system stability 
+
+Throttling is especially useful during sudden traffic spikes. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+4⃣ Auto-Scaling 
+
+Auto-scaling happens at the infrastructure level (Kubernetes). 
+
+●  Horizontal Pod Autoscaler increases service instances 
+
+●  Based on CPU, memory, or request count 
+
+●  Scales down during low traffic to optimize cost 
+
+So load management is a combination of: 
+
+●  API Gateway traffic control 
+
+●  Kubernetes load balancing 
+
+Throttling and rate limiting are handled at the API Gateway level. 
+
+How load balancing done in your project? 
+Architecture Short Note – Load Balancing, Service Registry & Routing (Kubernetes 
+Deployment) 
+
+1⃣ Who does Load Balancing? 
+
+In Kubernetes, load balancing is handled at multiple layers: 
+
+• Kubernetes Service (ClusterIP / NodePort / LoadBalancer) 
+  - Distributes traffic across healthy pods. 
+  - Uses kube-proxy (iptables/IPVS) internally. 
+  - Performs round-robin load balancing by default. 
+
+• Ingress Controller (if used) 
+  - Handles external HTTP/HTTPS traffic. 
+  - Routes traffic from outside cluster to internal services. 
+
+• API Gateway (Application Level) 
+  - Routes requests to correct backend services. 
+  - Applies rate limiting, throttling, authentication. 
+  - Relies on Kubernetes Service for actual pod-level balancing. 
+
+So: 
+External LB → Ingress → API Gateway → Kubernetes Service → Pods 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+------------------------------------------------------------ 
+
+2⃣ Do we use Service Registry? 
+
+In Kubernetes, a separate service registry like Eureka is usually NOT required. 
+
+Reason: 
+• Kubernetes has built-in service discovery. 
+• Each Service gets a DNS name. 
+• Pods communicate using: 
+
+  http://service-name:port 
+
+Kube-DNS / CoreDNS resolves service names to cluster IPs automatically. 
+
+So Kubernetes itself acts as: 
+• Service Registry 
+• Service Discovery mechanism 
+
+------------------------------------------------------------ 
+
+3⃣ How is Routing Done? 
+
+Routing happens in layers: 
+
+A) External Routing 
+   Client → Load Balancer → Ingress Controller 
+
+B) Gateway Routing 
+   API Gateway inspects: 
+   - Path (/audit/**) 
+   - HTTP method 
+   - Headers 
+   - JWT claims 
+
+   Then forwards to appropriate internal service. 
+
+C) Internal Routing 
+   API Gateway calls: 
+   http://audit-service:8080 
+   http://auth-service:8080 
+
+   Kubernetes Service forwards request to one of the healthy pods. 
+
+------------------------------------------------------------ 
+
+Final Flow: 
+
+ 
+ 
+ 
+ 
+   
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Client 
+   ↓ 
+Cloud Load Balancer 
+   ↓ 
+Ingress Controller 
+   ↓ 
+API Gateway 
+   ↓ 
+Kubernetes Service (DNS-based discovery) 
+   ↓ 
+Pod Instance (Load Balanced) 
+
+------------------------------------------------------------ 
+
+Key Points for Interview: 
+
+• Kubernetes handles service discovery. 
+• kube-proxy handles pod-level load balancing. 
+• Ingress handles external routing. 
+• API Gateway handles application-level routing and traffic control. 
+• No separate Eureka needed in Kubernetes-native setup.
+
+==== 25_4_Database_Design__Load_Handling_.txt ====
+
+4. Database Design & Load Handling 
+ 
+
+- How many databases do you have? 
+
+Currently, we use a single shared database across the application. 
+
+This is intentional because the system is in a transition phase from a monolithic 
+architecture to microservices. Using a single database simplifies data consistency, 
+reduces migration complexity, and ensures stability while services are being gradually 
+extracted. 
+
+As part of the future roadmap, the plan is to move toward a database-per-service model 
+once the microservices are fully isolated. 
+
+- How does your database handle load? 
+
+The database handles load through a combination of design optimizations and supporting 
+infrastructure. 
+
+We use proper indexing on frequently queried columns to speed up read operations. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Connection pooling is enabled to efficiently manage database connections and prevent 
+connection exhaustion under high traffic. 
+
+To reduce direct database load, Redis caching is used for frequently accessed and 
+read-heavy data. Pagination is applied for large result sets to avoid heavy queries. 
+
+Additionally, background processing and asynchronous workflows via Kafka help offload 
+non-critical operations from synchronous database access, improving overall 
+performance and scalability. 
+
+Connection Pooling  
+-------------------------- 
+Connection pooling works by maintaining a pool of pre-created database connections 
+that can be reused by multiple requests instead of creating a new connection each time. 
+
+When the application starts, the connection pool (for example, HikariCP in Spring Boot) 
+creates a fixed number of database connections and keeps them ready. 
+
+When a request needs to access the database: 
+- It borrows an available connection from the pool 
+- Executes the query 
+- Returns the connection back to the pool instead of closing it 
+
+If all connections are in use, new requests wait until a connection becomes available, 
+rather than creating unlimited connections and overwhelming the database. 
+
+This approach: 
+- Reduces connection creation overhead 
+- Improves performance under high traffic 
+- Prevents database connection exhaustion 
+- Ensures controlled and efficient use of database resources
+
+==== 27_6_Logging__Monitoring_.txt ====
+
+6. Logging & Monitoring 
+ 
+- How is logging implemented? 
+- Which logging/monitoring tools are used? 
+- How is the logging tool integrated? 
+- How does application data reach the logging system?
+
+==== 29_8_InterService_Communication_.txt ====
+
+8. Inter-Service Communication 
+ 
+- How do services communicate with each other? 
+- Synchronous vs asynchronous communication 
+- where is multithreading applied in your application ?
+
+==== 35_15_AOP_AspectOriented_Programming_.txt ====
+
+15. AOP (Aspect-Oriented Programming) 
+ 
+- Where is AOP used in your project? 
+- Why was AOP used? 
+
+ 
+Cloud 
+ 
+-  how do you manage load balancing ? 
+
+ 
+Others 
+ 
+
+1)  HTTP vs HTTPS 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Functional Info 
+
+We have an internal audit application that supports the end-to-end audit lifecycle. 
+
+Key modules: 
+
+●  Dashboard 
+●  Assessment area 
+●  Project management 
+●  Time tracking 
+●  Audit report creation 
+●  Recycle bin 
+●  Audit history 
+
+Core audit objects: 
+
+●  Risks and controls 
+●  Strategic risks 
+●  Objectives 
+●  Workpapers 
+
+Major functionalities: 
+
+●  Configurable workflows 
+●  Dynamic role- and permission-based access control 
+●  Dynamic rule engine for business logic 
+●  Workpaper upload and download 
+●  Customizable naming and taxonomy 
+●  SMTP-based email notifications 
+●  Automated audit report generation 
+
+Competitors:: 
+AuditBoard  
+Workiva 
+
+ 
+ 
+ 
+ 
+Business user/admin  flow 
+
+Admin Flow (Context Definition) 
+
+In the audit application, the Admin has full system-level access and configuration control. 
+
+Admin responsibilities include: 
+
+●  Managing taxonomy settings across the application 
+
+●  Defining roles and permissions 
+
+○  Creating new roles from existing system roles 
+
+○  Assigning permissions to roles 
+
+●  User management 
+
+○  Creating users 
+
+○  Assigning roles to users 
+
+●  Customizing the system 
+
+○  Renaming audit objects (risk, control, objective, workpaper, etc.) 
+
+○  Modifying taxonomy structures 
+
+●  Configuring SMTP settings for email notifications 
+
+In addition to administrative capabilities, the Admin can perform all operations available 
+to a normal user, including working on audits, assessments, workpapers, workflows, and 
+reports. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+User Flow (Context Definition) 
+
+A User has functional access based on the roles and permissions assigned to them. 
+
+User capabilities include: 
+
+●  Accessing the Assignment area 
+
+○  Creating new assignments 
+
+○  Adding audit objects within an assignment 
+
+●  Working with Projects 
+
+○  Linking a project to a specific audit area 
+
+○  Performing audits within that project 
+
+○  Adding predefined audit objects (risks, controls, objectives, workpapers, etc.) 
+
+●  Managing audit objects 
+
+○  Creating, editing, and deleting objects 
+
+●  Generating audit reports from assignment or project data 
+
+●  Participating in assessment workflows 
+
+○  Being assigned to specific assessment phases 
+
+○  Receiving notifications based on assigned phases and tasks 
+
+User limitations: 
+
+●  No access to administrative areas such as: 
+
+○  System settings 
+
+○  Statistics 
+
+○  Configuration modules 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Application flow 
+
+TeamMate+ Audit – Overview 
+
+TeamMate+ Audit is a software application used by internal audit teams to plan, execute, 
+track, and report audits efficiently. 
+ It is widely used by organizations—especially in regulated industries like banking—to 
+manage risk, compliance, and governance activities. 
+
+Who Uses TeamMate+ Audit?
+
+==== 43_5_FollowUp_CronBased_Tracking_.txt ====
+
+5. Follow-Up (Cron-Based Tracking) 
+
+●  Tracks whether audit issues are resolved 
+●  Sends reminders until actions are closed 
+●  Ensures accountability 
+
+Benefits to the Bank 
+
+●  Time Savings – Less manual tracking and documentation 
+
+●  Reduced Risk – Systematic and consistent audits 
+
+● 
+
+Improved Compliance – Easier regulatory adherence 
+
+●  Actionable Insights – Identifies recurring issues and trends 
+
+●  Transparency – Clear visibility for management and regulators 
+
+Final Summary 
+
+✅ In short: 
+ In the banking sector, TeamMate+ Audit is used to manage audits, control risks, ensure 
+regulatory compliance, and improve audit efficiency, helping banks remain safe, 
+compliant, and trustworthy. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Technical Architecture 
+
+Tech stack used  
+
+Frontend: 
+- React 18, TypeScript, Vite 
+- Redux Toolkit 
+
+Backend: 
+- Java 17 
+- Spring Boot 3.x 
+- Spring Security, JWT, OAuth2 
+- RESTful APIs, Swagger (OpenAPI) 
+- JPA / Hibernate 
+
+Database: 
+- MySQL 
+
+Messaging & Cache: 
+- Kafka 
+- Redis 
+
+DevOps & Cloud: 
+- Git, GitHub 
+- Jenkins (CI/CD pipelines) 
+- Docker, Kubernetes 
+- AWS (EC2, S3, Lambda) 
+
+Testing & Quality: 
+- JUnit, Mockito 
+- Spring Boot Test 
+- SonarQube 
+
+Monitoring & Logging: 
+- Splunk 
+- Datadog 
+
+Tools: 
+- MobaXterm 
+- PuTTY 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Design Pattern 
+
+Adapter design pattern:: 
+
+Adapted Design Pattern – Application Flow Explanation 
+
+Our application follows an adapted Adapter-based design pattern to bridge HTTP 
+requests with the service layer and enforce a structured business pipeline. 
+
+Why we use this pattern 
+
+●  To decouple controllers from business logic 
+
+●  To enforce a standard execution pipeline for every request 
+
+●  To centralize authorization, DB handling, and post-processing 
+
+●  To make the system extensible and maintainable 
+
+Request Flow (End-to-End)
+
+==== 55_5_During_sprint_planning_stories_are_assigned_to_developers_Based_on_the_number_of_.txt ====
+
+5. During sprint planning, stories are assigned to developers. Based on the number of 
+   stories (for example, 10 tickets) and available QA resources (for example, 2 QA), 
+   QA planning is done for functional and feature-wise testing.
+
+==== 57_7_Once_development_for_a_story_is_completed_it_is_handed_over_to_the_QA_team_for_.txt ====
+
+7. Once development for a story is completed, it is handed over to the QA team for 
+   functional and regression testing.
+
+==== 60_10_After_bug_fixes_the_QA_team_retests_the_functionality_to_ensure_the_issue_is_.txt ====
+
+10. After bug fixes, the QA team re-tests the functionality to ensure the issue is 
+    resolved and no regressions are introduced.
+
+==== 78_3_STAGING_BRANCH_CREATION_.txt ====
+
+3. STAGING BRANCH CREATION 
+- After code freeze, a staging branch is created from the stabilized development branch. 
+- The staging branch represents a production-like snapshot of the application. 
+- No direct feature development happens on this branch.
+
+==== 81_6_MANUAL__BUSINESS_VALIDATION_.txt ====
+
+6. MANUAL & BUSINESS VALIDATION 
+- After automation passes, manual testing is performed: 
+  - Functional testing 
+  - Exploratory testing 
+  - User acceptance testing (UAT) 
+
+ 
+ 
+ 
+ 
+ 
+ 
+- Business stakeholders validate: 
+  - Feature correctness 
+  - Data integrity 
+  - End-to-end workflows
+
+==== 84_9_POSTDEPLOYMENT_VERIFICATION_.txt ====
+
+9. POST-DEPLOYMENT VERIFICATION 
+- After production deployment: 
+  - Application logs are monitored 
+  - Metrics and alerts are observed 
+  - Performance and error rates are validated 
+- Immediate rollback plans are kept ready in case of issues.
+
+==== 85_10_RELEASE_CLOSURE_.txt ====
+
+10. RELEASE CLOSURE 
+- Once production stability is confirmed: 
+  - The release branch is tagged 
+  - Changes are merged back to the main branch 
+  - Release notes are finalized 
+- The system is now ready for the next development cycle. 
+
+KEY BENEFITS OF THIS PROCESS: 
+- Controlled and predictable releases 
+- Early detection of defects 
+- Production stability 
+- Clear separation of development, validation, and release stages 
+- Reduced risk during deployment 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Bugs and interview que 
+
+Bugs faced in the project 
+
+1)Latency bug  
+
+BUG SCENARIO: PERFORMANCE / LATENCY ISSUE – TIME TRACKING MODULE 
+
+ISSUE: 
+Users were experiencing significant latency while loading the Time Tracking screen. 
+The page was attempting to load a large dataset (~5000 records) in a single request, 
+resulting in slow response times and poor user experience. 
+
+INITIAL ANALYSIS: 
+- The first assumption was a database performance issue. 
+- We analyzed: 
+  - SQL queries 
+  - Execution plans 
+  - Index usage 
+  - DB response time 
+- Database queries were optimized and performed within acceptable limits. 
+- Conclusion: DB was NOT the bottleneck. 
+
+DEEPER INVESTIGATION: 
+- We performed end-to-end profiling of the request flow. 
+- Identified that the delay was occurring in the application layer. 
+- Root cause was found in a custom DTO mapper. 
+
+ROOT CAUSE: 
+- A custom mapper was using a traditional for-loop to map each entity 
+  to a DTO one-by-one. 
+- This resulted in: 
+  - High CPU usage 
+  - Increased object creation 
+  - Long processing time for large datasets 
+- The mapping logic was O(n) and executed for all 5000 records at once, 
+  causing noticeable latency. 
+
+SOLUTION IMPLEMENTED:
+
+==== 87_2_PAGINATION_IMPLEMENTATION_.txt ====
+
+2. PAGINATION IMPLEMENTATION 
+   - Introduced server-side pagination. 
+   - Instead of loading all 5000 records at once, data is now fetched in chunks 
+     (e.g., 50 or 100 records per page). 
+   - Significantly reduced payload size and processing time. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+3. MAPPER OPTIMIZATION 
+   - Refactored the custom mapper to avoid inefficient looping where possible. 
+   - Optimized DTO mapping to handle smaller paginated datasets efficiently. 
+
+RESULT: 
+- Page load time is reduced drastically. 
+- CPU and memory utilization normalized. 
+- Improved overall user experience. 
+- Application became scalable for larger datasets. 
+
+KEY LEARNINGS: 
+- Performance issues are not always database-related. 
+- Application-layer processing (DTO mapping, loops, object creation) 
+  can become a major bottleneck. 
+- Pagination and indexing are critical for handling large datasets efficiently. 
+
+2)BUG SCENARIO: UI FIELD NOT RENDERING – DATA COMPATIBILITY ISSUE 
+
+ISSUE: 
+Users reported that a specific text field was not visible on the UI while loading 
+a particular screen. The field existed in the layout configuration but was either 
+blank or not rendered properly in the new UI. 
+
+IMPACT: 
+- Users were unable to view or edit a critical test-related field. 
+- Issue was intermittent and data-specific, making it difficult to reproduce. 
+- Affected only a subset of existing records. 
+
+INITIAL INVESTIGATION: 
+- Attempted to reproduce the issue locally and in lower environments. 
+- Verified: 
+  - UI configuration 
+  - Field visibility rules 
+  - Role-based permissions 
+  - API response payload 
+- The issue could NOT be reproduced consistently. 
+- New records were working fine, indicating the problem was not in the UI logic itself. 
+
+HYPOTHESIS: 
+- After detailed discussion and comparison between affected and non-affected records, 
+  we suspected a data-related issue rather than a UI or backend logic issue. 
+
+DATA ANALYSIS: 
+- Identified the database column backing the problematic text field. 
+- Executed queries to extract all distinct values from that column for affected records. 
+- While analyzing the data, we found: 
+  - Presence of restricted / non-printable / legacy special characters 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  - Characters introduced from an older version of the UI 
+  - These characters were not compatible with the new UI rendering engine 
+
+ROOT CAUSE: 
+- The old UI allowed certain unsupported characters to be persisted in the database. 
+- The new UI framework had stricter rendering and validation rules. 
+- As a result, the field failed to render when encountering those invalid characters. 
+
+SOLUTION IMPLEMENTED:
+
+==== 96_6_Result_.txt ====
+
+6. Result 
+--------- 
+
+- Database now prevents duplicate combinations. 
+- Even if two concurrent inserts happen: 
+    • One succeeds 
+    • The other fails with unique constraint violation 
+- Data integrity guaranteed at DB level. 
+- No performance degradation from application-level locking. 
+
+Conclusion: 
+------------ 
+Instead of handling concurrency at application layer, 
+we enforced consistency at the database layer using 
+a composite unique constraint. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+3. To implement any functionality you faced difficulty & you need to learn some tech & 
+how you implemented that? How we handle if there are already duplicate entry? 
+
+Biggest Challenge: 
+Handling duplicate survey responses caused by concurrent API requests 
+in a high-concurrency system where the API was not idempotent. 
+
+System Context: 
+- Separate tables and services: 
+    • Survey 
+    • Questions 
+    • Survey Assignment 
+    • Survey Response 
+
+- survey_response table structure: 
+    id (PK) 
+    user_id (FK) 
+    survey_id (FK) 
+    question_id (FK) 
+    response 
+
+Business Rule: 
+Each (user_id, survey_id, question_id) combination must be unique. 
+
+Problem: 
+Due to server slowness, UI sent duplicate requests. 
+Backend had “check-then-insert” logic (update or insert). 
+Method was not synchronized. 
+
+Failure Flow: 
+    Thread 1 → Check exists → Not found 
+    Thread 2 → Check exists → Not found 
+    Thread 1 → Insert 
+    Thread 2 → Insert 
+
+Result: 
+Duplicate rows created in survey_response table. 
+
+Why Not Use Synchronization? 
+- Would reduce throughput. 
+- High concurrency system. 
+- Blocking threads was not acceptable. 
+- Frontend debouncing not reliable. 
+
+Solution: 
+Moved consistency enforcement to database layer. 
+
+Added composite UNIQUE constraint: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    ALTER TABLE survey_response 
+    ADD CONSTRAINT uk_user_survey_question 
+    UNIQUE (user_id, survey_id, question_id); 
+
+Result: 
+- Database guarantees uniqueness. 
+- If two concurrent inserts occur: 
+    • One succeeds 
+    • One fails with unique constraint violation 
+- No application-level locking. 
+- No performance degradation. 
+- Data integrity guaranteed. 
+
+Outcome: 
+Issue permanently resolved. 
+Appreciated by team lead in retrospective. 
+
+-- PROBLEM: 
+-- Add UNIQUE(survey_id, question_id, user_id) 
+-- Table already exists + has duplicate data 
+
+-------------------------------------------------- 
+-- STEP 1: FIND DUPLICATES 
+-------------------------------------------------- 
+SELECT survey_id, question_id, user_id, COUNT(*) AS cnt 
+FROM your_table 
+GROUP BY survey_id, question_id, user_id 
+HAVING COUNT(*) > 1; 
+
+-------------------------------------------------- 
+-- STEP 2: DELETE DUPLICATES (KEEP LOWEST ID) 
+-------------------------------------------------- 
+-- VERIFY FIRST 
+SELECT t1.* 
+FROM your_table t1 
+JOIN your_table t2 
+ON t1.survey_id = t2.survey_id 
+AND t1.question_id = t2.question_id 
+AND t1.user_id = t2.user_id 
+AND t1.id > t2.id; 
+
+-- DELETE DUPLICATES 
+DELETE t1 
+FROM your_table t1 
+JOIN your_table t2 
+ON t1.survey_id = t2.survey_id 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+AND t1.question_id = t2.question_id 
+AND t1.user_id = t2.user_id 
+AND t1.id > t2.id; 
+
+-------------------------------------------------- 
+-- STEP 3: ADD UNIQUE CONSTRAINT 
+-------------------------------------------------- 
+ALTER TABLE your_table 
+ADD CONSTRAINT unique_survey_question_user 
+UNIQUE (survey_id, question_id, user_id); 
+
+-------------------------------------------------- 
+-- NOTE: 
+-- 1. ORDER OF EXECUTION IS IMPORTANT 
+-- 2. TAKE BACKUP BEFORE DELETE 
+-- 3. CONSTRAINT WILL FAIL IF DUPLICATES EXIST 
+-------------------------------------------------- 
+
+------------------------------------------------------------
+
+==== 97_4_How_you_optimised_your_API_.txt ====
+
+4. How you optimised your API? 
+
+ 
+HOW I OPTIMIZED OUR APIs 
+ 
+
+API optimization was not done in one place. 
+It was done at multiple layers: 
+
+1) Database layer 
+2) Caching layer 
+3) Application layer 
+4) Authorization layer 
+5) Infrastructure layer 
+
+-------------------------------------------------------- 
+1⃣ DATABASE OPTIMIZATION 
+-------------------------------------------------------- 
+
+Problem: 
+- Slow queries in audit reports 
+- N+1 query issues 
+- Large joins across audit, risk, findings tables 
+
+What I did: 
+
+✔ Added proper indexing 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+   - Composite indexes on (audit_id, status) 
+   - Indexes on foreign keys 
+   - Indexes on frequently filtered columns 
+
+✔ Solved N+1 issue 
+   - Replaced lazy loops with JOIN FETCH / custom queries 
+   - Used DTO projections instead of full entity load 
+
+✔ Reduced payload size 
+   - Used pagination (Pageable) 
+   - Limited columns using projections 
+
+✔ Optimized reporting queries 
+   - Used native queries for heavy aggregation 
+   - Avoided unnecessary entity hydration 
+
+Impact: 
+- Query time reduced significantly 
+- Lower DB CPU usage 
+- Faster report APIs 
+
+-------------------------------------------------------- 
+2⃣ REDIS CACHING OPTIMIZATION 
+-------------------------------------------------------- 
+
+Problem: 
+Authorization lookup hitting DB every request. 
+
+Solution: 
+✔ Implemented cache-aside pattern 
+✔ Stored user permissions in Redis SET 
+✔ TTL strategy (15–30 mins) 
+✔ Explicit invalidation on role update 
+
+Impact: 
+- Reduced DB calls for auth by large margin 
+- Authorization became O(1) lookup 
+
+-------------------------------------------------------- 
+3⃣ APPLICATION LAYER OPTIMIZATION 
+-------------------------------------------------------- 
+
+✔ Removed unnecessary object mapping 
+   - Avoided deep entity graph serialization 
+
+✔ Used async processing for: 
+   - Email notifications 
+   - Report generation 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+   - Background tasks 
+
+✔ Used connection pooling (HikariCP tuning) 
+   - Optimized max pool size 
+   - Monitored slow queries 
+
+✔ Avoided excessive logging in production 
+   - Reduced I/O overhead 
+
+-------------------------------------------------------- 
+4⃣ AUTHORIZATION OPTIMIZATION 
+-------------------------------------------------------- 
+
+Problem: 
+Heavy permission checks at service level. 
+
+Solution: 
+✔ Moved to AOP-based centralized permission check 
+✔ Avoided duplicate authorization logic in services 
+✔ Used Redis-based permission resolution 
+
+Impact: 
+- Cleaner code 
+- Faster permission validation 
+- Reduced redundant checks 
+
+-------------------------------------------------------- 
+5⃣ INFRASTRUCTURE OPTIMIZATION 
+-------------------------------------------------------- 
+
+✔ Enabled API Gateway level rate limiting 
+✔ Enabled compression (GZIP) 
+✔ Proper thread pool configuration 
+✔ Monitored via logs & metrics 
+✔ Tuned Kubernetes resource limits 
+
+-------------------------------------------------------- 
+6⃣ RESPONSE OPTIMIZATION 
+-------------------------------------------------------- 
+
+✔ Used pagination everywhere 
+✔ Avoided returning large nested JSON 
+✔ Used DTO instead of exposing entities 
+✔ Applied selective serialization 
+
+-------------------------------------------------------- 
+REAL PRODUCTION EXAMPLE 
+-------------------------------------------------------- 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+In reporting API: 
+
+Before: 
+- Multiple joins 
+- Full entity load 
+- No caching 
+- High response time 
+
+After: 
+- Optimized native query 
+- Added index 
+- Added pagination 
+- Moved heavy calculation async 
+- Cached static metadata 
+
+Result: 
+✔ API response time reduced 
+✔ DB load reduced 
+✔ No timeout in peak usage 
+
+-------------------------------------------------------- 
+SHORT INTERVIEW VERSION 
+-------------------------------------------------------- 
+
+"I optimized APIs at multiple layers — database indexing,  
+query tuning, fixing N+1 issues, Redis caching for  
+authorization, DTO projections to reduce payload size,  
+async processing for heavy tasks, and infrastructure tuning.  
+This significantly reduced response time and DB load while  
+improving scalability."
+
+==== 99_6_What_was_the_DB_schemas_you_worked_on_.txt ====
+
+6. What was the DB schemas you worked on? 
+
+I primarily worked on RBAC (Role-Based Access Control) schemas  
+and core business schemas for an enterprise audit application. 
+
+------------------------------------------------------------------ 
+A) RBAC SCHEMAS (Most Critical Area) 
+------------------------------------------------------------------ 
+
+1) users 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- username (Unique) 
+- email (Unique) 
+- password_hash 
+- status 
+- created_at 
+- updated_at 
+
+Note: 
+UUID used because: 
+- Distributed microservices environment 
+- Avoid sequential ID exposure 
+- Better merge compatibility across services 
+
+2) roles 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- role_name (Unique) 
+- description 
+- role_type (GLOBAL / ASSESSMENT) 
+- created_at 
+- updated_at 
+
+3) permissions 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+- permission_key (Unique) 
+- module_name 
+- action_type (READ / WRITE / DELETE / APPROVE) 
+- created_at 
+- updated_at 
+
+4) user_roles (Mapping Table) 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- user_id (UUID, FK → users.id) 
+- role_id (UUID, FK → roles.id) 
+- assessment_id (UUID, Nullable, for context-based role override) 
+- assigned_at 
+- assigned_by 
+
+5) role_permissions (Mapping Table) 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- role_id (UUID, FK → roles.id) 
+- permission_id (UUID, FK → permissions.id) 
+- created_at 
+
+Why UUID here? 
+- Security-sensitive module 
+- Prevent predictable ID enumeration 
+- Used across microservices 
+- Compatible with Redis caching keys 
+
+------------------------------------------------------------------ 
+B) SURVEY / RESPONSE SCHEMA 
+------------------------------------------------------------------ 
+
+6) survey 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- title 
+- description 
+- created_by (UUID) 
+- created_at 
+- updated_at 
+
+7) question 
+-------------------------------------------------- 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+- id (UUID, Primary Key) 
+- question_text 
+- question_type 
+- is_mandatory 
+- created_at 
+
+8) survey_assignment 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- survey_id (UUID, FK) 
+- user_id (UUID, FK) 
+- assigned_at 
+- due_date 
+- status 
+
+9) survey_response 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- user_id (UUID, FK) 
+- survey_id (UUID, FK) 
+- question_id (UUID, FK) 
+- response 
+- submitted_at 
+
+Composite Unique Constraint: 
+UNIQUE (user_id, survey_id, question_id) 
+
+Purpose: 
+Prevent duplicate entries under concurrent API calls. 
+
+------------------------------------------------------------------ 
+C) GENERIC CORE BUSINESS SCHEMAS 
+------------------------------------------------------------------ 
+
+10) audit 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- audit_name 
+- audit_type 
+- status 
+- start_date 
+- end_date 
+- created_by (UUID) 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+11) findings 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- audit_id (UUID, FK) 
+- severity 
+- description 
+- status 
+- owner_id (UUID) 
+- created_at 
+
+12) documents 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- reference_id (UUID) 
+- reference_type 
+- s3_path 
+- uploaded_by (UUID) 
+- uploaded_at 
+
+13) notifications 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- user_id (UUID) 
+- message 
+- is_read 
+- created_at 
+
+------------------------------------------------------------------ 
+Why UUID Instead of Auto-Increment? 
+------------------------------------------------------------------ 
+
+- Microservices architecture 
+- Avoid collision during data migration 
+- Prevent ID guessing 
+- Easier replication & sharding 
+- Safe for distributed systems 
+
+------------------------------------------------------------------ 
+Summary (Interview Ready) 
+------------------------------------------------------------------ 
+
+I worked extensively on: 
+
+1) RBAC schemas (users, roles, permissions, mappings) 
+2) Context-based authorization schemas 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+3) Survey & response management schemas 
+4) Audit core business schemas 
+5) Document & notification schemas 
+
+Most tables used UUID as primary key  
+to support distributed architecture, security, and scalability.

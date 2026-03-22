@@ -1,0 +1,1343 @@
+==== 245_15_Multi_Tenant_Architecture_.txt ====
+
+15. Multi Tenant Architecture 
+
+Shared database 
+Schema per tenant 
+Database per tenant 
+
+ 
+SECTION 3 — REAL DEBUGGING STORIES 
+ 
+
+Story 1 — Slow API 
+
+Situation 
+API response time increased to 4 seconds. 
+
+Investigation 
+Checked logs and DB queries. 
+
+Root Cause 
+Missing index. 
+
+Fix 
+
+CREATE INDEX idx_user_id 
+ON orders(user_id) 
+
+Result 
+API response reduced to 150ms. 
+
+-------------------------------------------------------- 
+
+Story 2 — Memory Leak 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Situation 
+Memory usage increasing continuously. 
+
+Root Cause 
+Large objects cached in static map. 
+
+Fix 
+Used Redis with TTL. 
+
+Result 
+Memory stabilized. 
+
+-------------------------------------------------------- 
+
+Story 3 — Connection Pool Exhausted 
+
+Error 
+
+HikariPool - Connection not available 
+
+Root Cause 
+Slow DB queries. 
+
+Fix 
+
+- optimized query 
+- increased pool size 
+- added proper transaction handling 
+
+-------------------------------------------------------- 
+
+Story 4 — Kafka Duplicate Processing 
+
+Situation 
+Orders processed twice. 
+
+Root Cause 
+Consumer retry. 
+
+Fix 
+
+Idempotent consumer. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Store processed eventId. 
+
+-------------------------------------------------------- 
+
+Story 5 — Circular Dependency 
+
+ServiceA → ServiceB 
+ServiceB → ServiceA 
+
+Fix 
+
+Refactored to 
+
+ServiceA 
+ServiceB 
+CommonService 
+
+-------------------------------------------------------- 
+
+Story 6 — Production 500 Errors 
+
+Situation 
+Random failures. 
+
+Investigation 
+
+Logs 
+Metrics 
+External API latency 
+
+Fix 
+
+Added 
+
+Circuit Breaker 
+Retry 
+Timeout 
+
+ 
+BEST WAY TO ANSWER DEBUGGING QUESTIONS 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1 Identify the issue 
+2 Check logs and metrics 
+3 Find root cause 
+4 Fix problem 
+5 Prevent future occurrence 
+
+ 
+END OF NOTES 
+ 
+
+ 
+ 
+ 
+maven 
+
+Maven Command 
+
+What It Does 
+
+What Happens Internally 
+
+Output 
+
+mvn clean 
+
+Deletes previous 
+build files 
+
+Removes target/ 
+directory 
+
+Fresh build 
+environment 
+
+mvn validate 
+
+Checks project 
+structure 
+
+Validates pom.xml and 
+project configuration 
+
+Ensures project is 
+correct 
+
+mvn compile 
+
+Compiles source 
+code 
+
+Converts .java → 
+.class 
+
+target/classes 
+
+mvn test 
+
+Runs unit tests 
+
+Executes tests using JUnit 
+/ Surefire plugin 
+
+Test reports 
+
+mvn package 
+
+Packages 
+application 
+
+Compiles + tests + creates 
+artifact 
+
+.jar / .war in 
+target/ 
+
+mvn verify 
+
+Runs additional 
+checks 
+
+Integration tests, quality 
+checks 
+
+Verified build 
+
+mvn install 
+
+Installs artifact 
+locally 
+
+Copies artifact to local 
+Maven repo 
+
+~/.m2/repositor
+y 
+
+mvn deploy 
+
+Deploys artifact to 
+remote repo 
+
+Uploads JAR to 
+Nexus/Artifactory 
+
+Available for other 
+projects 
+
+mvn 
+spring-boot:run 
+
+Runs Spring Boot 
+application 
+
+Starts embedded server 
+
+Application starts 
+
+mvn 
+dependency:tree 
+
+Shows dependency 
+hierarchy 
+
+Displays all project 
+dependencies 
+
+Dependency graph 
+
+mvn 
+
+dependency:anal
+yze 
+
+Finds unused 
+dependencies 
+
+Detects redundant libraries  Optimization info 
+
+mvn sonar:sonar  Runs SonarQube 
+
+analysis 
+
+Checks bugs, code smells, 
+coverage 
+
+Sonar dashboard 
+report 
+
+mvn clean 
+install 
+
+mvn clean 
+package 
+
+Clean + build + 
+install 
+
+Deletes old build and 
+installs new artifact 
+
+Local repository 
+artifact 
+
+Clean + build jar 
+
+Rebuilds project 
+completely 
+
+Executable jar 
+
+ 
+ 
+microservice scenario 
+
+ 
+how we implement rate limiting for particular user 
+ 
+
+redis rate limiter config in properties 
+bucket 4j  
+
+ 
+Micro vs mono arch: 
+ 
+
+1) Architecture (as per business function they divide in module in micro ) 
+2) tech stack  (each module can have its own diff stack) 
+3) deployment  (independently deploy ) 
+4) use case     (smaller app use mono,large complex flexible move toward micro) 
+5) scalability (vertical in mono ,horizontal in micro) 
+
+ 
+keyy feature of microservice 
+ 
+
+1) independent deployement 
+2) fault isolation 
+3) scalibility  
+
+ 
+compopnent of micorservices 
+ 
+
+core char:: 
+
+1) service independence 
+2) domain driven dessign (DDD) 
+3) API communication 
+4) Technology Diversity 
+
+service registry and discovery: 
+
+1) Api gateway 
+2) load balancer 
+3) data management 
+4) monitoring and logging 
+5) ci/cd pipeline 
+
+ 
+API gateway  
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1) centralise entrypoint for managing client interaction.It simplifies communication 
+by routing. 
+2) load balancing  
+3) authentication and authorization  
+
+ 
+service discovery 
+ 
+-> enable microservices to dynamically locate and communicate with each other within 
+a distributed system 
+-> connect each other services witout hard coded 
+
+ 
+what is container 
+ 
+lightweight,standalone unit that bundles an app along with its 
+dependencies,including libraries,cofig and runtime 
+
+ 
+how do microservice communicate with each other 
+ 
+1) msg queue  -> awssqs ,kafka , rabitmq 
+2) grpc 
+3) syncronise -> rest 
+
+how would you handle microservice failure 
+ 
+
+-> one failure lead to cascade failure 
+-> circuit breaker 
+-> retries and fallback 
+-> centralize logging  
+
+how can you ensure backword compability  
+ 
+
+1) api versioning 
+2) semantic versioning principles 
+
+what is Oauth and why it is used ? 
+ 
+
+what is cqrs pattern in microservices ? what prob it solve? 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+compare api gateway and load balancer in microservices? 
+ 
+
+What are some common design principles? 
+ 
+
+1) high cohesion 
+2) autonomous 
+3) business domain centric 
+4) resilience 
+5) observable 
+6) automation 
+
+how do ensure security in microservices 
+ 
+
+1) secure the communication 
+2) authentication and authorization 
+3) service level isolation 
+
+what are the few way to achive synchronous and asynchronous communication between 
+microservice? 
+
+ 
+
+sync -> rest api calls,grpc,graphQL api  
+
+how do you implement rate limiting in microservices? 
+ 
+
+-> token bucket algoritham  
+-> API gateway  
+
+What is an event driven arch in microservices? 
+ 
+
+microservice communicate on event msgs 
+
+what is idempotency and why it is imp in microservices 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+-> multiple request  -> same type of response 
+
+what is database sharding and why used it is used in microservices? 
+ 
+
+-> large databse are divided into smaller more manageable pieces called "shard". 
+
+how do you handle data consistency in microservices 
+ 
+
+1) saga pattern 
+2) event sourcing  
+3) distributed transaction 
+
+what is canary deployment in microservices? 
+ 
+
+how would you monitor the microservices? 
+ 
+
+1) distribution tracing  
+2) metrics collection  (promithius) 
+3) visualization and alerting (graphana and kibana) 
+
+what are DDD principles ? 
+ 
+
+1) bounded context  
+2) ubiquitous languages 
+3) aggregates 
+
+how do you design for scalability in microservices? 
+ 
+
+1) horizontal scaling 
+2) database partitioning (sharding) 
+3) catching  
+4) load balancing  
+5) asynchronous processing  
+6) service mesh  
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+what is chaos engineering and hwow is it applied in microservice ? 
+ 
+
+how do you perform logging in a distributed microservices system? 
+ 
+
+1) centralized loging  
+2) structured logging 
+3) trace ids 
+4) log levels 
+5) security 
+
+what is the purpose of retry pattern in microservices 
+ 
+
+what are sidecars in microservices? 
+ 
+
+what are the best practices to deploy microservices in prod ? 
+ 
+1) containerisatiion  
+2) ci/cd 
+3) deployment strategies 
+4) monitoring and observalibility 
+5) service discovery  
+6) security 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+java classic 
+
+we have two employee class which has two object both have same id and name ,now we have one 
+set,now we want only unique employee elements to be stored in set  
+
+Employee e1 = new Employee(1, "Tejas"); 
+Employee e2 = new Employee(1, "Tejas"); 
+
+Set<Employee> set = new HashSet<>(); 
+set.add(e1); 
+set.add(e2); 
+
+System.out.println(set.size()); 
+
+class Employee { 
+    private int id; 
+    private String name; 
+
+    public Employee(int id, String name) { 
+        this.id = id; 
+        this.name = name; 
+    } 
+
+    // 1. Override equals 
+    @Override 
+    public boolean equals(Object o) { 
+        if (this == o) return true; 
+        if (!(o instanceof Employee)) return false; 
+
+        Employee e = (Employee) o; 
+        return id == e.id && 
+               Objects.equals(name, e.name); 
+    } 
+
+    // 2. Override hashCode 
+    @Override 
+    public int hashCode() { 
+        return Objects.hash(id, name); 
+    } 
+} 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Used_in_project 
+
+1)  Component used in project 
+2)  Config classes  
+3)  Service  
+4)  Repo 
+5)   
+
+Prod Defect 
+
+In our application, we use a pipeline-based design pattern where business logic is executed 
+through a sequence of processing steps. A key part of this pipeline is a mapper layer, where we 
+maintain precomputed logic for calculating risk scores. These risk calculations can be triggered from 
+multiple entry points depending on the flow (e.g., assessment, self-assessment, etc.). 
+
+Problem: 
+Recently, a defect was introduced when an additional validation was added to ensure that 
+pre-calculation of risk should only be executed in an “assessment” context. 
+
+However, this change unintentionally blocked the risk pre-calculation when the flow originated from 
+the self-assessment module. As a result: 
+
+●  After submitting a self-assessment, expected risk calculations were not triggered. 
+●  This caused incorrect or missing risk scores for certain business rules. 
+
+Root Cause: 
+The newly added context check was too restrictive and did not account for the self-assessment flow, 
+even though it also required the same pre-calculation logic. 
+
+Solution: 
+To fix this: 
+
+I updated the service layer (adapter class) where the pipeline is orchestrated. 
+Introduced conditional checks to correctly identify when recalculation should happen. 
+
+● 
+● 
+●  Explicitly invoked the mapper’s pre-calculation logic for the self-assessment flow by passing 
+
+the appropriate context. 
+
+●  Ensured that the logic remains reusable and does not violate the original design constraints. 
+
+Outcome: 
+
+●  Risk calculation now correctly triggers for both assessment and self-assessment flows. 
+●  No regression in existing assessment behavior. 
+●  Maintained separation of concerns by handling context-specific logic at the adapter/service 
+
+layer instead of modifying core mapper logic. 
+
+Key Takeaways (for interview emphasis): 
+
+●  Careful handling of context-driven logic in pipeline systems. 
+● 
+●  Fix applied at the right abstraction layer to avoid breaking existing design. 
+
+Importance of identifying side effects of restrictive conditions.
+
+==== 43_5_FollowUp_CronBased_Tracking_.txt ====
+
+5. Follow-Up (Cron-Based Tracking) 
+
+●  Tracks whether audit issues are resolved 
+●  Sends reminders until actions are closed 
+●  Ensures accountability 
+
+Benefits to the Bank 
+
+●  Time Savings – Less manual tracking and documentation 
+
+●  Reduced Risk – Systematic and consistent audits 
+
+● 
+
+Improved Compliance – Easier regulatory adherence 
+
+●  Actionable Insights – Identifies recurring issues and trends 
+
+●  Transparency – Clear visibility for management and regulators 
+
+Final Summary 
+
+✅ In short: 
+ In the banking sector, TeamMate+ Audit is used to manage audits, control risks, ensure 
+regulatory compliance, and improve audit efficiency, helping banks remain safe, 
+compliant, and trustworthy. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Technical Architecture 
+
+Tech stack used  
+
+Frontend: 
+- React 18, TypeScript, Vite 
+- Redux Toolkit 
+
+Backend: 
+- Java 17 
+- Spring Boot 3.x 
+- Spring Security, JWT, OAuth2 
+- RESTful APIs, Swagger (OpenAPI) 
+- JPA / Hibernate 
+
+Database: 
+- MySQL 
+
+Messaging & Cache: 
+- Kafka 
+- Redis 
+
+DevOps & Cloud: 
+- Git, GitHub 
+- Jenkins (CI/CD pipelines) 
+- Docker, Kubernetes 
+- AWS (EC2, S3, Lambda) 
+
+Testing & Quality: 
+- JUnit, Mockito 
+- Spring Boot Test 
+- SonarQube 
+
+Monitoring & Logging: 
+- Splunk 
+- Datadog 
+
+Tools: 
+- MobaXterm 
+- PuTTY 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Design Pattern 
+
+Adapter design pattern:: 
+
+Adapted Design Pattern – Application Flow Explanation 
+
+Our application follows an adapted Adapter-based design pattern to bridge HTTP 
+requests with the service layer and enforce a structured business pipeline. 
+
+Why we use this pattern 
+
+●  To decouple controllers from business logic 
+
+●  To enforce a standard execution pipeline for every request 
+
+●  To centralize authorization, DB handling, and post-processing 
+
+●  To make the system extensible and maintainable 
+
+Request Flow (End-to-End)
+
+==== 44_1__Controller_Layer_.txt ====
+
+1.  Controller Layer 
+
+○  Receives the HTTP request 
+
+○  Performs minimal request validation 
+
+○  Creates an instance of the Adapter
+
+==== 45_2__Adapter_Layer_.txt ====
+
+2.  Adapter Layer 
+
+○  Acts as a bridge between the HTTP layer and business logic 
+
+○  Translates request data into a business-friendly format 
+
+○  Passes control to the Execution Service 
+
+○  Ensures the controller remains thin
+
+==== 50_7__Response_Flow_.txt ====
+
+7.  Response Flow 
+
+○  Travels back through Execution Service → Adapter → Controller 
+
+○  Controller sends the final HTTP response 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+High-Level Flow Summary 
+
+Controller 
+
+   ↓ 
+Adapter 
+
+   ↓ 
+Execution Service (Business Pipeline) 
+
+   ↓ 
+Specific Service 
+
+   ↓ 
+Database 
+
+   ↑ 
+Post-Operation Checks 
+
+   ↑ 
+Response back to Controller 
+
+Key Benefits 
+
+●  Loose coupling between layers 
+
+●  Single execution pipeline for all business flows 
+
+●  Easy to add new services without touching controllers 
+
+●  Cleaner controllers, reusable business logic 
+
+●  Consistent security and DB handling 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Example: Create Audit Assignment Flow 
+
+1⃣ Controller (Thin – no business logic) 
+
+@RestController 
+
+@RequestMapping("/assignments") 
+
+public class AssignmentController { 
+
+    private final AssignmentAdapter assignmentAdapter; 
+
+    public AssignmentController(AssignmentAdapter assignmentAdapter) 
+
+{ 
+
+        this.assignmentAdapter = assignmentAdapter; 
+
+    } 
+
+    @PostMapping 
+
+    public ResponseEntity<?> createAssignment(@RequestBody 
+
+AssignmentRequest request) { 
+
+        return assignmentAdapter.createAssignment(request); 
+
+    } 
+
+} 
+
+👉 Controller only: 
+
+●  Accepts HTTP request 
+
+●  Delegates to Adapter 
+
+●  No DB, no security, no logic 
+
+2⃣ Adapter (HTTP → Business Bridge) 
+
+@Component 
+
+public class AssignmentAdapter { 
+
+    private final ExecutionService executionService; 
+
+    public AssignmentAdapter(ExecutionService executionService) { 
+
+        this.executionService = executionService; 
+
+    } 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    public ResponseEntity<?> createAssignment(AssignmentRequest 
+
+request) { 
+
+        AssignmentContext context = new AssignmentContext(); 
+
+        context.setRequest(request); 
+
+        ExecutionResult result = executionService.execute( 
+
+                context, 
+
+                BusinessOperation.CREATE_ASSIGNMENT 
+
+        ); 
+
+        return ResponseEntity.status(result.getStatus()) 
+
+                             .body(result.getResponse()); 
+
+    } 
+
+} 
+
+👉 Adapter responsibilities: 
+
+●  Converts HTTP request to business context 
+
+●  Calls execution pipeline 
+
+●  Converts business response → HTTP response 
+
+3⃣ Execution Service (Business Pipeline – Core) 
+
+This is where your adapted design pattern really lives. 
+
+@Service 
+
+public class ExecutionService { 
+
+    private final AuthService authService; 
+
+    private final BusinessServiceFactory serviceFactory; 
+
+    public ExecutionResult execute(BusinessContext context, 
+
+                                   BusinessOperation operation) { 
+
+        // 1. Authentication & Role validation 
+
+        authService.validateUser(context.getUser(), operation); 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+        // 2. Get business service 
+
+        BusinessService service = 
+
+                serviceFactory.getService(operation); 
+
+        // 3. Execute business logic 
+
+        Object result = service.execute(context); 
+
+        // 4. Post-operation checks 
+
+        audit(context, result); 
+
+        return ExecutionResult.success(result); 
+
+    } 
+
+    private void audit(BusinessContext context, Object result) { 
+
+        // logging / audit trail / validation 
+
+    } 
+
+} 
+
+👉 Pipeline enforced here: 
+
+●  Security 
+
+●  Service routing 
+
+●  Execution 
+
+●  Post-processing 
+
+4⃣ Business Service Interface (Template-like) 
+
+public interface BusinessService { 
+
+    Object execute(BusinessContext context); 
+
+} 
+
+5⃣ Specific Business Service (Actual Logic) 
+
+@Service 
+
+public class CreateAssignmentService implements BusinessService { 
+
+    private final AssignmentRepository repository; 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    public CreateAssignmentService(AssignmentRepository repository) 
+
+{ 
+
+        this.repository = repository; 
+
+    } 
+
+    @Override 
+
+    public Object execute(BusinessContext context) { 
+
+        AssignmentRequest req = 
+
+                ((AssignmentContext) context).getRequest(); 
+
+        // Prepared statement via JPA / JDBC 
+
+        Assignment assignment = new Assignment(); 
+
+        assignment.setName(req.getName()); 
+
+        assignment.setCreatedBy(context.getUser().getId()); 
+
+        return repository.save(assignment); 
+
+    } 
+
+} 
+
+👉 Only business logic, nothing else. 
+
+6⃣ Factory (Routes Operation → Service) 
+
+@Component 
+
+public class BusinessServiceFactory { 
+
+    private final Map<BusinessOperation, BusinessService> services; 
+
+    public BusinessServiceFactory(List<BusinessService> serviceList) 
+
+{ 
+
+        services = Map.of( 
+
+            BusinessOperation.CREATE_ASSIGNMENT, 
+
+            serviceList.stream() 
+
+                .filter(s -> s instanceof CreateAssignmentService) 
+
+                .findFirst() 
+
+                .orElseThrow() 
+
+        ); 
+
+    } 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    public BusinessService getService(BusinessOperation operation) { 
+
+        return services.get(operation); 
+
+    } 
+
+} 
+
+7⃣ Flow Recap (Interview-friendly) 
+
+HTTP Request 
+
+   ↓ 
+Controller (thin) 
+
+   ↓ 
+Adapter (HTTP → Business) 
+   ↓ 
+Execution Service (pipeline) 
+
+   ↓ 
+Specific Business Service 
+
+   ↓ 
+Database 
+
+   ↑ 
+Post-operation checks 
+
+   ↑ 
+HTTP Response 
+
+Patterns Used (Tell it straight) 
+
+●  Adapter Pattern – Controller → Adapter → Service 
+
+●  Template Method (adapted) – Fixed execution pipeline 
+
+●  Factory Pattern – Resolve business service at runtime 
+
+●  Single Responsibility – Each layer does one thing 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Roles and responsibility 
+
+Roles and responsibility  
+ 
+
+- Actively involved in development activities, with approximately 80% focus on new 
+  feature development and enhancements. 
+
+- Handle around 20% of sprint capacity for production support, client-reported 
+  defects, and bug fixes, ensuring minimal impact on business operations. 
+
+- Participate in technical and architectural discussions, contributing to design 
+  decisions, scalability considerations, and best practices. 
+
+- Actively participate in Agile Scrum ceremonies including: 
+  - Daily stand-ups 
+  - Sprint planning 
+  - Backlog grooming 
+  - PI increment planning 
+
+- Perform peer code reviews to ensure code quality, adherence to coding standards, 
+  performance optimization, and maintainability. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+SDLC 
+
+Software Development Life Cycle (SDLC)

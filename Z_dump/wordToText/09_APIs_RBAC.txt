@@ -1,0 +1,1363 @@
+==== 112_3_If_the_condition_is_true_the_action_is_executed_.txt ====
+
+3. If the condition is true, the action is executed 
+
+--- 
+
+## 4. High Level Architecture 
+
+Admin UI   
+↓   
+Rule Management API   
+↓   
+Database (Rules Table)   
+↓   
+Rule Engine Service   
+↓   
+Load Rules   
+↓   
+Evaluate Conditions   
+↓   
+Execute Actions   
+↓   
+Return Modified Entity 
+
+--- 
+
+## 5. Rule Creation Flow 
+
+### Step 1 — Admin Creates Rule From UI 
+
+| Field | Value | 
+|------|------| 
+| Rule Name | High Risk Assessment | 
+| Entity Type | Assessment | 
+| Condition | score < 40 | 
+| Action | setRiskLevel("HIGH") | 
+| Priority | 10 | 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+| Active | true | 
+
+--- 
+
+### Step 2 — Rule Stored In Database 
+
+Example table: 
+
+```sql 
+CREATE TABLE rules ( 
+    id BIGINT PRIMARY KEY, 
+    rule_name VARCHAR(255), 
+    entity_type VARCHAR(100), 
+    condition_expression TEXT, 
+    action_expression TEXT, 
+    priority INT, 
+    is_active BOOLEAN, 
+    created_at TIMESTAMP, 
+    updated_at TIMESTAMP 
+); 
+``` 
+
+Example record: 
+
+| id | rule_name | entity_type | condition_expression | action_expression | priority | is_active | 
+|----|-----------|-------------|---------------------|------------------|----------|-----------| 
+| 1 | HIGH_RISK_RULE | ASSESSMENT | score < 40 | setRiskLevel("HIGH") | 10 | true | 
+
+--- 
+
+## 6. Rule Execution Flow 
+
+When an event occurs (example: assessment submission): 
+
+Assessment Submitted   
+↓   
+Rule Engine Service   
+↓   
+Fetch Active Rules From Database   
+↓   
+Filter Rules By Entity Type   
+↓   
+Sort Rules By Priority   
+↓   
+Evaluate Condition   
+↓   
+Execute Action   
+↓   
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Return Updated Object 
+
+--- 
+
+## 7. Core Components 
+
+### Rule Entity 
+
+```java 
+public class Rule { 
+
+    private Long id; 
+    private String ruleName; 
+    private String entityType; 
+    private String conditionExpression; 
+    private String actionExpression; 
+    private Integer priority; 
+    private Boolean active; 
+} 
+``` 
+
+--- 
+
+### Rule Repository 
+
+```java 
+@Repository 
+public interface RuleRepository extends JpaRepository<Rule, Long> { 
+
+    List<Rule> findByEntityTypeAndActiveTrueOrderByPriorityDesc(String entityType); 
+} 
+``` 
+
+Ensures: 
+
+- Only active rules are loaded 
+- Rules executed in priority order 
+
+--- 
+
+### Rule Engine Service 
+
+```java 
+@Service 
+public class RuleEngineService { 
+
+    @Autowired 
+    private RuleRepository ruleRepository; 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    public void evaluateRules(Assessment assessment){ 
+
+        List<Rule> rules = ruleRepository 
+                .findByEntityTypeAndActiveTrueOrderByPriorityDesc("ASSESSMENT"); 
+
+        for(Rule rule : rules){ 
+
+            if(evaluateCondition(rule.getConditionExpression(), assessment)){ 
+                executeAction(rule.getActionExpression(), assessment); 
+            } 
+        } 
+    } 
+} 
+``` 
+
+--- 
+
+## 8. Condition Evaluation 
+
+Conditions stored as expressions. 
+
+Examples: 
+
+``` 
+score < 40 
+department == 'Finance' 
+riskScore > 80 
+assessmentType == 'INTERNAL' 
+``` 
+
+Evaluated using **Spring Expression Language (SpEL)**. 
+
+```java 
+private boolean evaluateCondition(String expression, Assessment assessment){ 
+
+    ExpressionParser parser = new SpelExpressionParser(); 
+
+    EvaluationContext context = new StandardEvaluationContext(assessment); 
+
+    Boolean result = parser.parseExpression(expression).getValue(context, Boolean.class); 
+
+    return Boolean.TRUE.equals(result); 
+} 
+``` 
+
+--- 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+## 9. Action Execution 
+
+Actions executed when condition is satisfied. 
+
+Examples: 
+
+``` 
+setRiskLevel("HIGH") 
+setApprovalRequired(true) 
+assignReviewer("RISK_TEAM") 
+sendNotification("ADMIN") 
+``` 
+
+Example implementation: 
+
+```java 
+private void executeAction(String action, Assessment assessment){ 
+
+    if(action.contains("setRiskLevel")){ 
+        assessment.setRiskLevel("HIGH"); 
+    } 
+
+    if(action.contains("setApprovalRequired")){ 
+        assessment.setApprovalRequired(true); 
+    } 
+} 
+``` 
+
+In advanced systems actions use **strategy pattern or handler classes**. 
+
+--- 
+
+## 10. Rule Caching 
+
+Fetching rules from the database every request is inefficient. 
+
+Rules are cached in memory. 
+
+Application Startup   
+↓   
+Load Rules From Database   
+↓   
+Store In Memory Cache   
+↓   
+Runtime Rule Evaluation 
+
+Example cache: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+``` 
+Map<String, List<Rule>> ruleCache 
+``` 
+
+Example: 
+
+``` 
+ASSESSMENT -> [Rule1, Rule2, Rule3] 
+SURVEY -> [Rule4, Rule5] 
+``` 
+
+Cache refresh strategies: 
+
+- Scheduled refresh 
+- Event-based refresh 
+- Manual refresh 
+
+--- 
+
+## 11. Rule Priority Handling 
+
+Multiple rules may apply. 
+
+| Rule | Condition | Action | 
+|-----|-----------|--------| 
+| HIGH_RISK_RULE | score < 40 | setRiskLevel("HIGH") | 
+| CRITICAL_RISK_RULE | score < 30 | setRiskLevel("CRITICAL") | 
+
+Priority: 
+
+| Rule | Priority | 
+|-----|---------| 
+| CRITICAL_RISK_RULE | 20 | 
+| HIGH_RISK_RULE | 10 | 
+
+Higher priority executes first. 
+
+--- 
+
+## 12. Rule Versioning 
+
+Track rule updates. 
+
+```sql 
+CREATE TABLE rule_versions ( 
+    id BIGINT PRIMARY KEY, 
+    rule_id BIGINT, 
+    version INT, 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    condition_expression TEXT, 
+    action_expression TEXT, 
+    created_at TIMESTAMP 
+); 
+``` 
+
+Benefits: 
+
+- Audit history 
+- Rollback capability 
+- Track rule evolution 
+
+--- 
+
+## 13. Rule Execution Logging 
+
+```sql 
+CREATE TABLE rule_execution_log ( 
+    id BIGINT PRIMARY KEY, 
+    rule_id BIGINT, 
+    entity_id BIGINT, 
+    result VARCHAR(50), 
+    executed_at TIMESTAMP 
+); 
+``` 
+
+Example log: 
+
+| rule_id | entity_id | result | 
+|--------|-----------|--------| 
+| 1 | 4521 | SUCCESS | 
+
+--- 
+
+## 14. Example End-to-End Scenario 
+
+Input: 
+
+``` 
+score = 35 
+department = Finance 
+``` 
+
+Rules: 
+
+| Rule | Condition | Action | 
+|-----|-----------|--------| 
+| Rule1 | score < 40 | setRiskLevel("HIGH") | 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+| Rule2 | department == 'Finance' | setApprovalRequired(true) | 
+
+Execution: 
+
+``` 
+Rule1 triggered → riskLevel = HIGH 
+Rule2 triggered → approvalRequired = true 
+``` 
+
+Final result: 
+
+``` 
+riskLevel = HIGH 
+approvalRequired = true 
+``` 
+
+--- 
+
+## 15. Advantages 
+
+- Dynamic business logic 
+- No deployment required 
+- Business-friendly configuration 
+- Centralized rule management 
+- Extensible architecture 
+
+--- 
+
+## 16. Limitations 
+
+- Complex debugging 
+- Rule conflicts 
+- Performance concerns for large rule sets 
+
+--- 
+
+## 17. Interview Summary Answer 
+
+In Teammate+, a dynamic rule engine externalizes business logic from application code. 
+Administrators create rules via a UI where each rule contains a condition and action. These rules are 
+stored in the database and evaluated dynamically at runtime using Spring Expression Language. The 
+rule engine loads active rules, evaluates conditions, executes actions, and applies them to entities. 
+Rules are prioritized and cached in memory to improve performance. This allows business logic to 
+change without modifying code or redeploying the application. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Authorisation 
+
+Authorisation  
+
+Previous rbac 
+
+ 
+PREVIOUS AUTHORIZATION SETUP 
+(Static / Hard-coded Roles) 
+ 
+
+1) PREDEFINED ROLES IN THE SYSTEM 
+
+The application had predefined roles already configured in the backend code. 
+These roles were fixed and could NOT be modified by the admin. 
+
+Example predefined roles: 
+
+    ADMIN 
+    AUDITOR 
+    REVIEWER 
+    OBSERVER 
+
+Internally Spring Security stores roles with prefix ROLE_ : 
+
+    ROLE_ADMIN 
+    ROLE_AUDITOR 
+    ROLE_REVIEWER 
+    ROLE_OBSERVER 
+
+-------------------------------------------------- 
+
+2) ADMIN CREATES USER AND ASSIGNS ROLE 
+
+Admin could create a new user and assign one of the predefined roles. 
+
+Example: 
+
+    User      Assigned Role 
+    ----------------------- 
+    Tejas     ADMIN 
+    Rahul     AUDITOR 
+    Priya     REVIEWER 
+
+Example DB record: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    username : rahul 
+    role     : ROLE_AUDITOR 
+
+-------------------------------------------------- 
+
+3) PROTECTING APIs USING @PreAuthorize 
+
+To restrict access to APIs we used Spring Security annotation 
+@PreAuthorize. 
+
+Example: 
+
+    @PreAuthorize("hasRole('ADMIN')") 
+    public void deleteAudit(Long id){ 
+        auditRepository.deleteById(id); 
+    } 
+
+Meaning: 
+
+    Only users with ADMIN role can execute this method. 
+
+-------------------------------------------------- 
+
+4) HOW @PreAuthorize CHECKS ROLE 
+
+When request comes: 
+
+    Client Request 
+         ↓ 
+    JWT Token Validated 
+         ↓ 
+    Roles extracted from token 
+         ↓ 
+    Authentication object created 
+         ↓ 
+    Stored inside SecurityContext 
+
+Example SecurityContext: 
+
+    User : rahul 
+    Authorities : [ROLE_AUDITOR] 
+
+Now Spring evaluates: 
+
+    @PreAuthorize("hasRole('ADMIN')") 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Spring internally converts this to: 
+
+    ROLE_ADMIN 
+
+Then it checks: 
+
+    Does ROLE_ADMIN exist in authentication authorities? 
+
+-------------------------------------------------- 
+
+5) FINAL AUTHORIZATION DECISION 
+
+CASE 1 : ROLE PRESENT 
+
+    Authorities : [ROLE_ADMIN] 
+    Required    : ROLE_ADMIN 
+
+    Result → Access Granted 
+    Method executes 
+
+CASE 2 : ROLE NOT PRESENT 
+
+    Authorities : [ROLE_AUDITOR] 
+    Required    : ROLE_ADMIN 
+
+    Result → AccessDeniedException 
+    HTTP 403 Forbidden 
+    Method execution blocked 
+
+SHORT SUMMARY 
+
+    • Roles were predefined in the system 
+    • Admin could only assign roles to users 
+    • APIs were protected using @PreAuthorize 
+    • Spring fetched roles from SecurityContext 
+    • If role matched → method executed 
+    • If role missing → access denied 
+
+ 
+Circuit breaker config  
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+RESILIENCE4J CIRCUIT BREAKER - SETUP NOTES 
+ 
+
+PURPOSE 
+------- 
+Circuit Breaker protects an application from repeatedly calling a failing service. 
+If a service fails frequently, the circuit opens and prevents further calls, 
+redirecting requests to a fallback method. 
+
+Example: 
+Primary Service : Redis 
+Fallback Service: Database 
+
+--------------------------------------------------
+
+==== 124_9_KEY_INTERVIEW_POINT_.txt ====
+
+9. KEY INTERVIEW POINT 
+-------------------------------------------------- 
+
+Circuit Breaker prevents cascading failures in  
+microservices by temporarily stopping calls to a  
+failing service and redirecting requests to a  
+fallback mechanism. 
+-------------------------------------------------- 
+
+States of circuit breaker 
+ 
+--------------------------------- 
+WHICH LOGIC RUNS IN WHICH STATE 
+--------------------------------- 
+
+STATE       PRIMARY LOGIC (REDIS)      FALLBACK 
+
+CLOSED      YES                        Only if exception occurs 
+
+OPEN        NO                         Always executed 
+
+HALF_OPEN   Limited requests           If those requests fail 
+
+ 
+
+RBAC AUTHORIZATION FLOW – PROJECT 
+NOTES 
+
+(Multi-Tenant + Assessment Based Access) 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+SYSTEM IDENTIFIERS 
+
+tenantId → identifies client organization 
+userId (UUID) → identifies user 
+assessmentId → identifies audit/assessment context 
+
+Authorization decision is based on: 
+
+tenantId + userId + assessmentId 
+
+ 
+
+A) ADMIN OPERATIONS
+
+==== 130_5__REDIS_CONFIGURATION_AND_METHODS_.txt ====
+
+5.  REDIS CONFIGURATION AND METHODS 
+
+Redis is used as a caching layer for RBAC. 
+
+Main Redis Keys: 
+
+User role per assessment: 
+
+role:user:{tenantId}:{userId}:{assessmentId} 
+
+Example: 
+
+role:user:T100:U123:A101 → AUDITOR 
+
+Role permissions: 
+
+perm:role:{roleName} 
+
+Example: 
+
+perm:role:AUDITOR 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Value stored as SET: 
+
+AUDIT_CREATE 
+AUDIT_EDIT 
+WORKPAPER_UPLOAD 
+
+Redis Service Example: 
+
+public String getUserRole(String tenantId,String userId,String assessmentId){ 
+
+    String key = "role:user:" + tenantId + ":" + userId + ":" + assessmentId; 
+
+    return redisTemplate.opsForValue().get(key); 
+} 
+
+public Set<String> getPermissionsForRole(String role){ 
+
+    String key = "perm:role:" + role; 
+
+    return redisTemplate.opsForSet().members(key); 
+}
+
+==== 134_9__IMPORTANT_THINGS_TO_FOCUS_.txt ====
+
+9.  IMPORTANT THINGS TO FOCUS 
+
+• Use userId(UUID) instead of email for Redis keys 
+• Avoid storing roles inside JWT 
+• Always invalidate cache after role updates 
+• Use Redis SET for permission lookup 
+• Use cache-aside pattern for loading RBAC data 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+• Never use global FLUSHALL in production 
+• Ensure Redis TTL prevents stale permissions 
+
+ 
+
+FINAL AUTHORIZATION FLOW 
+
+User Request 
+↓ 
+JWT validated 
+↓ 
+Extract tenantId + userId 
+↓ 
+Extract assessmentId from API 
+↓ 
+Redis lookup → role:user:{tenantId}:{userId}:{assessmentId} 
+↓ 
+Role obtained 
+↓ 
+Redis lookup → perm:role:{roleName} 
+↓ 
+Permission list obtained 
+↓ 
+Aspect checks required permission 
+↓ 
+Allow request OR throw AccessDeniedException 
+
+ 
+
+END 
+
+ 
+ 
+Hackthon 
+
+Hackathon Project: AI-Driven Risk Auditing(Code Games 2024 – 1st Place) 
+
+Summary: 
+
+Built an AI-powered enterprise risk intelligence platform to assist auditors in identifying similar 
+historical risks and automatically generating mitigation controls. The system leveraged semantic 
+vector search and large language models to improve risk discovery beyond traditional keyword-based 
+search systems. 
+
+Core Technologies Used: 
+- Backend: Java, Spring Boot (REST APIs) 
+- AI/LLM: OpenAI GPT-3.5 Turbo 
+- Embeddings: OpenAI Text Embeddings 
+- Vector Database: Pinecone (vector embeddings) 
+- Frontend: React 
+- Architecture: RAG-style semantic retrieval + LLM generation 
+RAG -> retrieval augmented generation  
+Technical Implementation:
+
+==== 89_2_PREVENTIVE_VALIDATION_.txt ====
+
+2. PREVENTIVE VALIDATION 
+   - Added validation at the backend layer to prevent such characters 
+     from being saved in the future. 
+   - Ensured backward compatibility with the new UI. 
+
+RESULT: 
+- The affected field started rendering correctly for all users. 
+- No UI changes were required. 
+- Issue resolved permanently across environments. 
+
+KEY LEARNINGS: 
+- Legacy data can break modern UI frameworks. 
+- Not all UI issues are UI bugs — data integrity plays a critical role. 
+- Proper data validation and cleanup are essential during UI migrations. 
+
+3) Us military  client facing document upload issue ,filter was changed 
+
+- How were those bugs identified? 
+
+- How were they resolved? 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1. What was your contribution? -> RBAC
+
+==== 98_5_Which_endpointAPI_you_created_.txt ====
+
+5. Which endpoint/API you created? 
+ 
+DEPLOYED ROLE & PERMISSION MANAGEMENT APIs 
+ 
+
+We implemented dedicated APIs to manage dynamic roles 
+and permissions in the system. These APIs are not simple 
+CRUD endpoints — they include internal validation, 
+mapping logic, cache handling, and security enforcement. 
+
+-------------------------------------------------------- 
+1⃣ API :: getRoleList 
+-------------------------------------------------------- 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Endpoint: 
+    GET /api/roles 
+
+Purpose: 
+    Fetch all available roles (System + Custom). 
+
+Internal Logic: 
+    • Fetch roles from database 
+    • Identify system roles (non-editable flag) 
+    • Mark custom roles (editable) 
+    • Apply organization-level filtering if applicable 
+    • Return structured role response 
+
+Response Example: 
+[ 
+    { 
+        "roleId": 1, 
+        "roleName": "ADMIN", 
+        "type": "SYSTEM", 
+        "editable": false 
+    }, 
+    { 
+        "roleId": 7, 
+        "roleName": "CUSTOM_AUDITOR", 
+        "type": "CUSTOM", 
+        "editable": true 
+    } 
+] 
+
+Additional Handling: 
+    • Authorization check before returning roles 
+    • Redis caching (optional for optimization) 
+
+-------------------------------------------------------- 
+2⃣ API :: getPermissionListForRole 
+-------------------------------------------------------- 
+
+Triggered When: 
+    User clicks on a specific role in UI. 
+
+Endpoint: 
+    GET /api/roles/{roleId}/permissions 
+
+Purpose: 
+    Load complete permission matrix for the selected role. 
+
+Internal Logic: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    • Validate role existence 
+    • Fetch role-permission mappings 
+    • Group permissions by module (Survey, Audit, User Mgmt, etc.) 
+    • Mark selected vs unselected permissions 
+    • Handle system role restrictions (view-only if system role) 
+
+Response Example: 
+{ 
+    "roleId": 7, 
+    "roleName": "CUSTOM_AUDITOR", 
+    "permissions": [ 
+        { 
+            "module": "SURVEY", 
+            "permissionCode": "SURVEY_CREATE", 
+            "assigned": true 
+        }, 
+        { 
+            "module": "SURVEY", 
+            "permissionCode": "SURVEY_DELETE", 
+            "assigned": false 
+        } 
+    ] 
+} 
+
+Security Handling: 
+    • Permission to view role configuration required 
+    • Dynamic role-permission resolution via Redis → DB fallback 
+
+-------------------------------------------------------- 
+3⃣ API :: updateRolesToPermission 
+-------------------------------------------------------- 
+
+Triggered When: 
+    User edits permissions and clicks SAVE. 
+
+Endpoint: 
+    PUT /api/roles/{roleId}/permissions 
+
+Request Body: 
+{ 
+    "permissionIds": [101, 102, 205, 309] 
+} 
+
+Purpose: 
+    Update role-to-permission mapping. 
+
+Internal Execution Flow: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Step 1: 
+    • Validate role exists 
+    • Check if role is editable 
+    • Reject update if system role 
+
+Step 2: 
+    • Fetch existing permissions 
+    • Calculate: 
+          - Permissions to add 
+          - Permissions to remove 
+
+Step 3: 
+    • Perform batch insert/delete in mapping table 
+    • Maintain transactional integrity 
+
+Step 4: 
+    • Invalidate Redis cache: 
+          ROLE_PERMISSIONS:{roleId} 
+          USER_ROLES cache for impacted users 
+
+Step 5: 
+    • Optional audit logging of changes 
+
+Response: 
+{ 
+    "status": "SUCCESS", 
+    "message": "Role permissions updated successfully" 
+} 
+
+-------------------------------------------------------- 
+🚀 Why This Design Matters 
+-------------------------------------------------------- 
+
+✔ Clear separation between role and permission management 
+✔ System roles protected (non-editable) 
+✔ Custom roles flexible and configurable 
+✔ Redis cache keeps authorization fast 
+✔ Cache invalidation ensures immediate reflection 
+✔ Transaction-safe updates 
+✔ Fully dynamic RBAC 
+
+-------------------------------------------------------- 
+FLOW SUMMARY 
+-------------------------------------------------------- 
+
+UI → getRoleList 
+   → Click Role → getPermissionListForRole 
+   → Edit → updateRolesToPermission 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+   → Cache invalidation 
+   → Dynamic authorization reflects immediately 
+
+ 
+These APIs collectively power the dynamic RBAC system 
+deployed in production.
+
+==== 99_6_What_was_the_DB_schemas_you_worked_on_.txt ====
+
+6. What was the DB schemas you worked on? 
+
+I primarily worked on RBAC (Role-Based Access Control) schemas  
+and core business schemas for an enterprise audit application. 
+
+------------------------------------------------------------------ 
+A) RBAC SCHEMAS (Most Critical Area) 
+------------------------------------------------------------------ 
+
+1) users 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- username (Unique) 
+- email (Unique) 
+- password_hash 
+- status 
+- created_at 
+- updated_at 
+
+Note: 
+UUID used because: 
+- Distributed microservices environment 
+- Avoid sequential ID exposure 
+- Better merge compatibility across services 
+
+2) roles 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- role_name (Unique) 
+- description 
+- role_type (GLOBAL / ASSESSMENT) 
+- created_at 
+- updated_at 
+
+3) permissions 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+- permission_key (Unique) 
+- module_name 
+- action_type (READ / WRITE / DELETE / APPROVE) 
+- created_at 
+- updated_at 
+
+4) user_roles (Mapping Table) 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- user_id (UUID, FK → users.id) 
+- role_id (UUID, FK → roles.id) 
+- assessment_id (UUID, Nullable, for context-based role override) 
+- assigned_at 
+- assigned_by 
+
+5) role_permissions (Mapping Table) 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- role_id (UUID, FK → roles.id) 
+- permission_id (UUID, FK → permissions.id) 
+- created_at 
+
+Why UUID here? 
+- Security-sensitive module 
+- Prevent predictable ID enumeration 
+- Used across microservices 
+- Compatible with Redis caching keys 
+
+------------------------------------------------------------------ 
+B) SURVEY / RESPONSE SCHEMA 
+------------------------------------------------------------------ 
+
+6) survey 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- title 
+- description 
+- created_by (UUID) 
+- created_at 
+- updated_at 
+
+7) question 
+-------------------------------------------------- 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+- id (UUID, Primary Key) 
+- question_text 
+- question_type 
+- is_mandatory 
+- created_at 
+
+8) survey_assignment 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- survey_id (UUID, FK) 
+- user_id (UUID, FK) 
+- assigned_at 
+- due_date 
+- status 
+
+9) survey_response 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- user_id (UUID, FK) 
+- survey_id (UUID, FK) 
+- question_id (UUID, FK) 
+- response 
+- submitted_at 
+
+Composite Unique Constraint: 
+UNIQUE (user_id, survey_id, question_id) 
+
+Purpose: 
+Prevent duplicate entries under concurrent API calls. 
+
+------------------------------------------------------------------ 
+C) GENERIC CORE BUSINESS SCHEMAS 
+------------------------------------------------------------------ 
+
+10) audit 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- audit_name 
+- audit_type 
+- status 
+- start_date 
+- end_date 
+- created_by (UUID) 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+11) findings 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- audit_id (UUID, FK) 
+- severity 
+- description 
+- status 
+- owner_id (UUID) 
+- created_at 
+
+12) documents 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- reference_id (UUID) 
+- reference_type 
+- s3_path 
+- uploaded_by (UUID) 
+- uploaded_at 
+
+13) notifications 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- user_id (UUID) 
+- message 
+- is_read 
+- created_at 
+
+------------------------------------------------------------------ 
+Why UUID Instead of Auto-Increment? 
+------------------------------------------------------------------ 
+
+- Microservices architecture 
+- Avoid collision during data migration 
+- Prevent ID guessing 
+- Easier replication & sharding 
+- Safe for distributed systems 
+
+------------------------------------------------------------------ 
+Summary (Interview Ready) 
+------------------------------------------------------------------ 
+
+I worked extensively on: 
+
+1) RBAC schemas (users, roles, permissions, mappings) 
+2) Context-based authorization schemas 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+3) Survey & response management schemas 
+4) Audit core business schemas 
+5) Document & notification schemas 
+
+Most tables used UUID as primary key  
+to support distributed architecture, security, and scalability.

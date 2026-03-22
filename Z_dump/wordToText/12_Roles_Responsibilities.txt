@@ -1,0 +1,3486 @@
+==== 104_11_Tell_when_your_responsibility_over_feature_you_delivered.txt ====
+
+11. Tell when your responsibility over feature you delivered
+
+==== 107_16_Why_do_we_need_integer_pk_if_we_have_uuid_.txt ====
+
+16. Why do we need integer pk if we have uuid? 
+
+=> UUID ensures global uniqueness and prevents ID enumeration. However, BIGINT 
+primary keys provide better indexing, faster joins, lower storage cost, and improved write 
+performance due to sequential inserts. So we use BIGINT internally for database efficiency 
+and UUID externally for security and distributed system compatibility. 
+
+ 
+ 
+ 
+Authentication 
+
+Authentication in our project is implemented using JWT (JSON Web Token) and follows a 
+stateless authentication model. 
+
+The application is stateless, and authentication is handled at the API Gateway level. 
+Spring Security is used to validate and authenticate requests using a chain of 
+security filters. 
+
+When a user logs in: 
+- If no JWT is present, the API Gateway validates the user credentials 
+  (user ID and password) against the database. 
+- Once the credentials are successfully verified, the system generates a JWT. 
+
+The generated JWT contains: 
+- User ID 
+- User roles  
+- Token metadata (expiry, issuer, etc.) 
+
+Two types of tokens are issued:
+
+==== 109_2_Refresh_Token_.txt ====
+
+2. Refresh Token 
+
+The Access Token: 
+- Is short-lived 
+- Is stored in the frontend Redux store 
+- Is sent with every API request in the Authorization header 
+- Is used to authenticate and authorize the user for each request 
+
+The Refresh Token: 
+- Is long-lived 
+- Is stored securely in browser cookies 
+- Is used only when the access token expires or becomes invalid 
+
+For every incoming request: 
+- The API Gateway validates the access token using Spring Security filters 
+- If the token is missing, expired, the request is rejected 
+
+If the access token is expired: 
+- The refresh token is sent to generate a new access token 
+- If the refresh token is also invalid, the user is logged out and access is denied 
+
+Overall, authentication is enforced through a combination of 
+JWT-based stateless security and Spring Security filter chains. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Authorization 
+
+ 
+UPDATED AUTHORIZATION FLOW (Dynamic Role & Permission Lookup) 
+ 
+
+Systems roles :: system roles has some non editable and viewable permissions to create 
+custom permission we need to copy system roles and then edit permission inside them  
+
+5 System roles :: Admin, reviewer, observer , auditor, business contact 
+
+Authorization in our project follows a role-to-permission based access control model, 
+but roles and permissions are resolved dynamically on every request. 
+
+Each role in the system is mapped to a defined set of permissions for specific 
+functional areas of the application. These permissions control access at both 
+API and business logic levels. 
+
+-------------------------------------------------------- 
+
+🔐 Authentication Phase (JWT Based) 
+
+When a user is authenticated: 
+
+- A JWT is generated containing only user identity (userId / username) 
+- Roles and permissions are NOT permanently trusted from the token 
+- The JWT is used only to prove identity and validate authenticity. 
+
+-------------------------------------------------------- 
+
+🚀 Request Processing & Authorization Phase 
+
+For every incoming request: 
+
+1⃣ JWT is validated 
+   - Signature verified using secret key 
+   - Expiration checked 
+
+2⃣ User identity is extracted from JWT (userId / username) 
+
+3⃣ Roles and permissions are fetched dynamically: 
+   - First lookup in Redis (fast in-memory cache) 
+   - If not present, fetch from database 
+   - Cache the result in Redis 
+
+4⃣ Authorization checks are performed: 
+   - User’s roles are mapped to permissions 
+   - Requested resource is matched against required permission 
+   - Access is granted or denied 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+This ensures: 
+✔ Immediate reflection of role or permission updates   
+✔ Centralized and consistent authorization   
+✔ No stale role data from old tokens   
+
+-------------------------------------------------------- 
+
+🧩 AOP-Based Authorization Enforcement 
+
+To enforce authorization consistently: 
+
+- Custom annotations are defined on controller or service methods 
+- An authorization aspect intercepts method execution 
+- The aspect retrieves the authenticated user identity 
+- It fetches current roles and permissions (from Redis/DB) 
+- It validates required permissions before allowing execution 
+
+If required permission is missing: 
+
+- Execution is blocked 
+- Authorization exception is thrown 
+- Business logic is not executed 
+
+-------------------------------------------------------- 
+
+⚡ Performance Optimization Using Redis 
+
+- Role-to-permission mappings are cached in Redis 
+- Redis is used for fast lookup on every request 
+- Cache is refreshed or invalidated when role/permission updates occur 
+- Database remains the source of truth 
+
+This provides: 
+✔ Fast authorization checks   
+✔ Immediate permission updates   
+✔ Scalable performance   
+
+-------------------------------------------------------- 
+
+🛡 SecurityContext in This Architecture 
+
+SecurityContext is a Spring Security component that stores security-related 
+information for the current request. 
+
+In our updated flow: 
+
+After JWT validation: 
+- An Authentication object is created using user identity 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+- This object is stored in SecurityContext 
+- Roles/permissions are resolved dynamically during authorization 
+
+SecurityContext contains: 
+- Authenticated user identity 
+- Authentication status 
+- Security metadata 
+
+Roles and permissions are not blindly trusted from JWT; 
+they are validated dynamically before authorization checks. 
+
+Spring Security automatically: 
+- Creates SecurityContext at request start 
+- Populates it after authentication 
+- Clears it after request completion 
+
+-------------------------------------------------------- 
+
+FINAL SUMMARY 
+
+JWT → Used only for identity verification   
+Redis → Stores latest role-permission mappings   
+Database → Source of truth   
+AOP → Enforces permission checks   
+SecurityContext → Holds authenticated user for current request   
+
+This approach ensures centralized, dynamic, secure, and scalable authorization 
+with immediate reflection of role changes. 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Diagram 
+
+ 
+API created 
+
+ 
+@Async 
+
+ 
+@Async — History Service Summary 
+ 
+
+1) Purpose in History Service 
+------------------------------ 
+We use @Async in History Service to: 
+- Decouple audit/history persistence from main business flow 
+- Reduce API response time 
+- Prevent history failure from breaking main request 
+- Achieve eventual consistency 
+
+History is treated as non-blocking, secondary operation. 
+
+2) Basic Implementation 
+----------------------- 
+
+@EnableAsync   // required at configuration level 
+
+@Service 
+public class HistoryService { 
+
+    @Async("historyExecutor") 
+    public CompletableFuture<Void> saveAsync(HistoryEvent event) { 
+        try { 
+            historyRepository.save(event); 
+        } catch (Exception ex) { 
+            log.error("History persistence failed for {}", event.getId(), ex); 
+        } 
+        return CompletableFuture.completedFuture(null); 
+    } 
+} 
+
+3) How It Works Internally 
+-------------------------- 
+Caller Thread 
+     ↓ 
+Spring AOP Proxy 
+     ↓ 
+TaskExecutor.submit() 
+     ↓ 
+Separate background thread executes saveAsync() 
+
+Key Points: 
+- Runs in different thread 
+- Separate transaction context 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+- Exceptions do NOT propagate to caller 
+- Main request returns immediately 
+
+4) Ensuring Main Request Does Not Fail 
+-------------------------------------- 
+- Async method runs in separate thread 
+- Exceptions are caught inside method 
+- No exception bubbles back to controller 
+- History failure does not affect API response 
+
+5) Critical Data Consistency Requirement 
+----------------------------------------- 
+History must run ONLY after main transaction commits. 
+
+Correct pattern: 
+
+@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) 
+public void handle(TaskUpdatedEvent event) { 
+    historyService.saveAsync(event); 
+} 
+
+This ensures: 
+- No history written for rolled-back transactions 
+
+6) Retry for Transient Failures 
+-------------------------------- 
+
+@Async("historyExecutor") 
+@Retryable( 
+    value = { Exception.class }, 
+    maxAttempts = 3, 
+    backoff = @Backoff(delay = 2000) 
+) 
+public CompletableFuture<Void> saveAsync(HistoryEvent event) { 
+    historyRepository.save(event); 
+    return CompletableFuture.completedFuture(null); 
+} 
+
+Solves: 
+- Temporary DB failure 
+- Connection pool hiccups 
+- Deadlocks 
+
+7) Thread Pool Configuration 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+----------------------------- 
+
+@Bean(name = "historyExecutor") 
+public Executor historyExecutor() { 
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor(); 
+    executor.setCorePoolSize(5); 
+    executor.setMaxPoolSize(10); 
+    executor.setQueueCapacity(500); 
+    executor.initialize(); 
+    return executor; 
+} 
+
+Prevents: 
+- Blocking request threads 
+- Silent task dropping 
+- Thread exhaustion 
+
+8) Limitations of @Async for History 
+------------------------------------ 
+- In-memory execution (lost if app crashes) 
+- No durability guarantee 
+- No built-in retry unless added 
+- No delivery tracking 
+- No exactly-once guarantee 
+
+9) When @Async Is Acceptable for History 
+---------------------------------------- 
+- Audit is non-critical 
+- Minor data loss acceptable 
+- Low-to-moderate traffic 
+- Eventual consistency allowed 
+
+10) When @Async Is NOT Enough 
+----------------------------- 
+If history is: 
+- Compliance-critical 
+- Financially regulated 
+- Requires guaranteed persistence 
+- Needs high throughput 
+
+Better approach: 
+- Outbox Pattern 
+- Kafka-based event-driven architecture 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+11) Interview-Ready Summary 
+---------------------------- 
+In our system, History Service was executed asynchronously to prevent audit logging from increasing 
+API latency. The async method runs in a dedicated thread pool and is triggered only after the main 
+transaction commits using @TransactionalEventListener(AFTER_COMMIT). Failures are logged and 
+retried when necessary. Since @Async is thread-based and not crash-safe, stronger durability 
+guarantees would require an event-driven approach such as Kafka or the Outbox pattern. 
+
+ 
+END 
+ 
+
+ 
+ 
+StatusCodeExceptionHandling 
+
+ 
+Exception Handling Using @ResponseStatus 
+(Handling Specific HTTP Status Codes) 
+ 
+
+1) Purpose 
+---------- 
+@ResponseStatus is used to map a specific exception to a specific HTTP status code. 
+
+It allows: 
+- Clean separation of business logic and HTTP response logic 
+- Automatic HTTP status mapping 
+- Avoiding manual ResponseEntity creation everywhere 
+
+2) Basic Usage on Custom Exception 
+----------------------------------- 
+
+@ResponseStatus(HttpStatus.NOT_FOUND) 
+public class HistoryNotFoundException extends RuntimeException { 
+    public HistoryNotFoundException(String message) { 
+        super(message); 
+    } 
+} 
+
+When this exception is thrown: 
+
+throw new HistoryNotFoundException("History not found"); 
+
+Spring automatically returns: 
+
+HTTP 404 Not Found 
+
+3) With Custom Reason 
+--------------------- 
+
+@ResponseStatus( 
+    value = HttpStatus.BAD_REQUEST, 
+    reason = "Invalid history request" 
+) 
+public class InvalidHistoryRequestException extends RuntimeException { 
+} 
+
+Response: 
+HTTP 400 Bad Request 
+Body: 
+"Invalid history request" 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Note: 
+Using "reason" produces default error response body. 
+
+4) Using @ExceptionHandler (More Control) 
+------------------------------------------ 
+
+For structured JSON responses, prefer global exception handling: 
+
+@RestControllerAdvice 
+public class GlobalExceptionHandler { 
+
+    @ExceptionHandler(HistoryNotFoundException.class) 
+    @ResponseStatus(HttpStatus.NOT_FOUND) 
+    public ErrorResponse handleHistoryNotFound( 
+            HistoryNotFoundException ex) { 
+
+        return new ErrorResponse( 
+            404, 
+            ex.getMessage(), 
+            LocalDateTime.now() 
+        ); 
+    } 
+} 
+
+This gives: 
+- Custom JSON body 
+- Control over structure 
+- Consistent API contract 
+
+5) Handling Multiple Status Codes 
+---------------------------------- 
+
+Different exceptions → different status codes: 
+
+@ResponseStatus(HttpStatus.NOT_FOUND) 
+public class HistoryNotFoundException extends RuntimeException {} 
+
+@ResponseStatus(HttpStatus.BAD_REQUEST) 
+public class InvalidHistoryRequestException extends RuntimeException {} 
+
+@ResponseStatus(HttpStatus.CONFLICT) 
+public class DuplicateHistoryException extends RuntimeException {} 
+
+6) When Exception Is Thrown in Service 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--------------------------------------- 
+
+@Service 
+public class HistoryService { 
+
+    public History getHistory(Long id) { 
+        return historyRepository.findById(id) 
+            .orElseThrow(() -> 
+                new HistoryNotFoundException("History not found")); 
+    } 
+} 
+
+Spring automatically converts exception → HTTP status. 
+
+7) Difference: @ResponseStatus vs ResponseEntity 
+------------------------------------------------ 
+
+@ResponseStatus: 
+- Static mapping 
+- Cleaner 
+- Less boilerplate 
+- Good for simple APIs 
+
+ResponseEntity: 
+- Dynamic status 
+- Full response control 
+- Used when status depends on runtime condition 
+
+8) Limitations of @ResponseStatus 
+---------------------------------- 
+- Fixed HTTP status 
+- Harder to return dynamic error body 
+- Not ideal for complex error responses 
+- Does not handle validation errors automatically 
+
+9) Best Practice in Production 
+------------------------------- 
+For structured APIs: 
+
+Use: 
+- @RestControllerAdvice 
+- @ExceptionHandler 
+- Custom error response object 
+
+Avoid using "reason" in @ResponseStatus for REST APIs 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+because it limits response body customization. 
+
+10) Interview-Ready Summary 
+---------------------------- 
+@ResponseStatus allows mapping custom exceptions to specific HTTP status codes declaratively. 
+When the exception is thrown, Spring automatically converts it to the defined HTTP status. For more 
+structured error handling and custom JSON responses, it is recommended to use 
+@RestControllerAdvice with @ExceptionHandler instead of relying solely on @ResponseStatus. 
+
+ 
+END 
+ 
+
+ 
+How Exceptions Are Thrown & Detected in Spring Boot 
+ 
+
+1) Do We Need to Explicitly Throw Exceptions? 
+--------------------------------------------- 
+Yes — for custom business exceptions, you must explicitly throw them. 
+
+Example: 
+
+if (history == null) { 
+    throw new HistoryNotFoundException("History not found"); 
+} 
+
+Spring does NOT automatically throw your custom exceptions. 
+You define when business logic is violated. 
+
+2) Where Can Exceptions Be Thrown? 
+----------------------------------- 
+Exceptions can originate from: 
+
+• Controller layer 
+• Service layer 
+• Repository layer 
+• Validation layer 
+• Framework itself (Spring, Hibernate, Jackson, etc.) 
+
+Spring detects any unhandled exception that propagates up to the DispatcherServlet. 
+
+3) How Spring Detects Exceptions 
+--------------------------------- 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Flow: 
+
+Controller → Service → Repository 
+        ↓ 
+   Exception thrown 
+        ↓ 
+Bubbles up call stack 
+        ↓ 
+Spring DispatcherServlet catches it 
+        ↓ 
+Checks: 
+    - @ExceptionHandler 
+    - @RestControllerAdvice 
+    - @ResponseStatus 
+    - Default Exception Resolver 
+        ↓ 
+Converts to HTTP response 
+
+4) Example: Service Throws Exception 
+------------------------------------- 
+
+@Service 
+public class HistoryService { 
+
+    public History getHistory(Long id) { 
+        return historyRepository.findById(id) 
+            .orElseThrow(() -> 
+                new HistoryNotFoundException("History not found")); 
+    } 
+} 
+
+If not caught manually, 
+Spring automatically routes it to exception handlers. 
+
+5) Framework-Thrown Exceptions (Automatic) 
+------------------------------------------- 
+Some exceptions are thrown automatically by Spring: 
+
+• MethodArgumentNotValidException (validation failure) 
+• HttpMessageNotReadableException (invalid JSON) 
+• DataIntegrityViolationException (DB constraint violation) 
+• MissingServletRequestParameterException 
+
+You do NOT throw these manually. 
+Spring throws them internally. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+6) Can Spring Detect Exceptions From Anywhere? 
+----------------------------------------------- 
+Spring only handles exceptions that: 
+
+• Occur inside Spring-managed beans 
+• Happen during HTTP request processing 
+• Propagate to the DispatcherServlet 
+
+It will NOT detect: 
+• Exceptions caught and swallowed manually 
+• Exceptions inside separate threads unless handled properly 
+• Exceptions outside request lifecycle 
+
+7) What Happens If You Catch It? 
+--------------------------------- 
+
+try { 
+    historyRepository.save(entity); 
+} catch (Exception e) { 
+    log.error("Failed"); 
+} 
+
+If you catch and do NOT rethrow, 
+Spring never sees it. 
+
+To let Spring handle it: 
+
+catch (Exception e) { 
+    throw new HistorySaveException("Failed to save history"); 
+} 
+
+8) Async Case (Important) 
+-------------------------- 
+For @Async methods: 
+
+• Exception does NOT propagate to controller thread. 
+• Must handle inside async method. 
+• Or use CompletableFuture and handle via exceptionally(). 
+
+9) Summary 
+---------- 
+• Business exceptions must be explicitly thrown. 
+• Spring automatically catches uncaught exceptions. 
+• Exceptions bubble up the call stack. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+• @ExceptionHandler / @ResponseStatus decide HTTP response. 
+• If you catch and suppress exception, Spring cannot detect it. 
+• Async exceptions do not propagate to request thread. 
+
+ 
+END 
+ 
+
+ 
+ 
+Deployment Strategy 
+
+ 
+Rolling Update Deployment Strategy 
+ 
+
+1) Purpose 
+---------- 
+Rolling Update is a deployment strategy where: 
+- New version instances are deployed gradually 
+- Old version instances are terminated progressively 
+- System remains available during deployment 
+- No full downtime occurs 
+
+Used in: 
+- Microservices 
+- Kubernetes-based deployments 
+- High-availability systems 
+
+2) How It Works 
+--------------- 
+Instead of replacing all instances at once: 
+
+Old Version (v1): 
+Instance 1 
+Instance 2 
+Instance 3 
+Instance 4 
+
+Step-by-step process: 
+
+Step 1: 
+Terminate Instance 1 (v1) 
+Start Instance 1 (v2) 
+
+Step 2: 
+Terminate Instance 2 (v1) 
+Start Instance 2 (v2) 
+
+Continue until all are upgraded. 
+
+Traffic always flows to healthy instances. 
+
+3) Example in Kubernetes 
+------------------------- 
+
+spec: 
+  replicas: 4 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  strategy: 
+    type: RollingUpdate 
+    rollingUpdate: 
+      maxUnavailable: 1 
+      maxSurge: 1 
+
+Meaning: 
+- At most 1 pod can be unavailable 
+- At most 1 extra pod can be created temporarily 
+
+4) Key Parameters 
+----------------- 
+• maxUnavailable 
+  Number of old pods that can go down during update. 
+
+• maxSurge 
+  Extra pods allowed above desired replica count. 
+
+• Readiness Probe 
+  Ensures traffic only goes to healthy pods. 
+
+• Liveness Probe 
+  Restarts unhealthy pods. 
+
+5) Traffic Flow During Deployment 
+---------------------------------- 
+Load Balancer 
+      ↓ 
+Healthy Pods Only 
+      ↓ 
+Old + New versions coexist temporarily 
+
+Once new pod is Ready: 
+- It starts receiving traffic 
+- Old pod is removed 
+
+6) Advantages 
+------------- 
+• Zero downtime 
+• No traffic interruption 
+• Safe gradual rollout 
+• No duplicate environments required 
+• Resource-efficient 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+7) Limitations 
+-------------- 
+• Old and new versions coexist → must be backward compatible 
+• DB schema changes must be handled carefully 
+• Slower rollout compared to recreate strategy 
+
+8) Data Consistency Considerations 
+----------------------------------- 
+When doing rolling update: 
+
+✔ Use backward-compatible APIs   
+✔ Avoid breaking DB changes   
+✔ Use feature flags if needed   
+✔ Apply DB migrations before deployment   
+
+Bad Example: 
+- New code expects new DB column 
+- Old pods still running → may break 
+
+9) Comparison With Other Strategies 
+------------------------------------ 
+
+Rolling Update: 
+- Gradual replacement 
+- No downtime 
+- Mixed versions temporarily 
+
+Blue-Green: 
+- Two separate environments 
+- Instant switch 
+- Higher infrastructure cost 
+
+Canary: 
+- Small % traffic to new version 
+- Risk-controlled rollout 
+
+10) Failure Handling 
+-------------------- 
+If new pod fails readiness: 
+
+- Kubernetes stops rollout 
+- Old pods continue serving traffic 
+- Rollback can be triggered 
+
+Deployment does NOT take down entire system. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+11) When To Use 
+--------------- 
+✔ Stateless services   
+✔ High-availability APIs   
+✔ Microservices   
+✔ Kubernetes environments   
+
+Avoid if: 
+✖ Breaking schema changes 
+✖ Major incompatible changes 
+
+12) Interview-Ready Summary 
+---------------------------- 
+Rolling Update is a zero-downtime deployment strategy where instances are gradually replaced with 
+newer versions while keeping the service available. Traffic is routed only to healthy pods using 
+readiness checks. It requires backward compatibility since old and new versions coexist temporarily. 
+Kubernetes manages rollout using parameters like maxUnavailable and maxSurge, ensuring 
+controlled and safe deployment. 
+
+ 
+END 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Response code 
+
+ 
+Important HTTP Response Codes & Meaning 
+ 
+
+1) Purpose 
+---------- 
+HTTP response codes indicate: 
+- Whether request succeeded 
+- Whether client made an error 
+- Whether server failed 
+- What action client should take next 
+
+Format: 
+HTTP Status Code = 3-digit number 
+
+2) Status Code Categories 
+-------------------------- 
+
+1xx → Informational   
+2xx → Success   
+3xx → Redirection   
+4xx → Client Error   
+5xx → Server Error   
+
+ 
+2xx — Success Codes 
+ 
+
+200 OK 
+------- 
+Request succeeded. 
+Most common success response. 
+
+Used for: 
+✔ GET successful 
+✔ PUT successful 
+✔ General success 
+
+201 Created 
+------------ 
+Resource successfully created. 
+
+Used for: 
+✔ POST that creates new resource 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Example: 
+POST /history → returns 201 
+
+204 No Content 
+-------------- 
+Request successful but no response body. 
+
+Used for: 
+✔ DELETE 
+✔ Successful update with no return payload 
+
+ 
+3xx — Redirection Codes 
+ 
+
+301 Moved Permanently 
+---------------------- 
+Resource permanently moved. 
+
+302 Found 
+--------- 
+Temporary redirect. 
+
+(Used mostly in browser-based apps) 
+
+ 
+4xx — Client Error Codes 
+ 
+
+400 Bad Request 
+---------------- 
+Client sent invalid input. 
+
+Examples: 
+✔ Invalid JSON 
+✔ Validation failure 
+✔ Missing fields 
+
+401 Unauthorized 
+----------------- 
+Authentication required or invalid token. 
+
+Meaning: 
+User not authenticated. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+403 Forbidden 
+-------------- 
+User authenticated but not allowed. 
+
+Meaning: 
+Access denied. 
+
+404 Not Found 
+-------------- 
+Requested resource does not exist. 
+
+Example: 
+History ID not found. 
+
+405 Method Not Allowed 
+----------------------- 
+Wrong HTTP method used. 
+
+Example: 
+Sending POST on GET-only endpoint. 
+
+409 Conflict 
+------------ 
+Conflict with current state. 
+
+Example: 
+Duplicate resource creation. 
+
+422 Unprocessable Entity 
+------------------------- 
+Request is syntactically correct but semantically invalid. 
+(Common in validation-heavy APIs) 
+
+ 
+5xx — Server Error Codes 
+ 
+
+500 Internal Server Error 
+-------------------------- 
+Unexpected server failure. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Used for: 
+✔ Unhandled exceptions 
+✔ Unknown runtime errors 
+
+502 Bad Gateway 
+--------------- 
+Upstream service failure. 
+
+Example: 
+Microservice dependency failure. 
+
+503 Service Unavailable 
+------------------------ 
+Service temporarily unavailable. 
+
+Example: 
+Server overload 
+Maintenance mode 
+
+504 Gateway Timeout 
+-------------------- 
+Upstream service timed out. 
+
+ 
+Most Important Codes for Interviews 
+ 
+
+Must Remember: 
+
+200 → Success   
+201 → Created   
+204 → No Content   
+400 → Bad Request   
+401 → Unauthorized   
+403 → Forbidden   
+404 → Not Found   
+409 → Conflict   
+500 → Internal Server Error   
+503 → Service Unavailable   
+
+ 
+Difference Between Commonly Confused Codes 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+401 vs 403 
+----------- 
+401 → Not authenticated   
+403 → Authenticated but not authorized   
+
+400 vs 422 
+----------- 
+400 → Malformed request   
+422 → Validation/business rule failure   
+
+404 vs 403 
+----------- 
+404 → Resource doesn't exist   
+403 → Exists but no access   
+
+ 
+How Spring Sets Response Codes 
+ 
+
+Using @ResponseStatus: 
+
+@ResponseStatus(HttpStatus.NOT_FOUND) 
+
+Using ResponseEntity: 
+
+return ResponseEntity.status(404).body(...); 
+
+Using ExceptionHandler: 
+
+@ExceptionHandler(...) 
+@ResponseStatus(HttpStatus.BAD_REQUEST) 
+
+ 
+Interview-Ready Summary 
+ 
+HTTP response codes are standardized 3-digit numbers that indicate the outcome of an HTTP 
+request. They are grouped into 1xx informational, 2xx success, 3xx redirection, 4xx client errors, and 
+5xx server errors. Proper use of status codes improves API clarity, debugging, and contract 
+correctness in distributed systems. 
+
+ 
+END 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Service Boundry 
+
+## Service Boundary – Brief Summary 
+
+A **service boundary** defines what responsibilities, data, and business capability belong inside a 
+microservice. 
+
+### Key Principles 
+
+- **Business Capability Based** 
+  - Each service represents one clear business function. 
+
+- **Owns Its Data** 
+  - A service has its own database. 
+  - No direct DB access from other services. 
+
+- **High Cohesion** 
+  - All functionalities inside the service are closely related. 
+
+- **Low Coupling** 
+  - Avoid excessive synchronous calls between services. 
+
+- **Independent Deployment** 
+  - Services should be deployable without coordinating with others. 
+
+- **Change Isolation** 
+  - Features that change together → same service. 
+  - Features that evolve independently → separate services. 
+
+- **Transaction Boundary** 
+  - Avoid frequent distributed transactions. 
+  - Prefer eventual consistency (Saga pattern). 
+
+--- 
+
+### One-Line Definition 
+
+> A service boundary defines the scope of responsibility and data ownership of a microservice to 
+ensure high cohesion, low coupling, and independent scalability. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Custom Aspect 
+
+ 
+  
+ 
+JDBC 
+
+ 
+Dynamic rules engine 
+
+# Dynamic Rule Engine (Teammate+) – Complete Interview Explanation 
+
+## 1. Overview 
+
+In Teammate+, a **dynamic rule engine** is implemented to allow business logic to be configured 
+without modifying application code. Instead of hardcoding conditions in Java services, rules are 
+created through an **admin UI page**, stored in the **database**, and evaluated dynamically at 
+runtime. 
+
+This design enables business teams or admuinistrators to change system behavior without 
+redeploying the application. 
+
+Typical use cases: 
+
+- Assessment validation rules 
+- Risk classification based on score 
+- Conditional workflow triggers 
+- Approval requirements 
+- Dynamic scoring logic 
+- Conditional notifications 
+- Role-based workflow actions 
+
+--- 
+
+## 2. Problem With Hardcoded Business Logic 
+
+Without a rule engine, business logic is embedded directly in code. 
+
+Example: 
+
+```java 
+if(score < 40){ 
+    assessment.setRiskLevel("HIGH"); 
+} 
+``` 
+
+Problems with this approach: 
+
+- Requires code changes for every rule update 
+- Requires deployment 
+- Business users cannot manage logic 
+- Difficult to scale rule complexity 
+
+A dynamic rule engine externalizes this logic into the database. 
+
+--- 
+
+## 3. Core Idea of Dynamic Rule Engine 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Rules are stored as **data instead of code**. 
+
+Example rule stored in DB: 
+
+| rule_name | condition_expression | action_expression | 
+|-----------|---------------------|------------------| 
+| HIGH_RISK_RULE | score < 40 | setRiskLevel("HIGH") | 
+
+At runtime:
+
+==== 112_3_If_the_condition_is_true_the_action_is_executed_.txt ====
+
+3. If the condition is true, the action is executed 
+
+--- 
+
+## 4. High Level Architecture 
+
+Admin UI   
+↓   
+Rule Management API   
+↓   
+Database (Rules Table)   
+↓   
+Rule Engine Service   
+↓   
+Load Rules   
+↓   
+Evaluate Conditions   
+↓   
+Execute Actions   
+↓   
+Return Modified Entity 
+
+--- 
+
+## 5. Rule Creation Flow 
+
+### Step 1 — Admin Creates Rule From UI 
+
+| Field | Value | 
+|------|------| 
+| Rule Name | High Risk Assessment | 
+| Entity Type | Assessment | 
+| Condition | score < 40 | 
+| Action | setRiskLevel("HIGH") | 
+| Priority | 10 | 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+| Active | true | 
+
+--- 
+
+### Step 2 — Rule Stored In Database 
+
+Example table: 
+
+```sql 
+CREATE TABLE rules ( 
+    id BIGINT PRIMARY KEY, 
+    rule_name VARCHAR(255), 
+    entity_type VARCHAR(100), 
+    condition_expression TEXT, 
+    action_expression TEXT, 
+    priority INT, 
+    is_active BOOLEAN, 
+    created_at TIMESTAMP, 
+    updated_at TIMESTAMP 
+); 
+``` 
+
+Example record: 
+
+| id | rule_name | entity_type | condition_expression | action_expression | priority | is_active | 
+|----|-----------|-------------|---------------------|------------------|----------|-----------| 
+| 1 | HIGH_RISK_RULE | ASSESSMENT | score < 40 | setRiskLevel("HIGH") | 10 | true | 
+
+--- 
+
+## 6. Rule Execution Flow 
+
+When an event occurs (example: assessment submission): 
+
+Assessment Submitted   
+↓   
+Rule Engine Service   
+↓   
+Fetch Active Rules From Database   
+↓   
+Filter Rules By Entity Type   
+↓   
+Sort Rules By Priority   
+↓   
+Evaluate Condition   
+↓   
+Execute Action   
+↓   
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Return Updated Object 
+
+--- 
+
+## 7. Core Components 
+
+### Rule Entity 
+
+```java 
+public class Rule { 
+
+    private Long id; 
+    private String ruleName; 
+    private String entityType; 
+    private String conditionExpression; 
+    private String actionExpression; 
+    private Integer priority; 
+    private Boolean active; 
+} 
+``` 
+
+--- 
+
+### Rule Repository 
+
+```java 
+@Repository 
+public interface RuleRepository extends JpaRepository<Rule, Long> { 
+
+    List<Rule> findByEntityTypeAndActiveTrueOrderByPriorityDesc(String entityType); 
+} 
+``` 
+
+Ensures: 
+
+- Only active rules are loaded 
+- Rules executed in priority order 
+
+--- 
+
+### Rule Engine Service 
+
+```java 
+@Service 
+public class RuleEngineService { 
+
+    @Autowired 
+    private RuleRepository ruleRepository; 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    public void evaluateRules(Assessment assessment){ 
+
+        List<Rule> rules = ruleRepository 
+                .findByEntityTypeAndActiveTrueOrderByPriorityDesc("ASSESSMENT"); 
+
+        for(Rule rule : rules){ 
+
+            if(evaluateCondition(rule.getConditionExpression(), assessment)){ 
+                executeAction(rule.getActionExpression(), assessment); 
+            } 
+        } 
+    } 
+} 
+``` 
+
+--- 
+
+## 8. Condition Evaluation 
+
+Conditions stored as expressions. 
+
+Examples: 
+
+``` 
+score < 40 
+department == 'Finance' 
+riskScore > 80 
+assessmentType == 'INTERNAL' 
+``` 
+
+Evaluated using **Spring Expression Language (SpEL)**. 
+
+```java 
+private boolean evaluateCondition(String expression, Assessment assessment){ 
+
+    ExpressionParser parser = new SpelExpressionParser(); 
+
+    EvaluationContext context = new StandardEvaluationContext(assessment); 
+
+    Boolean result = parser.parseExpression(expression).getValue(context, Boolean.class); 
+
+    return Boolean.TRUE.equals(result); 
+} 
+``` 
+
+--- 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+## 9. Action Execution 
+
+Actions executed when condition is satisfied. 
+
+Examples: 
+
+``` 
+setRiskLevel("HIGH") 
+setApprovalRequired(true) 
+assignReviewer("RISK_TEAM") 
+sendNotification("ADMIN") 
+``` 
+
+Example implementation: 
+
+```java 
+private void executeAction(String action, Assessment assessment){ 
+
+    if(action.contains("setRiskLevel")){ 
+        assessment.setRiskLevel("HIGH"); 
+    } 
+
+    if(action.contains("setApprovalRequired")){ 
+        assessment.setApprovalRequired(true); 
+    } 
+} 
+``` 
+
+In advanced systems actions use **strategy pattern or handler classes**. 
+
+--- 
+
+## 10. Rule Caching 
+
+Fetching rules from the database every request is inefficient. 
+
+Rules are cached in memory. 
+
+Application Startup   
+↓   
+Load Rules From Database   
+↓   
+Store In Memory Cache   
+↓   
+Runtime Rule Evaluation 
+
+Example cache: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+``` 
+Map<String, List<Rule>> ruleCache 
+``` 
+
+Example: 
+
+``` 
+ASSESSMENT -> [Rule1, Rule2, Rule3] 
+SURVEY -> [Rule4, Rule5] 
+``` 
+
+Cache refresh strategies: 
+
+- Scheduled refresh 
+- Event-based refresh 
+- Manual refresh 
+
+--- 
+
+## 11. Rule Priority Handling 
+
+Multiple rules may apply. 
+
+| Rule | Condition | Action | 
+|-----|-----------|--------| 
+| HIGH_RISK_RULE | score < 40 | setRiskLevel("HIGH") | 
+| CRITICAL_RISK_RULE | score < 30 | setRiskLevel("CRITICAL") | 
+
+Priority: 
+
+| Rule | Priority | 
+|-----|---------| 
+| CRITICAL_RISK_RULE | 20 | 
+| HIGH_RISK_RULE | 10 | 
+
+Higher priority executes first. 
+
+--- 
+
+## 12. Rule Versioning 
+
+Track rule updates. 
+
+```sql 
+CREATE TABLE rule_versions ( 
+    id BIGINT PRIMARY KEY, 
+    rule_id BIGINT, 
+    version INT, 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    condition_expression TEXT, 
+    action_expression TEXT, 
+    created_at TIMESTAMP 
+); 
+``` 
+
+Benefits: 
+
+- Audit history 
+- Rollback capability 
+- Track rule evolution 
+
+--- 
+
+## 13. Rule Execution Logging 
+
+```sql 
+CREATE TABLE rule_execution_log ( 
+    id BIGINT PRIMARY KEY, 
+    rule_id BIGINT, 
+    entity_id BIGINT, 
+    result VARCHAR(50), 
+    executed_at TIMESTAMP 
+); 
+``` 
+
+Example log: 
+
+| rule_id | entity_id | result | 
+|--------|-----------|--------| 
+| 1 | 4521 | SUCCESS | 
+
+--- 
+
+## 14. Example End-to-End Scenario 
+
+Input: 
+
+``` 
+score = 35 
+department = Finance 
+``` 
+
+Rules: 
+
+| Rule | Condition | Action | 
+|-----|-----------|--------| 
+| Rule1 | score < 40 | setRiskLevel("HIGH") | 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+| Rule2 | department == 'Finance' | setApprovalRequired(true) | 
+
+Execution: 
+
+``` 
+Rule1 triggered → riskLevel = HIGH 
+Rule2 triggered → approvalRequired = true 
+``` 
+
+Final result: 
+
+``` 
+riskLevel = HIGH 
+approvalRequired = true 
+``` 
+
+--- 
+
+## 15. Advantages 
+
+- Dynamic business logic 
+- No deployment required 
+- Business-friendly configuration 
+- Centralized rule management 
+- Extensible architecture 
+
+--- 
+
+## 16. Limitations 
+
+- Complex debugging 
+- Rule conflicts 
+- Performance concerns for large rule sets 
+
+--- 
+
+## 17. Interview Summary Answer 
+
+In Teammate+, a dynamic rule engine externalizes business logic from application code. 
+Administrators create rules via a UI where each rule contains a condition and action. These rules are 
+stored in the database and evaluated dynamically at runtime using Spring Expression Language. The 
+rule engine loads active rules, evaluates conditions, executes actions, and applies them to entities. 
+Rules are prioritized and cached in memory to improve performance. This allows business logic to 
+change without modifying code or redeploying the application. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Authorisation 
+
+Authorisation  
+
+Previous rbac 
+
+ 
+PREVIOUS AUTHORIZATION SETUP 
+(Static / Hard-coded Roles) 
+ 
+
+1) PREDEFINED ROLES IN THE SYSTEM 
+
+The application had predefined roles already configured in the backend code. 
+These roles were fixed and could NOT be modified by the admin. 
+
+Example predefined roles: 
+
+    ADMIN 
+    AUDITOR 
+    REVIEWER 
+    OBSERVER 
+
+Internally Spring Security stores roles with prefix ROLE_ : 
+
+    ROLE_ADMIN 
+    ROLE_AUDITOR 
+    ROLE_REVIEWER 
+    ROLE_OBSERVER 
+
+-------------------------------------------------- 
+
+2) ADMIN CREATES USER AND ASSIGNS ROLE 
+
+Admin could create a new user and assign one of the predefined roles. 
+
+Example: 
+
+    User      Assigned Role 
+    ----------------------- 
+    Tejas     ADMIN 
+    Rahul     AUDITOR 
+    Priya     REVIEWER 
+
+Example DB record: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    username : rahul 
+    role     : ROLE_AUDITOR 
+
+-------------------------------------------------- 
+
+3) PROTECTING APIs USING @PreAuthorize 
+
+To restrict access to APIs we used Spring Security annotation 
+@PreAuthorize. 
+
+Example: 
+
+    @PreAuthorize("hasRole('ADMIN')") 
+    public void deleteAudit(Long id){ 
+        auditRepository.deleteById(id); 
+    } 
+
+Meaning: 
+
+    Only users with ADMIN role can execute this method. 
+
+-------------------------------------------------- 
+
+4) HOW @PreAuthorize CHECKS ROLE 
+
+When request comes: 
+
+    Client Request 
+         ↓ 
+    JWT Token Validated 
+         ↓ 
+    Roles extracted from token 
+         ↓ 
+    Authentication object created 
+         ↓ 
+    Stored inside SecurityContext 
+
+Example SecurityContext: 
+
+    User : rahul 
+    Authorities : [ROLE_AUDITOR] 
+
+Now Spring evaluates: 
+
+    @PreAuthorize("hasRole('ADMIN')") 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Spring internally converts this to: 
+
+    ROLE_ADMIN 
+
+Then it checks: 
+
+    Does ROLE_ADMIN exist in authentication authorities? 
+
+-------------------------------------------------- 
+
+5) FINAL AUTHORIZATION DECISION 
+
+CASE 1 : ROLE PRESENT 
+
+    Authorities : [ROLE_ADMIN] 
+    Required    : ROLE_ADMIN 
+
+    Result → Access Granted 
+    Method executes 
+
+CASE 2 : ROLE NOT PRESENT 
+
+    Authorities : [ROLE_AUDITOR] 
+    Required    : ROLE_ADMIN 
+
+    Result → AccessDeniedException 
+    HTTP 403 Forbidden 
+    Method execution blocked 
+
+SHORT SUMMARY 
+
+    • Roles were predefined in the system 
+    • Admin could only assign roles to users 
+    • APIs were protected using @PreAuthorize 
+    • Spring fetched roles from SecurityContext 
+    • If role matched → method executed 
+    • If role missing → access denied 
+
+ 
+Circuit breaker config  
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+RESILIENCE4J CIRCUIT BREAKER - SETUP NOTES 
+ 
+
+PURPOSE 
+------- 
+Circuit Breaker protects an application from repeatedly calling a failing service. 
+If a service fails frequently, the circuit opens and prevents further calls, 
+redirecting requests to a fallback method. 
+
+Example: 
+Primary Service : Redis 
+Fallback Service: Database 
+
+--------------------------------------------------
+
+==== 125_1__ADMIN_CREATES_USER_AND_ASSIGNS_ROLE_.txt ====
+
+1.  ADMIN CREATES USER AND ASSIGNS ROLE 
+
+Admin creates a user from the UI and assigns role per assessment. 
+
+Example UI action: 
+
+User Email: tejas@gmail.com 
+Tenant: ABC Bank 
+Assessment: A101 
+Role: AUDITOR 
+
+DATABASE TABLES USED 
+
+TABLE: users 
+
+user_id (UUID) 
+tenant_id 
+email 
+name 
+status 
+
+Example: 
+
+ 
+ 
+ 
+ 
+ 
+user_id  = U123 
+tenant_id = T100 
+email = tejas@gmail.com 
+
+TABLE: assessments 
+
+assessment_id 
+tenant_id 
+assessment_name 
+
+Example: 
+
+assessment_id = A101 
+
+TABLE: user_assessment_roles 
+
+Stores role of a user for a specific assessment. 
+
+id 
+tenant_id 
+user_id 
+assessment_id 
+role_id 
+assigned_at 
+
+Example record: 
+
+tenant_id     T100 
+user_id       U123 
+assessment_id A101 
+role_id       AUDITOR 
+
+Meaning: 
+
+User U123 is AUDITOR in assessment A101
+
+==== 126_2__ROLE__PERMISSION_MAPPING_.txt ====
+
+2.  ROLE → PERMISSION MAPPING 
+
+Roles and permissions are stored separately. 
+
+TABLE: roles 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+role_id 
+role_name 
+
+Example: 
+
+ADMIN 
+AUDITOR 
+REVIEWER 
+
+TABLE: permissions 
+
+permission_id 
+permission_key 
+
+Example: 
+
+AUDIT_CREATE 
+AUDIT_EDIT 
+WORKPAPER_UPLOAD 
+REPORT_EXPORT 
+
+TABLE: role_permissions 
+
+role_id 
+permission_id 
+
+Example records: 
+
+AUDITOR  → AUDIT_CREATE 
+AUDITOR  → AUDIT_EDIT 
+AUDITOR  → WORKPAPER_UPLOAD 
+
+REVIEWER → AUDIT_REVIEW 
+REVIEWER → WORKPAPER_APPROVE 
+
+ADMIN → all permissions 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+B) USER REQUEST FLOW
+
+==== 129_4__AOP_AUTHORIZATION_ASPECT_.txt ====
+
+4.  AOP AUTHORIZATION ASPECT 
+
+The aspect intercepts the API and checks permission. 
+
+@Aspect 
+@Component 
+public class AuthorizationAspect { 
+
+    @Autowired 
+    private RedisService redisService; 
+
+    @Autowired 
+    private RoleService roleService; 
+
+    @Before("@annotation(requirePermission)") 
+    public void checkPermission(RequirePermission requirePermission) { 
+
+        String requiredPermission = requirePermission.value(); 
+
+        Authentication auth = 
+            SecurityContextHolder.getContext().getAuthentication(); 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+        String userId = auth.getName(); 
+
+        HttpServletRequest request = 
+            ((ServletRequestAttributes) RequestContextHolder 
+                .getRequestAttributes()).getRequest(); 
+
+        String tenantId = request.getHeader("tenantId"); 
+        String assessmentId = request.getParameter("assessmentId"); 
+
+        String role = redisService.getUserRole(tenantId, userId, assessmentId); 
+
+        Set<String> permissions = redisService.getPermissionsForRole(role); 
+
+        if(!permissions.contains(requiredPermission)){ 
+            throw new AccessDeniedException("Permission denied"); 
+        } 
+    } 
+}
+
+==== 134_9__IMPORTANT_THINGS_TO_FOCUS_.txt ====
+
+9.  IMPORTANT THINGS TO FOCUS 
+
+• Use userId(UUID) instead of email for Redis keys 
+• Avoid storing roles inside JWT 
+• Always invalidate cache after role updates 
+• Use Redis SET for permission lookup 
+• Use cache-aside pattern for loading RBAC data 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+• Never use global FLUSHALL in production 
+• Ensure Redis TTL prevents stale permissions 
+
+ 
+
+FINAL AUTHORIZATION FLOW 
+
+User Request 
+↓ 
+JWT validated 
+↓ 
+Extract tenantId + userId 
+↓ 
+Extract assessmentId from API 
+↓ 
+Redis lookup → role:user:{tenantId}:{userId}:{assessmentId} 
+↓ 
+Role obtained 
+↓ 
+Redis lookup → perm:role:{roleName} 
+↓ 
+Permission list obtained 
+↓ 
+Aspect checks required permission 
+↓ 
+Allow request OR throw AccessDeniedException 
+
+ 
+
+END 
+
+ 
+ 
+Hackthon 
+
+Hackathon Project: AI-Driven Risk Auditing(Code Games 2024 – 1st Place) 
+
+Summary: 
+
+Built an AI-powered enterprise risk intelligence platform to assist auditors in identifying similar 
+historical risks and automatically generating mitigation controls. The system leveraged semantic 
+vector search and large language models to improve risk discovery beyond traditional keyword-based 
+search systems. 
+
+Core Technologies Used: 
+- Backend: Java, Spring Boot (REST APIs) 
+- AI/LLM: OpenAI GPT-3.5 Turbo 
+- Embeddings: OpenAI Text Embeddings 
+- Vector Database: Pinecone (vector embeddings) 
+- Frontend: React 
+- Architecture: RAG-style semantic retrieval + LLM generation 
+RAG -> retrieval augmented generation  
+Technical Implementation:
+
+==== 33_12_Recent_Contributions_.txt ====
+
+12. Recent Contributions 
+ 
+- Your recent contributions to the project 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+13. Roles & Responsibilities 
+ 
+- Your role in the team 
+- Your day-to-day responsibilities
+
+==== 35_15_AOP_AspectOriented_Programming_.txt ====
+
+15. AOP (Aspect-Oriented Programming) 
+ 
+- Where is AOP used in your project? 
+- Why was AOP used? 
+
+ 
+Cloud 
+ 
+-  how do you manage load balancing ? 
+
+ 
+Others 
+ 
+
+1)  HTTP vs HTTPS 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Functional Info 
+
+We have an internal audit application that supports the end-to-end audit lifecycle. 
+
+Key modules: 
+
+●  Dashboard 
+●  Assessment area 
+●  Project management 
+●  Time tracking 
+●  Audit report creation 
+●  Recycle bin 
+●  Audit history 
+
+Core audit objects: 
+
+●  Risks and controls 
+●  Strategic risks 
+●  Objectives 
+●  Workpapers 
+
+Major functionalities: 
+
+●  Configurable workflows 
+●  Dynamic role- and permission-based access control 
+●  Dynamic rule engine for business logic 
+●  Workpaper upload and download 
+●  Customizable naming and taxonomy 
+●  SMTP-based email notifications 
+●  Automated audit report generation 
+
+Competitors:: 
+AuditBoard  
+Workiva 
+
+ 
+ 
+ 
+ 
+Business user/admin  flow 
+
+Admin Flow (Context Definition) 
+
+In the audit application, the Admin has full system-level access and configuration control. 
+
+Admin responsibilities include: 
+
+●  Managing taxonomy settings across the application 
+
+●  Defining roles and permissions 
+
+○  Creating new roles from existing system roles 
+
+○  Assigning permissions to roles 
+
+●  User management 
+
+○  Creating users 
+
+○  Assigning roles to users 
+
+●  Customizing the system 
+
+○  Renaming audit objects (risk, control, objective, workpaper, etc.) 
+
+○  Modifying taxonomy structures 
+
+●  Configuring SMTP settings for email notifications 
+
+In addition to administrative capabilities, the Admin can perform all operations available 
+to a normal user, including working on audits, assessments, workpapers, workflows, and 
+reports. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+User Flow (Context Definition) 
+
+A User has functional access based on the roles and permissions assigned to them. 
+
+User capabilities include: 
+
+●  Accessing the Assignment area 
+
+○  Creating new assignments 
+
+○  Adding audit objects within an assignment 
+
+●  Working with Projects 
+
+○  Linking a project to a specific audit area 
+
+○  Performing audits within that project 
+
+○  Adding predefined audit objects (risks, controls, objectives, workpapers, etc.) 
+
+●  Managing audit objects 
+
+○  Creating, editing, and deleting objects 
+
+●  Generating audit reports from assignment or project data 
+
+●  Participating in assessment workflows 
+
+○  Being assigned to specific assessment phases 
+
+○  Receiving notifications based on assigned phases and tasks 
+
+User limitations: 
+
+●  No access to administrative areas such as: 
+
+○  System settings 
+
+○  Statistics 
+
+○  Configuration modules 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Application flow 
+
+TeamMate+ Audit – Overview 
+
+TeamMate+ Audit is a software application used by internal audit teams to plan, execute, 
+track, and report audits efficiently. 
+ It is widely used by organizations—especially in regulated industries like banking—to 
+manage risk, compliance, and governance activities. 
+
+Who Uses TeamMate+ Audit?
+
+==== 50_7__Response_Flow_.txt ====
+
+7.  Response Flow 
+
+○  Travels back through Execution Service → Adapter → Controller 
+
+○  Controller sends the final HTTP response 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+High-Level Flow Summary 
+
+Controller 
+
+   ↓ 
+Adapter 
+
+   ↓ 
+Execution Service (Business Pipeline) 
+
+   ↓ 
+Specific Service 
+
+   ↓ 
+Database 
+
+   ↑ 
+Post-Operation Checks 
+
+   ↑ 
+Response back to Controller 
+
+Key Benefits 
+
+●  Loose coupling between layers 
+
+●  Single execution pipeline for all business flows 
+
+●  Easy to add new services without touching controllers 
+
+●  Cleaner controllers, reusable business logic 
+
+●  Consistent security and DB handling 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Example: Create Audit Assignment Flow 
+
+1⃣ Controller (Thin – no business logic) 
+
+@RestController 
+
+@RequestMapping("/assignments") 
+
+public class AssignmentController { 
+
+    private final AssignmentAdapter assignmentAdapter; 
+
+    public AssignmentController(AssignmentAdapter assignmentAdapter) 
+
+{ 
+
+        this.assignmentAdapter = assignmentAdapter; 
+
+    } 
+
+    @PostMapping 
+
+    public ResponseEntity<?> createAssignment(@RequestBody 
+
+AssignmentRequest request) { 
+
+        return assignmentAdapter.createAssignment(request); 
+
+    } 
+
+} 
+
+👉 Controller only: 
+
+●  Accepts HTTP request 
+
+●  Delegates to Adapter 
+
+●  No DB, no security, no logic 
+
+2⃣ Adapter (HTTP → Business Bridge) 
+
+@Component 
+
+public class AssignmentAdapter { 
+
+    private final ExecutionService executionService; 
+
+    public AssignmentAdapter(ExecutionService executionService) { 
+
+        this.executionService = executionService; 
+
+    } 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    public ResponseEntity<?> createAssignment(AssignmentRequest 
+
+request) { 
+
+        AssignmentContext context = new AssignmentContext(); 
+
+        context.setRequest(request); 
+
+        ExecutionResult result = executionService.execute( 
+
+                context, 
+
+                BusinessOperation.CREATE_ASSIGNMENT 
+
+        ); 
+
+        return ResponseEntity.status(result.getStatus()) 
+
+                             .body(result.getResponse()); 
+
+    } 
+
+} 
+
+👉 Adapter responsibilities: 
+
+●  Converts HTTP request to business context 
+
+●  Calls execution pipeline 
+
+●  Converts business response → HTTP response 
+
+3⃣ Execution Service (Business Pipeline – Core) 
+
+This is where your adapted design pattern really lives. 
+
+@Service 
+
+public class ExecutionService { 
+
+    private final AuthService authService; 
+
+    private final BusinessServiceFactory serviceFactory; 
+
+    public ExecutionResult execute(BusinessContext context, 
+
+                                   BusinessOperation operation) { 
+
+        // 1. Authentication & Role validation 
+
+        authService.validateUser(context.getUser(), operation); 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+        // 2. Get business service 
+
+        BusinessService service = 
+
+                serviceFactory.getService(operation); 
+
+        // 3. Execute business logic 
+
+        Object result = service.execute(context); 
+
+        // 4. Post-operation checks 
+
+        audit(context, result); 
+
+        return ExecutionResult.success(result); 
+
+    } 
+
+    private void audit(BusinessContext context, Object result) { 
+
+        // logging / audit trail / validation 
+
+    } 
+
+} 
+
+👉 Pipeline enforced here: 
+
+●  Security 
+
+●  Service routing 
+
+●  Execution 
+
+●  Post-processing 
+
+4⃣ Business Service Interface (Template-like) 
+
+public interface BusinessService { 
+
+    Object execute(BusinessContext context); 
+
+} 
+
+5⃣ Specific Business Service (Actual Logic) 
+
+@Service 
+
+public class CreateAssignmentService implements BusinessService { 
+
+    private final AssignmentRepository repository; 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    public CreateAssignmentService(AssignmentRepository repository) 
+
+{ 
+
+        this.repository = repository; 
+
+    } 
+
+    @Override 
+
+    public Object execute(BusinessContext context) { 
+
+        AssignmentRequest req = 
+
+                ((AssignmentContext) context).getRequest(); 
+
+        // Prepared statement via JPA / JDBC 
+
+        Assignment assignment = new Assignment(); 
+
+        assignment.setName(req.getName()); 
+
+        assignment.setCreatedBy(context.getUser().getId()); 
+
+        return repository.save(assignment); 
+
+    } 
+
+} 
+
+👉 Only business logic, nothing else. 
+
+6⃣ Factory (Routes Operation → Service) 
+
+@Component 
+
+public class BusinessServiceFactory { 
+
+    private final Map<BusinessOperation, BusinessService> services; 
+
+    public BusinessServiceFactory(List<BusinessService> serviceList) 
+
+{ 
+
+        services = Map.of( 
+
+            BusinessOperation.CREATE_ASSIGNMENT, 
+
+            serviceList.stream() 
+
+                .filter(s -> s instanceof CreateAssignmentService) 
+
+                .findFirst() 
+
+                .orElseThrow() 
+
+        ); 
+
+    } 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    public BusinessService getService(BusinessOperation operation) { 
+
+        return services.get(operation); 
+
+    } 
+
+} 
+
+7⃣ Flow Recap (Interview-friendly) 
+
+HTTP Request 
+
+   ↓ 
+Controller (thin) 
+
+   ↓ 
+Adapter (HTTP → Business) 
+   ↓ 
+Execution Service (pipeline) 
+
+   ↓ 
+Specific Business Service 
+
+   ↓ 
+Database 
+
+   ↑ 
+Post-operation checks 
+
+   ↑ 
+HTTP Response 
+
+Patterns Used (Tell it straight) 
+
+●  Adapter Pattern – Controller → Adapter → Service 
+
+●  Template Method (adapted) – Fixed execution pipeline 
+
+●  Factory Pattern – Resolve business service at runtime 
+
+●  Single Responsibility – Each layer does one thing 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Roles and responsibility 
+
+Roles and responsibility  
+ 
+
+- Actively involved in development activities, with approximately 80% focus on new 
+  feature development and enhancements. 
+
+- Handle around 20% of sprint capacity for production support, client-reported 
+  defects, and bug fixes, ensuring minimal impact on business operations. 
+
+- Participate in technical and architectural discussions, contributing to design 
+  decisions, scalability considerations, and best practices. 
+
+- Actively participate in Agile Scrum ceremonies including: 
+  - Daily stand-ups 
+  - Sprint planning 
+  - Backlog grooming 
+  - PI increment planning 
+
+- Perform peer code reviews to ensure code quality, adherence to coding standards, 
+  performance optimization, and maintainability. 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+SDLC 
+
+Software Development Life Cycle (SDLC)
+
+==== 98_5_Which_endpointAPI_you_created_.txt ====
+
+5. Which endpoint/API you created? 
+ 
+DEPLOYED ROLE & PERMISSION MANAGEMENT APIs 
+ 
+
+We implemented dedicated APIs to manage dynamic roles 
+and permissions in the system. These APIs are not simple 
+CRUD endpoints — they include internal validation, 
+mapping logic, cache handling, and security enforcement. 
+
+-------------------------------------------------------- 
+1⃣ API :: getRoleList 
+-------------------------------------------------------- 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Endpoint: 
+    GET /api/roles 
+
+Purpose: 
+    Fetch all available roles (System + Custom). 
+
+Internal Logic: 
+    • Fetch roles from database 
+    • Identify system roles (non-editable flag) 
+    • Mark custom roles (editable) 
+    • Apply organization-level filtering if applicable 
+    • Return structured role response 
+
+Response Example: 
+[ 
+    { 
+        "roleId": 1, 
+        "roleName": "ADMIN", 
+        "type": "SYSTEM", 
+        "editable": false 
+    }, 
+    { 
+        "roleId": 7, 
+        "roleName": "CUSTOM_AUDITOR", 
+        "type": "CUSTOM", 
+        "editable": true 
+    } 
+] 
+
+Additional Handling: 
+    • Authorization check before returning roles 
+    • Redis caching (optional for optimization) 
+
+-------------------------------------------------------- 
+2⃣ API :: getPermissionListForRole 
+-------------------------------------------------------- 
+
+Triggered When: 
+    User clicks on a specific role in UI. 
+
+Endpoint: 
+    GET /api/roles/{roleId}/permissions 
+
+Purpose: 
+    Load complete permission matrix for the selected role. 
+
+Internal Logic: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    • Validate role existence 
+    • Fetch role-permission mappings 
+    • Group permissions by module (Survey, Audit, User Mgmt, etc.) 
+    • Mark selected vs unselected permissions 
+    • Handle system role restrictions (view-only if system role) 
+
+Response Example: 
+{ 
+    "roleId": 7, 
+    "roleName": "CUSTOM_AUDITOR", 
+    "permissions": [ 
+        { 
+            "module": "SURVEY", 
+            "permissionCode": "SURVEY_CREATE", 
+            "assigned": true 
+        }, 
+        { 
+            "module": "SURVEY", 
+            "permissionCode": "SURVEY_DELETE", 
+            "assigned": false 
+        } 
+    ] 
+} 
+
+Security Handling: 
+    • Permission to view role configuration required 
+    • Dynamic role-permission resolution via Redis → DB fallback 
+
+-------------------------------------------------------- 
+3⃣ API :: updateRolesToPermission 
+-------------------------------------------------------- 
+
+Triggered When: 
+    User edits permissions and clicks SAVE. 
+
+Endpoint: 
+    PUT /api/roles/{roleId}/permissions 
+
+Request Body: 
+{ 
+    "permissionIds": [101, 102, 205, 309] 
+} 
+
+Purpose: 
+    Update role-to-permission mapping. 
+
+Internal Execution Flow: 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Step 1: 
+    • Validate role exists 
+    • Check if role is editable 
+    • Reject update if system role 
+
+Step 2: 
+    • Fetch existing permissions 
+    • Calculate: 
+          - Permissions to add 
+          - Permissions to remove 
+
+Step 3: 
+    • Perform batch insert/delete in mapping table 
+    • Maintain transactional integrity 
+
+Step 4: 
+    • Invalidate Redis cache: 
+          ROLE_PERMISSIONS:{roleId} 
+          USER_ROLES cache for impacted users 
+
+Step 5: 
+    • Optional audit logging of changes 
+
+Response: 
+{ 
+    "status": "SUCCESS", 
+    "message": "Role permissions updated successfully" 
+} 
+
+-------------------------------------------------------- 
+🚀 Why This Design Matters 
+-------------------------------------------------------- 
+
+✔ Clear separation between role and permission management 
+✔ System roles protected (non-editable) 
+✔ Custom roles flexible and configurable 
+✔ Redis cache keeps authorization fast 
+✔ Cache invalidation ensures immediate reflection 
+✔ Transaction-safe updates 
+✔ Fully dynamic RBAC 
+
+-------------------------------------------------------- 
+FLOW SUMMARY 
+-------------------------------------------------------- 
+
+UI → getRoleList 
+   → Click Role → getPermissionListForRole 
+   → Edit → updateRolesToPermission 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+   → Cache invalidation 
+   → Dynamic authorization reflects immediately 
+
+ 
+These APIs collectively power the dynamic RBAC system 
+deployed in production.
+
+==== 99_6_What_was_the_DB_schemas_you_worked_on_.txt ====
+
+6. What was the DB schemas you worked on? 
+
+I primarily worked on RBAC (Role-Based Access Control) schemas  
+and core business schemas for an enterprise audit application. 
+
+------------------------------------------------------------------ 
+A) RBAC SCHEMAS (Most Critical Area) 
+------------------------------------------------------------------ 
+
+1) users 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- username (Unique) 
+- email (Unique) 
+- password_hash 
+- status 
+- created_at 
+- updated_at 
+
+Note: 
+UUID used because: 
+- Distributed microservices environment 
+- Avoid sequential ID exposure 
+- Better merge compatibility across services 
+
+2) roles 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- role_name (Unique) 
+- description 
+- role_type (GLOBAL / ASSESSMENT) 
+- created_at 
+- updated_at 
+
+3) permissions 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+- permission_key (Unique) 
+- module_name 
+- action_type (READ / WRITE / DELETE / APPROVE) 
+- created_at 
+- updated_at 
+
+4) user_roles (Mapping Table) 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- user_id (UUID, FK → users.id) 
+- role_id (UUID, FK → roles.id) 
+- assessment_id (UUID, Nullable, for context-based role override) 
+- assigned_at 
+- assigned_by 
+
+5) role_permissions (Mapping Table) 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- role_id (UUID, FK → roles.id) 
+- permission_id (UUID, FK → permissions.id) 
+- created_at 
+
+Why UUID here? 
+- Security-sensitive module 
+- Prevent predictable ID enumeration 
+- Used across microservices 
+- Compatible with Redis caching keys 
+
+------------------------------------------------------------------ 
+B) SURVEY / RESPONSE SCHEMA 
+------------------------------------------------------------------ 
+
+6) survey 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- title 
+- description 
+- created_by (UUID) 
+- created_at 
+- updated_at 
+
+7) question 
+-------------------------------------------------- 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+- id (UUID, Primary Key) 
+- question_text 
+- question_type 
+- is_mandatory 
+- created_at 
+
+8) survey_assignment 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- survey_id (UUID, FK) 
+- user_id (UUID, FK) 
+- assigned_at 
+- due_date 
+- status 
+
+9) survey_response 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- user_id (UUID, FK) 
+- survey_id (UUID, FK) 
+- question_id (UUID, FK) 
+- response 
+- submitted_at 
+
+Composite Unique Constraint: 
+UNIQUE (user_id, survey_id, question_id) 
+
+Purpose: 
+Prevent duplicate entries under concurrent API calls. 
+
+------------------------------------------------------------------ 
+C) GENERIC CORE BUSINESS SCHEMAS 
+------------------------------------------------------------------ 
+
+10) audit 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- audit_name 
+- audit_type 
+- status 
+- start_date 
+- end_date 
+- created_by (UUID) 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+11) findings 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- audit_id (UUID, FK) 
+- severity 
+- description 
+- status 
+- owner_id (UUID) 
+- created_at 
+
+12) documents 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- reference_id (UUID) 
+- reference_type 
+- s3_path 
+- uploaded_by (UUID) 
+- uploaded_at 
+
+13) notifications 
+-------------------------------------------------- 
+- id (UUID, Primary Key) 
+- user_id (UUID) 
+- message 
+- is_read 
+- created_at 
+
+------------------------------------------------------------------ 
+Why UUID Instead of Auto-Increment? 
+------------------------------------------------------------------ 
+
+- Microservices architecture 
+- Avoid collision during data migration 
+- Prevent ID guessing 
+- Easier replication & sharding 
+- Safe for distributed systems 
+
+------------------------------------------------------------------ 
+Summary (Interview Ready) 
+------------------------------------------------------------------ 
+
+I worked extensively on: 
+
+1) RBAC schemas (users, roles, permissions, mappings) 
+2) Context-based authorization schemas 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+3) Survey & response management schemas 
+4) Audit core business schemas 
+5) Document & notification schemas 
+
+Most tables used UUID as primary key  
+to support distributed architecture, security, and scalability.

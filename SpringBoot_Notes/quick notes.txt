@@ -73,5 +73,9 @@ For critical flows, I rely on integration testing to validate the complete flow.
 Encoding: Transforming data into a different format for compatibility or transmission, which can be easily reversed without a key.
 Hashing: Converting data into a fixed-length value using a one-way function that cannot be reversed to the original data.
 
-18) 
+18) Functional Testing	New feature correctness     {qa}
+    Regression Testing	Existing feature stability   {qa}
+    uat and performance  -> {staging}
+19) feature → dev → staging → main → prod
 
+20) 
