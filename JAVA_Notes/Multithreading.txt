@@ -639,9 +639,9 @@ Note: If multiple threads access the same object at a time then there is a chanc
 
 Note: By Using Synchronization we can achieve Thread Safety but it will slow down our execution process.
 
-===========================
+==============================
 How to achieve synchronization
-===========================
+==============================
 
 -> Using  'synchronized' keyword we can implement synchronization
 -> synchronized keyword we can use at two places
@@ -722,7 +722,7 @@ try {
 | Lock creation     | `new Object()`               | `new ReentrantLock()`          |
 | How to lock       | `synchronized(lock)`         | `lock.lock()`                  |
 | How to unlock     | Automatic (JVM)              | `lock.unlock()`                |
-| Needs try–finally | ❌ No                         | ✅ Yes                          |
+| Needs try–finally | ❌ No                        | ✅ Yes                          |
 | Exception safety  | Lock auto-released           | Lock must be released manually |
 | tryLock / timeout | ❌ No                         | ✅ Yes                          |
 | Fairness option   | ❌ No                         | ✅ Yes                          |

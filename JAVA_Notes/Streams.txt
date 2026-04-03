@@ -1,0 +1,12 @@
+1) Top 3 highest paid Objects{Employee} by salary
+
+List<Employee> lst = employees.stream()
+        .sorted(Comparator.comparing((Employee e) -> e.salary).reversed())
+        .limit(3)
+        .collect(Collectors.toList());
+
+2) 
+
+
+
+

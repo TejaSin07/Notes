@@ -144,10 +144,10 @@ Linux Commands
 ==============
 
 whoami : Displays logged in user calender 
-date : prints todays date
-cal : print current month calendar
+date  : prints todays date
+cal   : print current month calendar
 mkdir : create new directory 
-pwd : display present working directory 
+pwd   : display present working directory 
 rmdir : remove empty directory 
 cd: change directory 
 ls: list files 
@@ -226,10 +226,11 @@ Note : when we install maven java install automatically because maven require ja
 	note : if we get error while executing above command then use 
 	=> $ mvn clean package -DskipTests (it ignore test class is present or not )
 
-3) then go to target folder 
+3) then go to target folder
 	$ cd target 
 	note : verify jar file creation in target directory 
-	$ ls -l  
+	$ ls -l 
+
 4) Run jar file using below command
 	$ java -jar target/jar-file-name
 

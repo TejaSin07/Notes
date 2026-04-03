@@ -93,3 +93,39 @@
 3. Which DB schema you worked on?
 4. How DB managed for each client?
 5. How DB migration done?
+
+
+
+
+
+
+
+
+//
+
+1) singleton design pattern with functional interface
+2) sort arraylist
+3) employee class -> salary per department
+4) first non repeating char
+5) freq of each char
+6) duplicate in string in string by 
+7) completable future callable 
+8) functional interface
+9) singleton, abstract factory ? which design pattern you used in project
+10) palindrome string
+11) transactional in project where you used ,automicity 
+12) solid
+13) saga
+14) circuit breaker 
+15) component vs enableautomaticcomponent
+16) qualifier primary 
+17) bean scope ,type of them
+18) lifecycle
+19) annotation
+20) hibernate 
+21) project structure 
+22) 12 factors 
+23) can we write static in child if main id available in parent
+24) we are accessing value with key present but getting value as null what's the issue
+25) 
+

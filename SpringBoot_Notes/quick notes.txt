@@ -2,7 +2,6 @@ quick notes
 
 1) custome repo ->In a custom repository, we create a @Repository class, inject EntityManager provided by Spring, and use it to manually perform CRUD operations and queries.
 
-
 2) Most built-in CRUD methods in CrudRepository operate using the primary key, and for non-ID fields, we define custom methods using naming conventions or @Query.
 
 3) @Query("from Worker w where w.ename = :name and w.esalary = :salary")
@@ -78,4 +77,127 @@ Hashing: Converting data into a fixed-length value using a one-way function that
     uat and performance  -> {staging}
 19) feature → dev → staging → main → prod
 
-20) 
+20) API created -> PUT /api/roles/{roleId}/permissions => Role validation (isEditable{if system role}) → fetch existing permissions → compute add/remove (delta) →  update/insert (transactional) → cache invalidation (Redis) → audit logging
+
+To delete key-value pair -> redisTemplate.delete("ROLE_PERMISSIONS:" + roleId);
+
+21) @Async on method → return void / Future / CompletableFuture → enable using @EnableAsync → configure custom ThreadPoolTaskExecutor → use it via @Async("executorName") → ensures controlled thread usage instead of unbounded thread creation -> @retryable -> to retry 
+
+22)  API → @Async → save history -> If app crashes → history lost
+
+API → publish event → Kafka → consumer saves -> If app crashes -> event save on disk -> consumer process later
+
+23) @ResponseStatus -> to send particular response status from method -> ignored when method not successful
+
+24) @RequirePermission("WORKPAPER_UPLOAD")
+@PostMapping("/assessments/{assessmentId}/workpapers")
+public ResponseEntity uploadWorkpaper() {
+    ...
+}
+
+25) Your Code → SLF4J (API) → Log4j2 (Implementation) → Output
+
+
+26) optimistic -> just use @version in entity -> while inserting if version not matched  -> ObjectOptimisticLockingFailureException
+
+27) pessimistic lock -> @lock(read or write lock) -> applied on repo method
+
+28) “We introduce a new API version only when there are breaking changes such as field removal, renaming, structural changes, or behavioral changes. For backward-compatible changes like adding fields or new endpoints, we continue using the same version to avoid unnecessary version proliferation.”
+
+29) Singleton Pattern
+Proxy Pattern
+Template Pattern
+Builder Pattern
+Observer Pattern
+Decorator Pattern
+Repository Pattern
+DTO Pattern
+circuit breaker
+
+30) Shallow copy copies reference, deep copy copies object
+
+31) Business Use Case Identification -> Resource-Based URL Design (REST) ->Proper HTTP Methods
+Request & Response Design -> API Versioning
+Validation->Error Handling -> Security->Pagination & Filtering -> Idempotency -> API Documentation-> Performance Considerations -> Inter-service Communication
+
+32) .ps1 file -> enter
+
+
+33) path variable - > @pathvariable   :: query parameter - > @RequestParam
+
+34) Why? Static methods are resolved using reference type, not object type 
+Static methods are resolved at compile time (early binding)  -> Instance methods are resolved at runtime (dynamic binding)
+
+35) super() present implicitly -> this() not present implicitly 
+-> both should be first statement -> only one can be available at once
+
+36) super -> require when current class and parent class variable has same name 
+
+37) static block does not use this and super
+
+38) method call statement bind at runtime dynamic method dispatch{Runtime polymorphism} :: A a = new B(); even if type is parent still use
+method body/method from child
+
+39) while overriding return type should be same or covariant allowed only
+
+40) access modifier should be wider in child not narrower
+
+41) exception should can be narrower not wider 
+
+42) upcast :: parent ref = new child()
+    downcast :: child ref2 = (child) ref;  Note :: only possible when upcasting already done
+
+43) concrete method -> having body or having braces { } , abstract body -> no body 
+
+44) submit method always return future object -> we can use both runnable and callable with executor service 
+
+->ExecutorService executor = Executors.newFixedThreadPool(2);
+
+Runnable task = () -> {
+    System.out.println(Thread.currentThread().getName());
+};
+
+executor.submit(task);   // pass Runnable/callable object
+
+executor.shutdown();
+
+45) to use completable future 
+@Async
+public CompletableFuture<String> getData() {
+    return CompletableFuture.completedFuture("Hello");
+}
+46) ReentrantLock creation
+ReentrantLock lock = new ReentrantLock(); // this is how we create ReentrantLock
+
+
+lock.lock() -> to lock 
+lock.unlock() -> used in finally to unlock 
+
+47) Synchronization types
+
+static synchronized void m1() {}  :: static method -> lock on ClassName.class
+
+synchronized (ClassName.class) {// critical section} ::static block -> lock on ClassName.class
+
+synchronized void m1() {}  ::// instance method -> lock on this (current object)
+
+Object objectInstance = new Object();   ::// instance block -> lock on shared object
+
+synchronized (objectInstance) {}  :: // you can pass any shared object (same reference across threads)
+
+
+48) join() -> t1.start(); -> t1.join(); -> t2.start();
+
+49) wait(),notify(),notify all() should be called inside synchronized "block or method " on the same object.
+
+50) // Producer (read)
+List<? extends Number> list;
+
+// Consumer (write)   also read is possible with Object as type 
+List<? super Integer> list;
+
+51) volatile -> “This variable is shared across threads, and its value must always be read from main memory, not from thread-local cache.”
+
+52) atomic integer -> AtomicInteger ensures thread-safe, lock-free updates (like increment) using CAS, preventing race conditions without synchronized.
+
+53) Varargs :: void printNumbers(int... nums) => internally int... nums  ≈  int[] nums

@@ -2,7 +2,7 @@ SQL:
 ====
 
 1) to save script -> go to file -> save script as
-
+S
 2) “Direct inserts without column names require strict column order and full value coverage; using column names avoids these issues.”
 
 	INSERT INTO users VALUES (...);
@@ -232,8 +232,34 @@ statements.
 15)  stored procedure is a saved SQL block that can be executed later.
 16) trigger is a special kind of stored program that is automatically execute
 17) select --- from user u INNER JOIN orders o  on u.id = o.user_id;
+18) If a column appears in SELECT and is not aggregated, it must be in GROUP BY
+19) SQL engine doesn’t care about logical uniqueness unless explicitly enforced
 
 
 
+Q. mostly asked in interview 
 
 
+1) singleton design pattern with functional interface
+2) sort arraylist
+3) employee class -> salary per department
+4) first non repeating char
+5) freq of each char
+6) duplicate in string in string by 
+7) completable future callable 
+8) functional interface
+9) singleton, abstract factory ? which design pattern you used in project
+10) palindrome string
+11) transactional in project where you used ,automicity 
+12) solid
+13) saga
+14) circuit breaker 
+15) component vs enableautomaticcomponent
+16) qualifier primary 
+17) bean scope ,type of them
+18) lifecycle
+19) annotation
+20) hibernate 
+21) project structure 
+22) 12 factors 
+23) can we write static in child if main id available in parent
