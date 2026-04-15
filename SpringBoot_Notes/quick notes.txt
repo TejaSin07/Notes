@@ -47,7 +47,6 @@ public void generateUUID() {
 
 11) @JsonProperty is used to explicitly map JSON fields to Java fields, especially when names differ or when we want control over serialization/deserialization.
 
-
 12) Java 8 + javax → legacy systems  :: Java 17 + jakarta → modern systems
 
 13) circuit breaker -> spring-cloud-starter-circuitbreaker-resilience4j
@@ -55,8 +54,6 @@ spring-boot-starter-aop -> Recommended (practical use) -> spring-boot-starter-ac
 -> (if retry needed)resilience4j-retry
 
 14) “How do you ensure your code works locally?”
-
-Say:
 
 I run the application locally and verify that it starts without errors.
 I test APIs using tools like Postman or Swagger to validate end-to-end functionality.
@@ -75,13 +72,14 @@ Hashing: Converting data into a fixed-length value using a one-way function that
 18) Functional Testing	New feature correctness     {qa}
     Regression Testing	Existing feature stability   {qa}
     uat and performance  -> {staging}
+
 19) feature → dev → staging → main → prod
 
 20) API created -> PUT /api/roles/{roleId}/permissions => Role validation (isEditable{if system role}) → fetch existing permissions → compute add/remove (delta) →  update/insert (transactional) → cache invalidation (Redis) → audit logging
 
 To delete key-value pair -> redisTemplate.delete("ROLE_PERMISSIONS:" + roleId);
 
-21) @Async on method → return void / Future / CompletableFuture → enable using @EnableAsync → configure custom ThreadPoolTaskExecutor → use it via @Async("executorName") → ensures controlled thread usage instead of unbounded thread creation -> @retryable -> to retry 
+21) @Async on method → return void / Future / CompletableFuture → enable using @EnableAsync → configure custom ThreadPoolTaskExecutor → use it via @Async("executorNameThreadPool") → ensures controlled thread usage instead of unbounded thread creation -> @retryable -> to retry 
 
 22)  API → @Async → save history -> If app crashes → history lost
 
@@ -104,7 +102,8 @@ public ResponseEntity uploadWorkpaper() {
 
 28) “We introduce a new API version only when there are breaking changes such as field removal, renaming, structural changes, or behavioral changes. For backward-compatible changes like adding fields or new endpoints, we continue using the same version to avoid unnecessary version proliferation.”
 
-29) Singleton Pattern
+29) 
+Singleton Pattern
 Proxy Pattern
 Template Pattern
 Builder Pattern
@@ -201,3 +200,198 @@ List<? super Integer> list;
 52) atomic integer -> AtomicInteger ensures thread-safe, lock-free updates (like increment) using CAS, preventing race conditions without synchronized.
 
 53) Varargs :: void printNumbers(int... nums) => internally int... nums  ≈  int[] nums
+
+54) Fail Fast behavior: => System throws exception immediately when modification or error occurs.   => ArrayList,HashMap
+    Fail Safe behavior: => System avoids failure by operating on a copy or safe structure and continues execution. => ConcurrentHashMap
+
+55) Producer and Consumer are created as separate threads using lambda expressions, both sharing a synchronized buffer where Producer adds data and Consumer removes it using wait() and notify() for coordination.  {we are using queue here to save data-> consumer : add :: producer : pop  }
+
+56) HashMap ->  key → hashCode() →  hashing -> hash value → bit manipulation → bucket index
+
+57) concurrent hashmap -> bucket level locking and used by spring internally to store singleton bean and bean defination catche
+
+58) memory leaks  -> objects staying for longer than needed, so GC cannot reclain them -> static feild 
+-> unclosed resources leak -> not doing catche eviction 
+
+:: heap : object,instance variable :: stack : method calls(recursion),local variable:: method : class level data ,static variable  :: pc register : thread related ::  native stack area : 3rd party library/language data
+ 
+=> gc works in heap area only  -> Unreachable objects (no references)
+
+59) process :: ex program under main method 
+    thread  :: multiple thread can create under main method/process
+
+60) Integer is immutable so every operation create new variable
+
+61) we not include static field in dto as it will break object design and not a good idea
+
+62) serialization : FileOutputStream , ObjectOutputStream 
+    de-serialization : FilInputStream , ObjectInputStream 
+    transient  : wont take part in serilization
+    final : will participate even if we use transient over that variable
+    static : wont take part in serialization even if we use transient
+    the order we maintain for serilization should maintain in deserilization
+
+63) diamond problem only occure when we are implementing two interface having same default method 
+same default method → override compulsory
+specific parent call → InterfaceName.super.m1()
+interface name in method call → resolve ambiguity
+no InterfaceName.m1() → not static
+super → call parent implementation
+
+64) hashcode and equals :: to insert object of employee which has unique name only we ovveridde hashcode and equals method in employee class :: HashSet uses hashCode to find bucket and equals to detect duplicates — so fields used must be immutable to avoid data corruption.
+->If you override equals() → you MUST override hashCode()
+
+65) t1.join() pauses the calling thread (here, the main thread) at that line until t1 finishes.it will not pasuse other thread execution which already called previously.
+
+66) set.add()  -> return boolean on insertion
+
+67) java.lang imported automatically ex ,Object class,comparable
+    java.util we need to import mannually ex, Collections,comparator
+
+68) Your Code → JPA (EntityManager / Repository) → Hibernate → JDBC → DB
+
+69) @Component → Redis helpers, JWT utils, Kafka producers ,AuditLogger,classes related to external client
+
+70) 1. Constructor called -> Dependency Injection ->  Aware Interfaces -> BeanPostProcessor (before init) -> @PostConstruct / init methods -> BeanPostProcessor (after init) -> Bean ready to use ->@PreDestroy / destroy methods
+
+71)  If Y requires X to be injected, then X is the dependency and Y is the dependent (target) bean.
+
+72) IOC -> principle to take care DI :: Spring bean -> classes managed by IOC
+
+73) group Id -> company name in form of package :: artifactId : project name
+
+74) bean lifecyle not managed by IOC for prototype beyond creation,when application context is closed then it will not call destroy automatically.
+
+75)  Pom startes -> Simplied Maven dependencies -> group of relatable dependencies -> starter ,starter-web/data-japa/mail/security
+
+76) spring boot(spring + auto config) adv -> starters , dependency version conflict solution -> autoconfig -> embedded servers -> actuators
+
+77)  we added spring-boot-starter-web it uses below class to start IOC
+Class Name : AnnotationConfigServletWebServerApplicationContext
+
+78) where we customise bean creation -> security/kafka/redis/swagger customization
+
+79) Starters and dependencies
+---------------------------------------
+spring-boot-starter -> spring-boot, spring-context, spring-aop, logging (logback, slf4j), snakeyaml
+
+spring-boot-starter-web -> spring-web, spring-webmvc, jackson (JSON), validation, embedded tomcat
+
+spring-boot-starter-data-jpa  -> spring-data-jpa, hibernate, jakarta persistence, jdbc
+
+usually we add starter but we can seperate dependencies also like jakson
+
+80) Auto Configuration  -> Boot will identify configurations based on pom starters
+
+81) Actuators -> Starter actuator dependency ->  /health : Used by load balancers, Kubernetes  -> /metrics : Used for performance monitoring -> info : Custom app info -> beans :Shows all Spring beans -> mappings :all api endpoints
+::management.endpoints.web.exposure.include=health,info
+
+82) Run method -> bootstrap context -> start listeners -> prepare env -> create Ioc -> call runners -> start embded server->return Ioc
+
+83) ApplicationRunner adn CommandLineRunner : Both are Spring Boot interfaces used to execute code after the application starts and the ApplicationContext is fully initialized.
+You implement their run() method to add startup logic.
+
+84) If you don’t specify a name in @Component, Spring generates a default (lowercase)
+
+85) @Qualifier : on injection point where @Autowired
+    @Primary : on bean defination @Component ,@Repository
+
+86) @Query ->  when method names cannot express complex queries
+
+87) JpaRepo = CrudRepo + Pagination + Sorting + QBE
+
+88) QBE ignore null feilds only care about which feild are not null : we use Example.of(entity) 
+
+89) JPA requires equals and hashCode for composite primary keys because it uses them to uniquely identify entities in the persistence context, cache, and collections.
+
+90) hibernate need session to execute lazy loading hickariConnection only provide connection ,hickari : car ,hibernate : driver 
+
+91) emails  -> mail starter -> configure application properties -> add our outlook mail -> create utils class -> use JavaMailSender 
+
+92) utility -> helper : config -> configuration 
+
+93) @ExceptionHandler(value = Exception.class) ::  @RestControllerAdvice
+
+94) write query and path multiple time on page
+
+95) why server side validation is reuire if we can apply validation on client side :: suppose makemytrip miss to apply validation ,whcih using irctc backend then issue is going to created thats why we apply validation on server side
+
+96) http -> request : a) Request Line (Http Method Type + URL) -> Request Headers (Metadata) (Key-Value) -> c) Request Body (Payload - text/xml/json)
+
+response :  Response Line (Status Code + Status MSG) ->  Response headers (Metadata - K & V) ->  Response body (Payload - text/xml/json)
+
+content type- format of  request body : Accept - format you expect in the response
+
+99)  consumes :: in which format reponse going to produces     
+produces :: response 
+ex : application/json , text/plain , 
+
+100) xml :  before  java 9 automatically handle by jax b 
+	    after java 9 we need jakson dependency to add in pom 
+
+101) @JsonProperty is used to map JSON fields to DTO fields during request handling and also to control how DTO fields are sent in the response JSON.
+
+102) kubernetes acts as service registry ,no need to register servvices -> with dns it will work automatically
+
+103)  Admin Server is used to manage all backend apis actuator endpoints at one place ,we use admin starter server dependency in pom file -> and use @EnableAdminServer at start class
+for clien we add admin-starter-client dependeny and add url config in prop file 
+
+
+104) zipkin -> distributed tracing -> which api is taking more time -> micrometer  to generate span and trace id -> reporter brave -> for client just add url in prop file
+
+105) @ExtendWith(MockitoExtension.class) -> unit test for service
+@WebMvcTest(EmployeeController.class) -> for controller
+
+106) during pr cicd apply test run on merged branch which will be the updated version of running branch 
+
+107) 3 points -> 2 points dev + 1 points qa -> assigned to dev -> subtask like tesing qa
+
+108)product owner tell ->  if requirenment change midway first i will do estimate and check if it is possible to complete in this period  -> if there is blocking story or if it require more time then i raised a risk in standup that it might take more time 
+
+109) i am manage junior members and wsr and msr this how I take initiative apart from my role. and I dont help him directly while solving bugs I help him debuging without telling direct he used to connect with me 
+
+110) one sprint -> two weeks -> 1 dev -> 8 to 10 story points
+
+111)  looking for role with ownership
+
+112) service boundry -> scop of responsibility and business capability -> own its data -> high cohesive (inside fuctionnality should be same)-> avoid exccesive syncronous calls -> independant deployment 
+
+113) sonarqube -> bugs -> null pointer risk ,optional mussuse
+code smells ->  duplicate code,long method
+vulnerabily -> security issue , loging sensetive data,missing authorization and authentication 
+
+
+114) inside sorted(Comparator.comparing(Employee::getSalary).reversed() .thenComparing(Employee::getName)) this how we compare multiple feilds and get output
+
+115) breakpoints work only when the application is running in debug mode.
+
+116) npn run scriptname/dev
+
+117) kub config maps :: service urls ,kafak topicd ,timeout/retry config
+kub secret :  jwt secret ,db user/password,api keys
+aws secret manager :: highly sensetive ,prod db credentials ,third party api  credential
+
+
+118) ingress  -> kubernetes eks -> nodes (ec2) -> pods -> containers -> image 
+
+119) prod issue -> 5000 entries taking time to load ->  query written -> create connection -> preapareStatement(ps) -> resultset{rs} == ps.executeQuery() - > we run for loop on rs and map all 5000 one by one to dto -> but same in jpa -> issue is not that jpa or jdbc -> issue is, it is taking time as there is 5000 entries -> so we apply pagination by getting offset and  limit as input in method and update query -> and fetching 50 record per request .previously it was taking around 10-15 sec to load all now 100 to 400 ms.
+
+
+120) Survey -> Questions -> Survey Assignment -> Survey Response :: Each (user_id, survey_id, question_id) combination must be unique -> APPLICATION-LEVEL SOLUTIONS WERE NOT USED -> as synchronization will reduce performance  ->Frontend Debouncing: -> Not reliable ->Cannot control retries or race conditions -> Added composite UNIQUE constraint:
+ALTER TABLE survey_response -> ADD CONSTRAINT uk_user_survey_question -> UNIQUE (user_id, survey_id, question_id);
+
+121) topics divided into partition -> ordering guranded only inside one partitions -> Offset: Sequential number inside partition  
+=> One consumer can read multiple partitions  :: One partition is consumed by ONLY ONE consumer (per group)
+
+
+
+
+
+
+
+
+
+
+
+
+

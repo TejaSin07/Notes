@@ -1,0 +1,577 @@
+
+DAY 3 — CSS Basics: Selectors, Box Model, Typography
+------------------------------------------------------
+Concepts:
+  - CSS selectors: element, class, id, attribute, pseudo-class (:hover, :focus)
+---------------------------------------------------------------------------------
+
+CSS SELECTORS QUICK NOTES
+
+1. Element Selector
+- Syntax: tag {}
+- Example: p { color: blue; }
+- Use: Apply style to all elements of same type
+
+2. Class Selector (.)
+- Syntax: .className {}
+- Example: .box { background: yellow; }
+- Use: Reusable styling (MOST USED)
+
+3. ID Selector (#)
+- Syntax: #idName {}
+- Example: #header { color: red; }
+- Use: Unique element (only one)
+
+4. Attribute Selector
+- Syntax: element[attribute="value"] {}
+- Example: input[type="text"] {}
+- Use: Target specific input types or attributes
+
+5. Pseudo-class Selector
+- :hover → mouse over
+- :focus → input active
+
+Example:
+button:hover { background: black; }
+input:focus { border: 2px solid blue; }
+
+KEY POINT:
+Priority → ID > Class > Element
+
+
+- Specificity and the cascade
+--------------------------------
+Inline style        → Highest
+ID (#)              → High
+Class (.)           → Medium
+Element (tag)       → Low
+
+Inline > ID > Class > Element
+
+CSS SPECIFICITY & CASCADE
+
+1. Specificity (Priority Order)
+Inline > ID > Class > Element
+
+2. Specificity Score
+Inline  = 1000
+ID      = 100
+Class   = 10
+Element = 1
+
+3. Example
+#id .class p = 111
+
+4. Cascade Rule
+If specificity same → LAST rule wins
+
+5. Inline Style
+style="" always highest priority
+
+6. !important
+Overrides everything
+Use only if necessary
+
+7. Debug Tip
+If CSS not working:
+- Check ID override
+- Check inline style
+- Check order of CSS
+
+Box model: margin, border, padding, content
+----------------------------------------------
+
+[ Margin ]
+  [ Border ]
+    [ Padding ]
+      [ Content ]
+
+padding: 10px;            /* all sides */
+padding: 10px 20px;       /* top-bottom, left-right */
+padding: 10px 20px 30px;  /* top, left-right, bottom */
+padding: 10px 20px 30px 40px; /* top, right, bottom, left */
+
+CSS BOX MODEL
+
+Structure:
+Content → Padding → Border → Margin
+
+1. Content
+- Actual data inside element
+- Controlled by width, height
+
+2. Padding
+- Space inside border
+- Adds inner spacing
+
+3. Border
+- Outline around element
+
+4. Margin
+- Space outside element
+- Used for gap between elements
+
+5. Total Size (default)
+Total = width + padding + border
+
+6. Fix (IMPORTANT)
+Use:
+box-sizing: border-box;
+
+7. Shorthand
+padding: top right bottom left;
+margin: top right bottom left;
+
+Display: block, inline, inline-block, none
+----------------------------------------------
+
+CSS DISPLAY PROPERTY
+
+1. Block
+- Takes full width
+- Starts on new line
+- Supports width & height
+- Example: div, p
+
+2. Inline
+- Takes only content width
+- Same line
+- No width/height
+- Example: span, a
+
+3. Inline-block
+- Same line like inline
+- Supports width & height
+- Used for buttons/cards
+
+4. None
+- Completely removes element
+- No space, no visibility
+
+KEY DIFFERENCE:
+Block → full width
+Inline → content only
+Inline-block → inline + size control
+None → removed
+
+Typography: font-family, font-size, line-height, letter-spacing
+---------------------------------------------------------------
+CSS TYPOGRAPHY
+
+1. font-family
+- Defines font type
+- Always use fallback
+Example:
+font-family: Arial, sans-serif;
+
+2. font-size
+- Controls text size
+- Use rem for scalability
+Example:
+font-size: 1rem;
+
+3. line-height
+- Space between lines
+- Improves readability
+Example:
+line-height: 1.6;
+
+4. letter-spacing
+- Space between characters
+- Used for headings/UI polish
+Example:
+letter-spacing: 2px;
+
+BEST PRACTICES:
+- Use 1–2 fonts only
+- Use rem units
+- Maintain good line spacing
+
+
+ Units: px, em, rem, %, vh/vw
+--------------------------------
+CSS UNITS
+
+1. px
+- Fixed size
+- Use for borders/small elements
+
+2. em
+- Relative to parent
+- Can cause nesting issues
+
+3. rem (BEST)
+- Relative to root (html)
+- Use for fonts
+
+4. %
+- Relative to parent
+- Use for width/layout
+
+5. vh / vw
+- Relative to screen
+- vh = height
+- vw = width
+
+BEST PRACTICE:
+Font → rem
+Layout → %
+Height → vh
+Avoid overusing px
+
+Hands-on:
+  - Style the bio page from Day 1
+  - Use at least 5 different selector types
+  - Experiment with box model — add colored borders and spacing
+
+Common Mistakes:
+  - Confusing em vs rem (em is relative to parent; rem to root)
+  - Overusing IDs for styling (too specific, hard to override)
+  - Ignoring box-sizing: border-box
+
+---
+
+DAY 4 — CSS Flexbox (Deep Dive)
+---------------------------------
+Concepts:
+  - Flex container vs flex items
+FLEXBOX BASICS
+
+1. Flex Container
+- Parent element
+- Uses: display: flex
+- Controls layout, alignment, spacing
+
+2. Flex Items
+- Direct children
+- Control size and growth
+
+3. Key Rule
+Only direct children become flex items
+
+4. Container Properties
+- flex-direction
+- justify-content
+- align-items
+- gap
+
+5. Item Properties
+- flex
+- flex-grow
+- flex-shrink
+- flex-basis
+
+MEMORY TIP:
+Container = layout
+Items = size
+
+
+  - flex-direction, justify-content, align-items, align-self
+--------------------------------------------------------------
+FLEXBOX ALIGNMENT
+
+1. flex-direction
+- Defines direction (row / column)
+- Changes axis
+
+2. justify-content
+- Aligns items on MAIN axis
+
+3. align-items
+- Aligns items on CROSS axis
+
+4. align-self
+- Overrides alignment for one item
+
+AXIS RULE:
+row → main = horizontal
+column → main = vertical
+
+FORMULA:
+Direction decides axis
+justify = main axis
+align = cross axis
+
+ flex-wrap, gap
+------------------
+FLEX-WRAP & GAP
+
+1. flex-wrap
+- nowrap (default)
+- wrap → items move to next line
+- wrap-reverse → reverse order
+
+2. gap
+- Adds space between items
+- Cleaner than margin
+
+3. Key Rule
+Wrap works when items have fixed width
+
+4. Best Pattern
+display: flex;
+flex-wrap: wrap;
+gap: 10px;
+
+5. Use Cases
+- Card layouts
+- Responsive grids
+- Tag lists
+
+
+flex-grow, flex-shrink, flex-basis shorthand
+---------------------------------------------
+FLEX GROW / SHRINK / BASIS
+
+1. flex-grow
+- Controls expansion
+- Higher value = more space
+
+2. flex-shrink
+- Controls shrinking
+- Higher value = shrinks more
+
+3. flex-basis
+- Initial size before grow/shrink
+
+4. Shorthand
+flex: grow shrink basis;
+
+5. Common Usage
+flex: 1; → equal width layout
+
+FORMULA:
+basis → start
+grow → expand
+shrink → reduce
+
+  - Centering elements (the right way)
+------------------------------------------------
+CENTERING ELEMENTS
+
+1. Horizontal (text)
+text-align: center;
+
+2. Block element
+margin: auto; (needs width)
+
+3. Best Method (Flexbox)
+display: flex;
+justify-content: center;
+align-items: center;
+
+4. Absolute Center
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+
+5. Grid Method
+display: grid;
+place-items: center;
+
+RULE:
+Use Flexbox in most cases
+
+=======================================
+remaining$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+=======================================
+Hands-on:
+  - Build a horizontal navigation bar
+  - Build a card layout (3 cards in a row, responsive wrapping)
+  - Center a login form on the screen using Flexbox
+
+Resource: https://flexboxfroggy.com (interactive game)
+
+---
+
+DAY 5 — CSS Grid
+------------------
+Concepts:
+  - grid-template-columns, grid-template-rows
+  - grid-area, grid-column, grid-row (spanning)
+  - auto-fill vs auto-fit
+  - Named grid areas
+  - When to use Grid vs Flexbox
+
+CSS GRID
+
+1. grid-template-columns / rows
+- Defines layout structure
+- Use repeat() and 1fr
+
+2. grid-column / grid-row
+- Used for spanning
+- Example: span 2
+
+3. grid-area
+- Shortcut for positioning
+
+4. auto-fill vs auto-fit
+- auto-fill → keeps empty space
+- auto-fit → stretches items
+
+5. Named areas
+- grid-template-areas for readable layout
+
+6. Grid vs Flexbox
+- Flex → 1D (alignment)
+- Grid → 2D (layout)
+
+BEST PRACTICE:
+Use Grid for layout
+Use Flex for alignment
+
+
+=========================================
+#################remaining
+=========================================
+Hands-on:
+  - Build a photo gallery using CSS Grid
+  - Build a dashboard layout (sidebar + main content + header + footer)
+  - Recreate a simple magazine-style article layout
+
+Resource: https://cssgridgarden.com
+
+---
+
+DAY 6 — Responsive Design & Media Queries
+-------------------------------------------
+Concepts:
+  - Mobile-first approach
+MOBILE-FIRST APPROACH
+
+1. Start with mobile layout
+- Simple, single column
+
+2. Use min-width media queries
+@media (min-width: 768px)
+
+3. Enhance layout step by step
+- Add flex/grid later
+
+4. Benefits
+- Better performance
+- Cleaner CSS
+- Industry standard
+
+RULE:
+Mobile → Tablet → Desktop
+
+  - Breakpoints: 480px, 768px, 1024px, 1280px
+RESPONSIVE BREAKPOINTS
+
+1. 480px → small mobile
+2. 768px → tablet (2 columns)
+3. 1024px → laptop (3 columns)
+4. 1280px → desktop (center layout)
+
+RULES:
+- Use min-width (mobile-first)
+- Add breakpoint when layout breaks
+- Don’t overuse breakpoints
+
+FLOW:
+Mobile → Tablet → Laptop → Desktop
+
+
+  - @media queries syntax
+1. Browser reads default CSS (mobile)
+2. As screen grows → applies matching media queries
+3. Later rules override earlier ones
+
+
+  - Responsive images: max-width: 100%, srcset
+
+RESPONSIVE IMAGES
+
+1. max-width: 100%
+- Prevents overflow
+- Keeps image inside container
+
+2. height: auto
+- Maintains aspect ratio
+
+3. srcset
+- Multiple image sizes
+- Browser selects best one
+
+4. sizes
+- Defines display size
+
+RULE:
+max-width → for layout
+srcset → for performance
+
+
+  - viewport meta tag
+
+
+  - clamp(), min(), max() functions
+
+RESPONSIVE BASICS
+
+1. Viewport
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+2. clamp(min, preferred, max)
+- Example: clamp(16px, 2vw, 24px)
+
+3. min()
+- Picks smaller value
+- Example: min(500px, 100%)
+
+4. max()
+- Picks larger value
+- Example: max(300px, 50%)
+
+RULE:
+Use clamp for fonts
+Use min/max for layout control
+
+
+++++++++++++++++++++++++++++++++++remaining
+
+
+Hands-on:
+  - Make the bio page fully responsive (mobile, tablet, desktop)
+  - Make the card layout from Day 4 collapse to 1 column on mobile
+
+---
+
+DAY 7 — CSS Animations, Variables & Mini Project
+--------------------------------------------------
+Concepts:
+  - CSS custom properties (variables): --color-primary: #3b82f6
+  - @keyframes and animation shorthand
+  - transition property
+  - transform: translate, scale, rotate
+  - :root selector for global variables
+
+Hands-on:
+  - Add a loading spinner animation
+  - Add hover effects with transitions to buttons/cards
+
+MINI PROJECT — PERSONAL PORTFOLIO PAGE
+  - Responsive HTML/CSS portfolio
+  - Sections: Hero, About, Skills, Projects, Contact Form
+  - Use Flexbox + Grid
+  - Add animations/transitions
+  - Mobile-first responsive design
+
+Interview Questions (HTML/CSS):
+  1. What is the difference between semantic and non-semantic HTML?
+  2. Explain the CSS box model.
+  3. What is specificity and how does the cascade work?
+  4. What's the difference between Flexbox and Grid? When would you use each?
+  5. What does position: absolute vs relative vs fixed do?
+  6. How do you center a div vertically and horizontally?
+  7. What is mobile-first design?
+  8. What are CSS custom properties and why are they useful?
+
+Best Practices:
+  - Always use box-sizing: border-box globally
+  - Use rem for font sizes, px for borders
+  - Keep selectors shallow (1-3 levels deep max)
+  - Use BEM naming: .card__title, .btn--primary
+

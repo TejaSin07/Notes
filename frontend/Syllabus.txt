@@ -1,0 +1,1017 @@
+================================================================================
+       FRONTEND DEVELOPMENT SYLLABUS — SCRATCH TO INTERVIEW-READY
+              8-Week Plan | 3 Hours/Day | HTML · CSS · JS · TS · React
+================================================================================
+
+OVERVIEW
+--------
+Total Duration  : 8 Weeks
+Daily Commitment: 3 Hours
+Structure       : 1 hr concept study + 2 hrs hands-on coding
+Goal            : Land frontend/full-stack roles with strong fundamentals
+
+
+================================================================================
+WEEK 1 — HTML FOUNDATIONS + CSS CORE
+================================================================================
+
+DAY 1 — HTML Structure & Semantics
+------------------------------------
+Concepts:
+  - How browsers parse HTML (DOM tree)
+  - Semantic tags: <header>, <nav>, <main>, <section>, <article>, <footer>
+  - Why semantics matter (SEO, accessibility, screen readers)
+  - Block vs inline elements
+  - DOCTYPE, meta tags, viewport tag
+
+Hands-on:
+  - Build a personal bio page using only semantic HTML
+  - No CSS yet — focus purely on structure
+  - Add a nav, hero section, about section, contact section
+
+Common Mistakes:
+  - Using <div> for everything instead of semantic tags
+  - Missing alt attributes on images
+  - Nesting block elements inside inline elements (e.g., <p> inside <span>)
+
+---
+
+DAY 2 — HTML Forms, Tables & Media
+------------------------------------
+Concepts:
+  - Form elements: input types, label, textarea, select, button
+  - Form attributes: action, method, name, placeholder, required
+  - Accessibility: aria-label, role, for/id pairing
+  - <img>, <video>, <audio>, <iframe> — best practices
+  - HTML entities and special characters
+
+Hands-on:
+  - Build a registration form (name, email, password, gender, DOB, submit)
+  - Build a simple HTML table for a student grade report
+  - Embed a YouTube iframe on a page
+
+---
+
+DAY 3 — CSS Basics: Selectors, Box Model, Typography
+------------------------------------------------------
+Concepts:
+  - CSS selectors: element, class, id, attribute, pseudo-class (:hover, :focus)
+  - Specificity and the cascade
+  - Box model: margin, border, padding, content
+  - Display: block, inline, inline-block, none
+  - Typography: font-family, font-size, line-height, letter-spacing
+  - Units: px, em, rem, %, vh/vw
+
+Hands-on:
+  - Style the bio page from Day 1
+  - Use at least 5 different selector types
+  - Experiment with box model — add colored borders and spacing
+
+Common Mistakes:
+  - Confusing em vs rem (em is relative to parent; rem to root)
+  - Overusing IDs for styling (too specific, hard to override)
+  - Ignoring box-sizing: border-box
+
+---
+
+DAY 4 — CSS Flexbox (Deep Dive)
+---------------------------------
+Concepts:
+  - Flex container vs flex items
+  - flex-direction, justify-content, align-items, align-self
+  - flex-wrap, gap
+  - flex-grow, flex-shrink, flex-basis shorthand
+  - Centering elements (the right way)
+
+Hands-on:
+  - Build a horizontal navigation bar
+  - Build a card layout (3 cards in a row, responsive wrapping)
+  - Center a login form on the screen using Flexbox
+
+Resource: https://flexboxfroggy.com (interactive game)
+
+---
+
+DAY 5 — CSS Grid
+------------------
+Concepts:
+  - grid-template-columns, grid-template-rows
+  - grid-area, grid-column, grid-row (spanning)
+  - auto-fill vs auto-fit
+  - Named grid areas
+  - When to use Grid vs Flexbox
+
+Hands-on:
+  - Build a photo gallery using CSS Grid
+  - Build a dashboard layout (sidebar + main content + header + footer)
+  - Recreate a simple magazine-style article layout
+
+Resource: https://cssgridgarden.com
+
+---
+
+DAY 6 — Responsive Design & Media Queries
+-------------------------------------------
+Concepts:
+  - Mobile-first approach
+  - Breakpoints: 480px, 768px, 1024px, 1280px
+  - @media queries syntax
+  - Responsive images: max-width: 100%, srcset
+  - viewport meta tag
+  - clamp(), min(), max() functions
+
+Hands-on:
+  - Make the bio page fully responsive (mobile, tablet, desktop)
+  - Make the card layout from Day 4 collapse to 1 column on mobile
+
+---
+
+DAY 7 — CSS Animations, Variables & Mini Project
+--------------------------------------------------
+Concepts:
+  - CSS custom properties (variables): --color-primary: #3b82f6
+  - @keyframes and animation shorthand
+  - transition property
+  - transform: translate, scale, rotate
+  - :root selector for global variables
+
+Hands-on:
+  - Add a loading spinner animation
+  - Add hover effects with transitions to buttons/cards
+
+MINI PROJECT — PERSONAL PORTFOLIO PAGE
+  - Responsive HTML/CSS portfolio
+  - Sections: Hero, About, Skills, Projects, Contact Form
+  - Use Flexbox + Grid
+  - Add animations/transitions
+  - Mobile-first responsive design
+
+Interview Questions (HTML/CSS):
+  1. What is the difference between semantic and non-semantic HTML?
+  2. Explain the CSS box model.
+  3. What is specificity and how does the cascade work?
+  4. What's the difference between Flexbox and Grid? When would you use each?
+  5. What does position: absolute vs relative vs fixed do?
+  6. How do you center a div vertically and horizontally?
+  7. What is mobile-first design?
+  8. What are CSS custom properties and why are they useful?
+
+Best Practices:
+  - Always use box-sizing: border-box globally
+  - Use rem for font sizes, px for borders
+  - Keep selectors shallow (1-3 levels deep max)
+  - Use BEM naming: .card__title, .btn--primary
+
+
+================================================================================
+WEEK 2 — JAVASCRIPT FUNDAMENTALS (Part 1)
+================================================================================
+
+DAY 8 — Variables, Data Types & Type Coercion
+-----------------------------------------------
+Concepts:
+  - var vs let vs const (hoisting, block scope, temporal dead zone)
+  - Primitive types: string, number, boolean, null, undefined, symbol, bigint
+  - typeof operator
+  - Type coercion: implicit vs explicit
+  - Truthy and falsy values
+  - == vs === (always use ===)
+
+Hands-on:
+  - Open browser console and experiment with type coercion
+  - Write a function that checks if a value is null, undefined, or empty
+  - Explore edge cases: typeof null, NaN === NaN
+
+---
+
+DAY 9 — Functions (In Depth)
+------------------------------
+Concepts:
+  - Function declarations vs expressions vs arrow functions
+  - Hoisting behavior of each
+  - Default parameters
+  - Rest parameters (...args)
+  - Arguments object (avoid in modern JS)
+  - First-class functions — passing and returning functions
+  - Pure functions vs side effects
+
+Hands-on:
+  - Write a calculator with add, subtract, multiply, divide as pure functions
+  - Write a higher-order function applyOperation(a, b, fn)
+  - Convert function declarations to arrow functions and observe differences
+
+---
+
+DAY 10 — Scope, Closures & Hoisting
+--------------------------------------
+Concepts:
+  - Global, function, and block scope
+  - Lexical scope
+  - Closures — what they are, why they're useful
+  - Hoisting — variables vs functions
+  - IIFE (Immediately Invoked Function Expression)
+  - Memory implications of closures
+
+Hands-on:
+  - Write a counter using closures (increment, decrement, reset)
+  - Trace through scope chains manually on paper
+  - Fix a classic loop-with-setTimeout bug using closures vs let
+
+Common Mistake:
+  - Confusing closure with scope — a closure is a function + its lexical environment
+
+---
+
+DAY 11 — Arrays & Array Methods (Core)
+----------------------------------------
+Concepts:
+  - map, filter, reduce (the holy trinity — master these)
+  - forEach, find, findIndex, some, every, includes
+  - flat, flatMap
+  - Spread operator with arrays
+  - Destructuring arrays
+  - Sorting: sort() gotchas with numbers
+
+Hands-on:
+  - Given an array of students [{name, grade}], write:
+    * Filter students who passed (grade >= 60)
+    * Map to get only names
+    * Reduce to find average grade
+    * Sort by grade descending
+  - Flatten a nested array without flat()
+  - Write your own map() using reduce()
+
+---
+
+DAY 12 — Objects & Prototypes
+--------------------------------
+Concepts:
+  - Object literals, computed property names
+  - Destructuring objects (with renaming and defaults)
+  - Spread with objects
+  - Object.keys(), Object.values(), Object.entries()
+  - this keyword — how it changes based on context
+  - Prototype chain (conceptual understanding)
+  - Object.create(), hasOwnProperty
+
+Hands-on:
+  - Build a user profile object with methods (greet, getAge)
+  - Use destructuring to extract deeply nested values
+  - Understand what 'this' refers to in regular vs arrow functions
+
+---
+
+DAY 13 — DOM Manipulation
+---------------------------
+Concepts:
+  - querySelector, querySelectorAll (use these, not getElement*)
+  - createElement, appendChild, innerHTML vs textContent
+  - Event listeners: addEventListener
+  - Event object: target, currentTarget, preventDefault, stopPropagation
+  - Event delegation (attaching listener to parent, not each child)
+  - classList: add, remove, toggle, contains
+
+Hands-on:
+  - Build a to-do list (add, delete, mark complete) using vanilla JS + DOM
+  - Implement event delegation on a list of items
+  - Build a character counter for a textarea
+
+---
+
+DAY 14 — Mini Project & Review
+--------------------------------
+MINI PROJECT — INTERACTIVE TO-DO APP
+  - Add/delete tasks
+  - Mark as complete (strikethrough)
+  - Filter: All / Active / Completed
+  - Save to localStorage
+  - No frameworks — pure HTML, CSS, JS
+
+Interview Questions (JS Fundamentals):
+  1. What is the difference between var, let, and const?
+  2. Explain closures with a real-world example.
+  3. What is hoisting?
+  4. What does 'this' refer to in different contexts?
+  5. What is the difference between == and ===?
+  6. Explain the prototype chain.
+  7. What is event delegation and why is it useful?
+  8. What is the difference between map, filter, and reduce?
+
+
+================================================================================
+WEEK 3 — JAVASCRIPT FUNDAMENTALS (Part 2) — ASYNC & ADVANCED
+================================================================================
+
+DAY 15 — ES6+ Features
+------------------------
+Concepts:
+  - Template literals (tagged templates too)
+  - Optional chaining (?.) and nullish coalescing (??)
+  - Logical assignment operators (??=, ||=, &&=)
+  - Short-circuit evaluation
+  - Symbol, WeakMap, WeakSet (brief)
+  - Modules: import/export, default vs named exports
+
+Hands-on:
+  - Refactor yesterday's to-do app to use ES6+ throughout
+  - Use optional chaining on deeply nested API-like objects
+  - Split code into multiple JS modules and import them
+
+---
+
+DAY 16 — Callbacks & The Event Loop
+--------------------------------------
+Concepts:
+  - Synchronous vs asynchronous code
+  - Call stack, Web APIs, Callback Queue, Microtask Queue
+  - Event loop explained step by step
+  - Callback functions and callback hell
+  - setTimeout, setInterval
+  - Why Promises were invented
+
+Hands-on:
+  - Visualize the event loop using Loupe (latentflip.com/loupe)
+  - Recreate a simple async waterfall using nested callbacks
+  - Predict output of mixed sync/async code snippets
+
+---
+
+DAY 17 — Promises
+-------------------
+Concepts:
+  - Promise states: pending, fulfilled, rejected
+  - .then(), .catch(), .finally()
+  - Promise chaining
+  - Promise.all(), Promise.allSettled(), Promise.race(), Promise.any()
+  - Creating your own Promise
+  - Error handling in promise chains
+
+Hands-on:
+  - Write a function that returns a Promise after 2 seconds
+  - Chain 3 async operations using .then()
+  - Fetch data from JSONPlaceholder API using fetch() + Promises
+  - Handle errors gracefully with .catch()
+
+---
+
+DAY 18 — Async/Await
+----------------------
+Concepts:
+  - async function — always returns a Promise
+  - await — pauses execution inside async function only
+  - try/catch/finally with async/await
+  - Running Promises in parallel: Promise.all with async/await
+  - Top-level await (in modules)
+  - Common mistake: forgetting await
+
+Hands-on:
+  - Rewrite Day 17 code using async/await
+  - Fetch user data + user posts in parallel using Promise.all
+  - Write an async retry function that retries a failed request 3 times
+
+---
+
+DAY 19 — Error Handling, Debugging & Browser Tools
+----------------------------------------------------
+Concepts:
+  - try/catch/throw — creating custom errors
+  - Error types: TypeError, ReferenceError, SyntaxError, RangeError
+  - Browser DevTools: Console, Network, Sources (breakpoints), Elements
+  - console.log, console.table, console.group, console.time
+  - Debugging async code
+  - Reading stack traces
+
+Hands-on:
+  - Set breakpoints and step through a function in DevTools
+  - Inspect network requests from a fetch call
+  - Build a function with intentional errors and catch/handle them correctly
+
+---
+
+DAY 20 — localStorage, JSON & Patterns
+----------------------------------------
+Concepts:
+  - localStorage vs sessionStorage vs cookies
+  - JSON.stringify() and JSON.parse()
+  - Debouncing and throttling (interview favorites)
+  - Module pattern
+  - Observer pattern (intro)
+
+Hands-on:
+  - Implement a debounced search input (300ms delay)
+  - Implement throttle for a scroll event handler
+  - Persist app state to localStorage and restore on page load
+
+---
+
+DAY 21 — Mini Project & Review
+--------------------------------
+MINI PROJECT — WEATHER APP
+  - Fetch from OpenWeatherMap API (free tier)
+  - Search by city name
+  - Display temperature, humidity, wind speed, weather icon
+  - Handle loading state and errors
+  - Debounced search input
+
+Interview Questions (Async JS):
+  1. Explain the JavaScript event loop.
+  2. What is the difference between a callback, a Promise, and async/await?
+  3. What does Promise.all do? How is it different from Promise.allSettled?
+  4. What happens if you forget await before a Promise?
+  5. What is debouncing vs throttling?
+  6. What's the difference between localStorage and sessionStorage?
+  7. How would you handle errors in async/await code?
+  8. What is the microtask queue?
+
+
+================================================================================
+WEEK 4 — TYPESCRIPT
+================================================================================
+
+DAY 22 — TypeScript Basics
+----------------------------
+Concepts:
+  - Why TypeScript? Static typing, better tooling, self-documenting code
+  - Setting up: tsc, tsconfig.json basics
+  - Type annotations: string, number, boolean, any, unknown, never, void
+  - Type inference — when not to annotate
+  - Arrays and tuples
+  - Union types: string | number
+  - Type aliases: type Point = { x: number; y: number }
+
+Hands-on:
+  - Set up a TypeScript project (npm init + tsc --init)
+  - Convert the to-do app's data logic to TypeScript
+  - Create type aliases for Todo, User, ApiResponse
+
+---
+
+DAY 23 — Interfaces, Enums & Functions
+----------------------------------------
+Concepts:
+  - interface vs type (similarities and differences)
+  - Optional properties (?), readonly properties
+  - Extending interfaces
+  - Enums (const enums preferred for performance)
+  - Function types and overloads
+  - void vs never in functions
+
+Hands-on:
+  - Define interfaces for a User and Product
+  - Create an enum for Order Status (PENDING, SHIPPED, DELIVERED, CANCELLED)
+  - Write typed utility functions for the to-do app
+
+---
+
+DAY 24 — Generics & Advanced Types
+-------------------------------------
+Concepts:
+  - Generics: <T> — write once, use with any type
+  - Generic functions and interfaces
+  - Constraints: <T extends object>
+  - Utility types: Partial<T>, Required<T>, Readonly<T>, Pick<T>, Omit<T>
+  - keyof and typeof
+  - Intersection types: TypeA & TypeB
+
+Hands-on:
+  - Write a generic fetchData<T>(url: string): Promise<T> function
+  - Use Partial<T> to type form state (all fields optional during editing)
+  - Use Pick to create a UserSummary from a full User type
+
+---
+
+DAY 25 — TypeScript with DOM & Modules
+----------------------------------------
+Concepts:
+  - Typing DOM elements: HTMLInputElement, HTMLButtonElement, etc.
+  - Type assertions: as HTMLInputElement (use carefully)
+  - Non-null assertion operator (!)
+  - TypeScript modules (same as ES6 modules, with types)
+  - Declaration files (.d.ts) — what they are, not how to write them
+
+Hands-on:
+  - Type a form handler correctly (get values without using any)
+  - Migrate the Weather App to TypeScript
+  - Fix all TypeScript errors — don't use any as a shortcut
+
+---
+
+DAY 26 — Mini Project + Interview Prep
+----------------------------------------
+MINI PROJECT — TYPED CRUD API CLIENT
+  - TypeScript-typed functions to call a REST API (JSONPlaceholder)
+  - CRUD operations: getUsers, getUserById, createUser, updateUser, deleteUser
+  - Proper types for request/response
+  - Error handling with typed errors
+
+Interview Questions (TypeScript):
+  1. What is the difference between interface and type?
+  2. What are generics and why are they useful?
+  3. What is the difference between any and unknown?
+  4. What are utility types? Name and use 3 of them.
+  5. What is type narrowing?
+  6. What is the non-null assertion operator and when should you avoid it?
+  7. Why use TypeScript over JavaScript?
+
+Common Mistakes:
+  - Using any everywhere (defeats the purpose)
+  - Over-annotating when TypeScript can infer
+  - Ignoring errors instead of fixing them
+
+Best Practices:
+  - Enable strict: true in tsconfig.json
+  - Prefer unknown over any for unsafe values
+  - Use interfaces for objects that will be extended/implemented
+
+
+================================================================================
+WEEK 5 — REACT FUNDAMENTALS
+================================================================================
+
+DAY 27 — React Setup & JSX
+----------------------------
+Concepts:
+  - Why React? Virtual DOM, component model, declarative UI
+  - Create React App vs Vite (use Vite — it's faster)
+  - JSX — it's NOT HTML (className, htmlFor, camelCase attributes)
+  - Babel transforms JSX to React.createElement()
+  - Fragments: <> </>
+  - Conditional rendering: &&, ternary
+  - Rendering lists: .map() + key prop (why keys matter)
+
+Hands-on:
+  - Set up a Vite + React + TypeScript project
+  - Build a static product card component
+  - Render a list of 5 product cards from an array
+
+Resource: https://react.dev (official docs — new version)
+
+---
+
+DAY 28 — Components & Props
+-----------------------------
+Concepts:
+  - Functional components (only this in modern React)
+  - Props — passing data parent to child
+  - Prop types with TypeScript interfaces
+  - children prop
+  - Default props with default parameter values
+  - Component composition — building complex UI from small pieces
+
+Hands-on:
+  - Create a Button component with variant prop (primary/secondary/danger)
+  - Create a Card component that accepts children
+  - Build a user profile card using composed components
+
+---
+
+DAY 29 — useState & Event Handling
+-------------------------------------
+Concepts:
+  - useState hook — syntax, initial value, setter function
+  - State is immutable — always replace, never mutate
+  - Updating objects and arrays in state (spread operator)
+  - Synthetic events in React
+  - Controlled components — form inputs controlled by state
+  - Multiple state variables vs one state object
+
+Hands-on:
+  - Build a counter component (increment, decrement, reset)
+  - Build a controlled form (name, email, submit → log values)
+  - Build a toggle dark/light theme button
+
+---
+
+DAY 30 — useEffect & Lifecycle
+--------------------------------
+Concepts:
+  - useEffect — runs after render
+  - Dependency array: [] (once), [dep] (on change), nothing (every render)
+  - Cleanup function (for subscriptions, timers, event listeners)
+  - Common pattern: fetch data on mount
+  - React StrictMode double-invocation (why your effect runs twice in dev)
+  - Avoiding infinite loops
+
+Hands-on:
+  - Fetch and display posts from JSONPlaceholder on component mount
+  - Add a timer that counts up and cleans up on unmount
+  - Fetch data when a search query (state) changes
+
+---
+
+DAY 31 — useRef, useMemo, useCallback
+---------------------------------------
+Concepts:
+  - useRef: persist value without re-render, access DOM nodes
+  - useMemo: memoize expensive computed values
+  - useCallback: memoize functions passed to child components
+  - When to use vs when it's premature optimization
+  - React.memo() — skip re-rendering unchanged child components
+
+Hands-on:
+  - Use useRef to focus an input programmatically
+  - Use useMemo to filter a large list only when the list or filter changes
+  - Use useCallback + React.memo to prevent unnecessary child re-renders
+
+---
+
+DAY 32 — Custom Hooks
+-----------------------
+Concepts:
+  - What is a custom hook? (starts with "use", uses React hooks inside)
+  - Extract reusable logic from components into hooks
+  - Common custom hooks: useFetch, useLocalStorage, useToggle, useDebounce
+
+Hands-on:
+  - Write a useFetch<T>(url) hook that returns { data, loading, error }
+  - Write a useLocalStorage(key, defaultValue) hook
+  - Write a useDebounce(value, delay) hook
+  - Refactor the Weather App to use these hooks
+
+---
+
+DAY 33 — Context API & useReducer
+-----------------------------------
+Concepts:
+  - Prop drilling problem — when state is passed too many levels deep
+  - React Context: createContext, Provider, useContext
+  - useReducer: like useState but for complex state logic
+  - Combining useReducer + Context for global state
+  - When Context is enough vs when you need a state library
+
+Hands-on:
+  - Build a theme context (light/dark) accessible everywhere
+  - Convert the to-do app state to useReducer
+  - Build an auth context with login/logout functionality
+
+Interview Questions (React):
+  1. What is the virtual DOM and how does reconciliation work?
+  2. What are controlled vs uncontrolled components?
+  3. Explain the useEffect dependency array.
+  4. When would you use useRef vs useState?
+  5. What is a custom hook? Give an example.
+  6. What is prop drilling and how do you solve it?
+  7. Explain useReducer and when you'd prefer it over useState.
+  8. What does the key prop do in a list?
+
+
+================================================================================
+WEEK 6 — REACT ADVANCED + ECOSYSTEM
+================================================================================
+
+DAY 34 — React Router
+-----------------------
+Concepts:
+  - Client-side routing vs server-side routing
+  - React Router v6: BrowserRouter, Routes, Route
+  - useNavigate, useParams, useLocation hooks
+  - Nested routes and layouts
+  - Protected routes (auth guard pattern)
+  - 404 handling
+
+Hands-on:
+  - Add routing to a multi-page app (Home, About, Users, User Detail)
+  - Implement a protected route that redirects to /login if not authenticated
+  - Use useParams to fetch and display a single user's detail
+
+---
+
+DAY 35 — API Integration Patterns
+-----------------------------------
+Concepts:
+  - REST API concepts: GET, POST, PUT, PATCH, DELETE
+  - fetch API vs axios
+  - Handling loading, error, and success states
+  - Optimistic updates
+  - Abort controller (cancel in-flight requests)
+  - Environment variables (VITE_API_URL)
+
+Hands-on:
+  - Build a full CRUD interface using JSONPlaceholder
+  - Show loading spinners and error messages
+  - Cancel a fetch request when a component unmounts using AbortController
+
+---
+
+DAY 36 — TanStack Query (React Query)
+---------------------------------------
+Concepts:
+  - Why React Query? Caching, background refetch, stale-while-revalidate
+  - useQuery — fetching data
+  - useMutation — creating/updating/deleting data
+  - Query keys, stale time, cache time
+  - Invalidating queries after mutation
+  - Loading and error states built-in
+
+Hands-on:
+  - Refactor the CRUD app to use React Query
+  - Implement optimistic updates on delete
+  - Show stale data while refetching in the background
+
+---
+
+DAY 37 — Forms with React Hook Form
+--------------------------------------
+Concepts:
+  - Why React Hook Form? Performance, less boilerplate
+  - register, handleSubmit, formState: { errors }
+  - Validation: required, minLength, pattern, custom validate
+  - useController for controlled components
+  - Integrating with Zod for schema validation
+
+Hands-on:
+  - Build a multi-field registration form with validation
+  - Integrate Zod schema validation with React Hook Form
+  - Show real-time error messages on blur
+
+---
+
+DAY 38 — State Management with Zustand
+----------------------------------------
+Concepts:
+  - When global state management is needed
+  - Zustand vs Redux (Zustand is simpler, preferred for new projects)
+  - Creating a store: create(), set, get
+  - Subscribing to partial state (selectors)
+  - Persisting state with zustand/middleware
+
+Hands-on:
+  - Move the auth state to a Zustand store
+  - Build a cart store (add, remove, update quantity, total price)
+  - Persist cart to localStorage using the persist middleware
+
+---
+
+DAY 39 — Performance & Best Practices
+----------------------------------------
+Concepts:
+  - Code splitting: React.lazy + Suspense
+  - Lazy loading routes
+  - Image optimization: loading="lazy"
+  - Avoiding common performance pitfalls:
+    * Creating objects/arrays in JSX props (causes re-renders)
+    * Not memoizing callbacks passed to child components
+    * Over-using useEffect
+  - React DevTools: Components, Profiler
+
+Hands-on:
+  - Lazy load each page route in the router
+  - Profile the CRUD app using React DevTools Profiler
+  - Find and fix an unnecessary re-render
+
+---
+
+DAY 40 — Styling in React
+---------------------------
+Concepts:
+  - CSS Modules (recommended for component-scoped styles)
+  - Tailwind CSS (most popular utility-first approach)
+  - Styled-components (CSS-in-JS)
+  - When to use which
+
+Hands-on:
+  - Style a component using CSS Modules
+  - Rebuild the same component using Tailwind CSS
+  - Compare approaches — pick one to use in final projects
+
+Interview Questions (Advanced React):
+  1. How does React Query differ from using useEffect for data fetching?
+  2. What is code splitting and how does React.lazy work?
+  3. How would you prevent unnecessary re-renders?
+  4. What is the difference between optimistic and pessimistic updates?
+  5. How does Zustand differ from Context API?
+  6. What is the stale-while-revalidate pattern?
+  7. How do you handle authentication in a React app?
+
+
+================================================================================
+WEEK 7 — FINAL POC PROJECTS
+================================================================================
+
+POC 1 — FULLSTACK-STYLE DASHBOARD (Days 41–44)
+-------------------------------------------------
+Tech: React + TypeScript + React Query + Zustand + Tailwind + React Router
+
+Features:
+  - Authentication flow (login form, protected routes, logout)
+  - Dashboard home with summary cards (total users, revenue, orders)
+  - Users page with table, search, filter, pagination
+  - Single user detail page (React Router)
+  - Dark/light theme toggle (Zustand)
+  - API: Use JSONPlaceholder or build a mock with json-server
+  - Loading skeletons for all data
+
+What this demonstrates in interviews:
+  - Routing and protected routes
+  - State management
+  - API integration + caching
+  - Component architecture
+  - TypeScript usage
+
+---
+
+POC 2 — FULL CRUD PRODUCT MANAGER (Days 45–47)
+-------------------------------------------------
+Tech: React + TypeScript + React Hook Form + Zod + React Query + Tailwind
+
+Features:
+  - Product list with search and sort
+  - Add product form (with full validation)
+  - Edit product (pre-filled form)
+  - Delete with confirmation modal
+  - Toast notifications on success/error
+  - Optimistic updates with React Query
+
+What this demonstrates in interviews:
+  - Form handling and validation
+  - Complete CRUD cycle
+  - Mutations and cache invalidation
+  - User experience patterns (loading, errors, success)
+
+---
+
+DAYS 48 — Polish & GitHub
+  - Write clear README files for both projects
+  - Add proper folder structure
+  - Push to GitHub with meaningful commit messages
+  - Deploy one project to Vercel (free)
+
+
+================================================================================
+WEEK 8 — INTERVIEW PREPARATION
+================================================================================
+
+DAY 49–50 — JavaScript Deep Dive Revision
+  - Closures, prototypes, event loop
+  - this, call, apply, bind
+  - Currying, memoization, function composition
+  - Write implementations: debounce, throttle, flatten, deepClone, pipe
+
+DAY 51–52 — React Deep Dive Revision
+  - Reconciliation algorithm
+  - Fiber architecture (conceptual)
+  - Common hooks interview scenarios
+  - Live code: Build a custom useFetch hook from scratch
+  - Live code: Build a pagination component
+
+DAY 53 — System Design (Frontend)
+  - How to design a Twitter-like feed
+  - Component breakdown and data flow
+  - State management decisions
+  - Performance considerations
+
+DAY 54 — Behavioral + Project Walkthroughs
+  - Practice explaining both POC projects
+  - "Walk me through your dashboard project"
+  - STAR format for behavioral questions
+  - Questions to ask the interviewer
+
+DAY 55–56 — Mock Interviews + Final Review
+  - Do 2-3 timed coding challenges on LeetCode (easy/medium — array/string)
+  - Practice on Pramp or Interviewing.io with a peer
+  - Review all interview questions from each week
+
+
+================================================================================
+MASTER INTERVIEW QUESTIONS REFERENCE
+================================================================================
+
+HTML/CSS:
+  1. What is the difference between id and class?
+  2. How does z-index work?
+  3. What is a CSS pseudo-element vs pseudo-class?
+  4. Explain position: sticky.
+  5. What is the difference between visibility: hidden and display: none?
+
+JavaScript:
+  1. Explain the difference between synchronous and asynchronous code.
+  2. What is the temporal dead zone?
+  3. How does Array.prototype.reduce work? Write it from scratch.
+  4. Explain call, apply, and bind.
+  5. What is a WeakMap and when would you use it?
+  6. How does the garbage collector interact with closures?
+
+TypeScript:
+  1. What is the difference between interface and type alias?
+  2. Explain conditional types.
+  3. What is type narrowing and how do you do it?
+  4. What is infer in TypeScript generics?
+
+React:
+  1. What happens during the React render phase?
+  2. How do you handle side effects that depend on props?
+  3. What is a render prop pattern?
+  4. How do you share logic between components?
+  5. What is the difference between controlled and uncontrolled components?
+  6. How do you prevent a child from re-rendering when the parent renders?
+
+
+================================================================================
+RESOURCES
+================================================================================
+
+HTML/CSS:
+  - MDN Web Docs (mdn web docs)              — Reference bible
+  - web.dev/learn/css                        — Google's CSS course
+  - flexboxfroggy.com                        — Flexbox practice game
+  - cssgridgarden.com                        — Grid practice game
+
+JavaScript:
+  - javascript.info                          — Best free JS resource (read it all)
+  - eloquentjavascript.net                   — Free book
+  - You Don't Know JS (github.com/getify)    — Deep dives
+  - Loupe (latentflip.com/loupe)             — Event loop visualizer
+
+TypeScript:
+  - typescriptlang.org/docs                  — Official handbook
+  - typescript-exercises.github.io           — Exercises with solutions
+  - totaltypescript.com                      — Advanced tutorials
+
+React:
+  - react.dev                                — Official modern docs
+  - beta.reactjs.org/learn                   — Interactive challenges
+  - ui.dev                                   — Paid but excellent
+  - TanStack Query docs (tanstack.com/query) — React Query official docs
+
+General:
+  - frontendmentor.io                        — Design challenges to build
+  - roadmap.sh/frontend                      — Visual roadmap
+  - javascript30.com                         — 30 vanilla JS projects (free)
+  - github.com/yangshun/front-end-interview-handbook
+
+
+================================================================================
+FOLDER STRUCTURE FOR REACT PROJECTS
+================================================================================
+
+src/
+  components/          # Shared/reusable components
+    ui/                # Base UI: Button, Input, Modal, Card
+    layout/            # Header, Sidebar, Footer
+  pages/               # Route-level components
+  hooks/               # Custom hooks
+  store/               # Zustand stores
+  services/            # API call functions
+  types/               # TypeScript types and interfaces
+  utils/               # Helper functions
+  assets/              # Images, icons
+  App.tsx
+  main.tsx
+
+
+================================================================================
+COMMON MISTAKES & HOW TO AVOID THEM
+================================================================================
+
+JavaScript:
+  - Mutating state directly in React (always return new objects/arrays)
+  - Not handling Promise rejections
+  - Using var instead of const/let
+  - Confusing undefined with null
+
+React:
+  - Using index as key in dynamic lists (use unique IDs)
+  - Fetching data without cleanup (memory leaks)
+  - Putting everything in one giant component (break it up)
+  - Calling hooks inside conditions or loops
+  - Not wrapping objects/arrays in useMemo when passed as props
+
+TypeScript:
+  - Using any instead of proper types
+  - Ignoring TypeScript errors with @ts-ignore without understanding why
+  - Not using strict mode
+
+General:
+  - Copying code without understanding it
+  - Skipping error handling
+  - Not writing meaningful commit messages
+  - Not testing edge cases (empty arrays, null responses, network errors)
+
+
+================================================================================
+DAILY SCHEDULE SUGGESTION
+================================================================================
+
+  Hour 1 (7:00 – 8:00 AM)  : Study concepts + take notes
+  Hour 2 (8:00 – 9:00 AM)  : Code the hands-on tasks
+  Hour 3 (9:00 – 10:00 AM) : Build the mini project / POC feature / review
+
+
+================================================================================
+PROGRESS TRACKER
+================================================================================
+
+Week 1  [ ] HTML Foundations + CSS Core        → Portfolio Page
+Week 2  [ ] JS Fundamentals Part 1             → To-Do App
+Week 3  [ ] JS Fundamentals Part 2 (Async)     → Weather App
+Week 4  [ ] TypeScript                          → Typed API Client
+Week 5  [ ] React Fundamentals                  → React components + hooks
+Week 6  [ ] React Advanced + Ecosystem          → Full-featured App
+Week 7  [ ] Final POC Projects                  → Dashboard + CRUD Manager
+Week 8  [ ] Interview Preparation               → Mock interviews
+
+
+================================================================================
+                     YOU GOT THIS. CONSISTENCY BEATS TALENT.
+                         COMMIT TO THE 3 HOURS EVERY DAY.
+================================================================================

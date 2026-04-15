@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.container {
+  width: 80%;
+  margin: auto;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <img 
+    src="https://via.placeholder.com/400"
+    srcset="
+      https://via.placeholder.com/400 400w,
+      https://via.placeholder.com/800 800w,
+      https://via.placeholder.com/1200 1200w"
+    sizes="(max-width: 768px) 100vw, 50vw"
+    alt="responsive image">
+</div>
+
+</body>
+</html>

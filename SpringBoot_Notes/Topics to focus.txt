@@ -1,6 +1,0 @@
-Topics to focus:
-
-1) configuration class:
-2) hibernate
-3) Database relation 
-4)

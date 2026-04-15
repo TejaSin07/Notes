@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Bio Page</title>
+
+  <style>
+    /* ELEMENT SELECTOR */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ID SELECTOR */
+    #header {
+      background-color: #333;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    /* CLASS SELECTOR */
+    .section {
+      padding: 20px;
+      margin: 20px;
+      border: 2px solid #ccc;
+      background-color: #f9f9f9;
+    }
+
+    /* ATTRIBUTE SELECTOR */
+    input[type="text"] {
+      padding: 10px;
+      border: 2px solid green;
+      margin-top: 10px;
+      width: 200px;
+    }
+
+    /* PSEUDO-CLASS SELECTOR */
+    button:hover {
+      background-color: black;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* EXTRA: PSEUDO-CLASS (FOCUS) */
+    input:focus {
+      border: 2px solid blue;
+      outline: none;
+    }
+
+    /* COMBINED SELECTOR */
+    .section h2 {
+      color: #333;
+      letter-spacing: 1px;
+    }
+
+    /* BOX MODEL EXPERIMENT */
+    .box-demo {
+      margin: 20px;
+      padding: 20px;
+      border: 5px solid red;
+      background-color: lightblue;
+    }
+  </style>
+
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div id="header">
+    <h1>Tejas Sinkar</h1>
+    <p>Java Backend Developer</p>
+  </div>
+
+  <!-- ABOUT SECTION -->
+  <div class="section">
+    <h2>About Me</h2>
+    <p>I am a backend developer working with Java, Spring Boot, and microservices.</p>
+  </div>
+
+  <!-- SKILLS SECTION -->
+  <div class="section">
+    <h2>Skills</h2>
+    <p>Java, Spring Boot, REST APIs, MySQL, Redis</p>
+  </div>
+
+  <!-- CONTACT SECTION -->
+  <div class="section">
+    <h2>Contact</h2>
+    <input type="text" placeholder="Enter your name"><br><br>
+    <button>Submit</button>
+  </div>
+
+  <!-- BOX MODEL DEMO -->
+  <div class="box-demo">
+    This box shows margin, padding, and border clearly.
+  </div>
+
+</body>
+</html>

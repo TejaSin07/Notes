@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+/* Mobile First */
+.container {
+  padding: 10px;
+}
+
+.card {
+  width: 100%;
+  background: lightblue;
+  margin-bottom: 10px;
+  padding: 20px;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .card {
+    width: 48%;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .card {
+    width: 30%;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">1</div>
+  <div class="card">2</div>
+  <div class="card">3</div>
+</div>
+
+</body>
+</html>

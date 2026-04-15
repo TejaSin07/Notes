@@ -1,4 +1,4 @@
-44Topics to cover:
+Topics to cover:
 ----------------
 
 1) Association mapping
@@ -209,9 +209,9 @@ spring.jpa.show-sql=true 				:-> Tells Hibernate to print SQL statements in the 
 public interface EmpRepository extends CrudRepository<Employee, Integer>{
 }
 
-| Aspect                           | **Interface ONLY** | **Extends JpaRepository / CrudRepository** |
-| -------------------------------- | ------------------ | ------------------------------------------ |
-| Proxy creation                   | ✅ Yes             | ✅ Yes                                      |
+| Aspect                           | **Interface ONLY** | **Extends JpaRepository / CrudRepository**   |
+| -------------------------------- | ------------------ | ------------------------------------------    |
+| Proxy creation                   | ✅ Yes             | ✅ Yes                                       |
 | Query derivation(findBy<ExactEntityFieldName>) | ✅ Yes              | ✅ Yes                        |
 | `save()`                         | ❌ No               | ✅ Yes                                      |
 | `findById()`                     | ❌ No               | ✅ Yes                                      |

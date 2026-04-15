@@ -1,0 +1,377 @@
+
+DAY 1 — HTML Structure & Semantics
+------------------------------------
+Concepts:
+- How browsers parse HTML (DOM tree)
+---------------------------------------
+DOM (Document Object Model)
+
+- DOM is a tree structure of HTML created by the browser
+- Each HTML element = node in the tree
+- JavaScript uses DOM to interact with UI
+
+Why we use DOM:
+- Update content dynamically
+- Handle user events (click, input)
+- Modify styles
+- Create/remove elements
+
+Common Methods:
+- document.getElementById()
+- document.querySelector()
+- element.innerText / innerHTML
+- element.style
+- document.createElement()
+- appendChild()
+
+Flow:
+HTML → Browser → DOM Tree → JavaScript manipulates → UI updates
+
+- Semantic tags: <header>, <nav>, <main>, <section>, <article>, <footer>
+--------------------------------------------------------------------------
+Semantic Tags (HTML5)
+
+- Provide meaning to HTML structure
+- Improve SEO and accessibility
+- Make code readable and maintainable
+
+Important Tags:
+- <header> → top section
+- <nav> → navigation links
+- <main> → main content (only one)
+- <section> → grouped content
+- <article> → independent content
+- <footer> → bottom section
+
+Key Difference:
+- section = grouping
+- article = standalone content
+
+Best Practice:
+Use semantic tags instead of generic <div> wherever possible
+
+
+- Why semantics matter (SEO, accessibility, screen readers)
+-------------------------------------------------------------
+Semantic HTML isn’t just “clean code”—it directly impacts SEO, accessibility, and how machines interpret your app. If you ignore it, your UI may look fine, but under the hood it becomes harder to index, navigate, and use.
+
+Why Semantic HTML Matters:
+
+1. SEO:
+- Helps search engines understand page structure
+- Improves ranking
+
+2. Accessibility:
+- Enables keyboard navigation
+- Works with assistive technologies
+
+3. Screen Readers:
+- Provides structure (header, nav, main)
+- Improves navigation for visually impaired users
+
+Key Rule:
+Use meaningful tags instead of generic <div>
+
+- Block vs inline elements
+----------------------------
+
+Block vs Inline Elements
+
+Block Elements:
+- Take full width
+- Start on new line
+- Examples: div, p, h1, section
+
+Inline Elements:
+- Take only required width
+- Stay in same line
+- Examples: span, a, b, img
+
+Key Property:
+- display: block / inline / inline-block
+
+Rule:
+- Block can contain inline
+- Inline should not contain block
+
+- DOCTYPE, meta tags, viewport tag
+------------------------------------
+DOCTYPE, Meta, Viewport
+
+<!DOCTYPE html>
+- Must be first line
+- Enables HTML5 standard mode
+
+<meta>
+- Provides metadata (not visible)
+- charset="UTF-8" → text encoding
+- name="description" → SEO
+
+Viewport Tag:
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+- Makes page responsive
+- width=device-width → match device width
+- initial-scale=1.0 → default zoom
+
+Rule:
+Always include DOCTYPE + charset + viewport in every HTML page
+
+
+
+Hands-on:
+  - Build a personal bio page using only semantic HTML
+  - No CSS yet — focus purely on structure
+  - Add a nav, hero section, about section, contact section
+
+Common Mistakes:
+  - Using <div> for everything instead of semantic tags
+  - Missing alt attributes on images
+  - Nesting block elements inside inline elements (e.g., <p> inside <span>)
+
+---
+
+DAY 2 — HTML Forms, Tables & Media
+------------------------------------
+Concepts:
+  - Form elements: input types, label, textarea, select, button
+-------------------------------------------------------------------
+Form Elements
+
+<input>
+- text, email, password, number, radio, checkbox, date
+- Most used element
+- name attribute is required for backend
+
+<label>
+- Links text with input
+- Improves accessibility
+- for="id" must match
+
+<textarea>
+- Multi-line input
+- Used for messages/comments
+
+<select>
+- Dropdown selection
+- Uses <option>
+
+<button>
+- submit → send data
+- button → JS action
+- reset → clear form
+
+Important:
+- Use name for backend mapping
+- Use required for validation
+- Use label for better UX
+
+
+  - Form attributes: action, method, name, placeholder, required
+-------------------------------------------------------------------
+
+Form Elements
+
+<input>
+- text, email, password, number, radio, checkbox, date
+- Most used element
+- name attribute is required for backend
+
+<label>
+- Links text with input
+- Improves accessibility
+- for="id" must match
+
+<textarea>
+- Multi-line input
+- Used for messages/comments
+
+<select>
+- Dropdown selection
+- Uses <option>
+
+<button>
+- submit → send data
+- button → JS action
+- reset → clear form
+
+Important:
+- Use name for backend mapping
+- Use required for validation
+- Use label for better UX
+
+  - Accessibility: aria-label, role, for/id pairing
+-------------------------------------------------------------------
+Accessibility Basics
+
+aria-label:
+- Adds hidden label for screen readers
+- Used for icons or elements without text
+
+role:
+- Defines purpose of element (button, navigation, etc.)
+- Use only when semantic HTML is not enough
+
+for/id:
+- Links label to input
+- Improves accessibility and usability
+
+Best Practices:
+- Always use semantic tags first
+- Avoid unnecessary divs
+- Ensure all inputs have labels
+- Use aria only when needed
+
+  - <img>, <video>, <audio>, <iframe> — best practices
+-------------------------------------------------------------------
+Media Elements Best Practices
+
+<img>
+- Always use alt attribute
+- Use optimized formats (webp, jpg)
+- Use loading="lazy"
+- Set width/height to avoid layout shift
+
+<video>
+- Use controls
+- Avoid autoplay (unless muted)
+- Provide fallback content
+
+<audio>
+- Use controls
+- Keep file size small
+
+<iframe>
+- Use title (accessibility)
+- Use sandbox (security)
+- Avoid untrusted sources
+- Use loading="lazy"
+
+Rule:
+Optimize media for performance + accessibility
+
+
+  - HTML entities and special characters
+-------------------------------------------
+
+| Character | Entity   | Meaning      |
+| --------- | -------- | ------------ |
+| `<`       | `&lt;`   | less than    |
+| `>`       | `&gt;`   | greater than |
+| `&`       | `&amp;`  | ampersand    |
+| `"`       | `&quot;` | double quote |
+| `'`       | `&apos;` | single quote |
+
+HTML Entities & Special Characters
+
+- Used to display reserved and special characters
+- Prevent HTML parsing issues
+
+Common Entities:
+<  → &lt;
+>  → &gt;
+&  → &amp;
+"  → &quot;
+'  → &apos;
+
+Special Symbols:
+&copy; → ©
+&reg; → ®
+&#8377; → ₹
+
+Types:
+- Named → &copy;
+- Decimal → &#169;
+- Hex → &#xA9;
+
+Important:
+- Use &nbsp; for extra spaces
+- Always escape reserved characters
+
+Hands-on:
+  - Build a registration form (name, email, password, gender, DOB, submit)
+  - Build a simple HTML table for a student grade report
+  - Embed a YouTube iframe on a page
+
+---
+
+
+| Tag       | Type      | Purpose                          | Example Use       |
+| --------- | --------- | -------------------------------- | ----------------- |
+| `<html>`  | Root      | Root of HTML document            | Wraps entire page |
+| `<head>`  | Metadata  | Contains meta info, title, links | SEO, scripts      |
+| `<title>` | Metadata  | Page title (SEO important)       | Browser tab name  |
+| `<meta>`  | Metadata  | Charset, viewport, SEO           | Responsive + SEO  |
+| `<body>`  | Structure | Visible content                  | All UI elements   |
+
+
+| Tag         | Type     | Purpose                 | Example Use    |
+| ----------- | -------- | ----------------------- | -------------- |
+| `<header>`  | Semantic | Top section of page     | Logo, nav      |
+| `<nav>`     | Semantic | Navigation links        | Menu bar       |
+| `<main>`    | Semantic | Main content (only one) | Core content   |
+| `<section>` | Semantic | Group related content   | About, Contact |
+| `<article>` | Semantic | Independent content     | Blog, post     |
+| `<aside>`   | Semantic | Side content            | Sidebar        |
+| `<footer>`  | Semantic | Bottom section          | Copyright      |
+
+
+| Tag           | Type   | Purpose              | Example Use       |
+| ------------- | ------ | -------------------- | ----------------- |
+| `<h1>`–`<h6>` | Text   | Headings             | Titles, sections  |
+| `<p>`         | Text   | Paragraph            | Description text  |
+| `<span>`      | Inline | Small inline styling | Highlight text    |
+| `<br>`        | Inline | Line break           | New line          |
+| `<hr>`        | Inline | Horizontal line      | Section separator |
+
+| Tag   | Type   | Purpose   | Example Use                |
+| ----- | ------ | --------- | -------------------------- |
+| `<a>` | Inline | Hyperlink | Navigation, external links |
+
+| Tag      | Type   | Purpose           | Example Use          |
+| -------- | ------ | ----------------- | -------------------- |
+| `<div>`  | Block  | Generic container | Layout grouping      |
+| `<span>` | Inline | Inline container  | Styling part of text |
+
+| Tag       | Type  | Purpose       | Example Use |
+| --------- | ----- | ------------- | ----------- |
+| `<img>`   | Media | Display image | Profile pic |
+| `<audio>` | Media | Play audio    | Music       |
+| `<video>` | Media | Play video    | Tutorials   |
+
+| Tag    | Type | Purpose        | Example Use   |
+| ------ | ---- | -------------- | ------------- |
+| `<ul>` | List | Unordered list | Bullet points |
+| `<ol>` | List | Ordered list   | Steps         |
+| `<li>` | List | List item      | Items         |
+
+| Tag       | Type  | Purpose         | Example Use    |
+| --------- | ----- | --------------- | -------------- |
+| `<table>` | Table | Table container | Data display   |
+| `<tr>`    | Table | Row             | Table row      |
+| `<td>`    | Table | Cell            | Data           |
+| `<th>`    | Table | Header cell     | Column heading |
+
+
+| Tag          | Type | Purpose          | Example Use   |
+| ------------ | ---- | ---------------- | ------------- |
+| `<form>`     | Form | Form container   | Submit data   |
+| `<input>`    | Form | Input field      | Text, email   |
+| `<textarea>` | Form | Multi-line input | Comments      |
+| `<button>`   | Form | Action button    | Submit        |
+| `<label>`    | Form | Label for input  | Accessibility |
+| `<select>`   | Form | Dropdown         | Options       |
+| `<option>`   | Form | Dropdown item    | Choice        |
+
+
+| Tag         | Type     | Purpose           | Example Use     |
+| ----------- | -------- | ----------------- | --------------- |
+| `<strong>`  | Text     | Important (bold)  | Emphasis        |
+| `<em>`      | Text     | Emphasis (italic) | Highlight       |
+| `<mark>`    | Text     | Highlight text    | Search result   |
+| `<code>`    | Text     | Code snippet      | Programming     |
+| `<pre>`     | Text     | Preformatted text | Code blocks     |
+| `<address>` | Semantic | Contact info      | Email, location |
+
+
+

@@ -43,7 +43,6 @@ What type of applications we can create using boot ?
 			a) stand-alone app
 			b) web application ( C2B )
 			c) distributed application (B2B)
-
 			  (webservices / rest apis)
 
 ========================
@@ -94,6 +93,7 @@ You don’t add them manually.
 			b) spring-boot-starter-data-jpa
 			c) spring-boot-starter-mail
 			d) spring-boot-starter-security
+
 Note: when we add pom starter boot will take care of dependency version.
 
 A Spring Boot starter will ALWAYS look like this: spring-boot-starter-<feature>  <---IMP
@@ -113,8 +113,7 @@ Embedded Servers
 Auto Configuration 
 ===================
 
-=> It is one of the most imp feature in spring boot
-
+=> It is one of the most imp feature in spring boot.
 => Boot will identify configurations required for the application based on pom starters and it will provide that configuration in runtime.	
 
 =========
@@ -220,7 +219,6 @@ What is @ComponentScan annotation ?
 Note: The package which contains start class of spring boot is called as base package.			<-- IMP TO NOTE
 
 => The packages which are starting with base package name are called as sub packages.
-
 
 			in.ashokit
 				- Application.java
@@ -338,7 +336,7 @@ Q) What is run ( ) method in spring boot start class ?
 
 		- Bootstrap context  - initialize basic setup for the spring boot application
 		- starting listeners - notify registered listeners about application startup event
-		- prepare Environment 
+		- prepare Environment
 		- printing banner 
 		- create context (IOC)
 		- prepare context  - register bean ,configure dependencies and initialize the context
@@ -372,7 +370,7 @@ Interview one-liner:
 ======================
 
 “IoC (Inversion of Control) means giving control of object creation and dependency management to the Spring container.
-When we call SpringApplication.run(),it starts that IoC container, which scans, creates, and wires all Spring beans automatically.”
+When we call SpringApplication.run(),it starts that IoC container,which scans, creates, and wires all Spring beans automatically.”
 
 ==============================================
 BeanFactory vs ApplicationContext (Short Notes)
@@ -585,7 +583,7 @@ No error, but unnecessary and confusing.
 Last method call wins (overwrites the variable).
 
 ===========================
-What is field injection ?													
+What is field injection ?					
 ===========================
 
 => Injecting dependent bean object into target bean object using target bean variable is called as field injection.
@@ -649,8 +647,7 @@ Autowiring modes
 => Autowiring works based on modes
 
 1) byName  : Based on variable name it will identify dependent bean
-
-2) byType : Based on variable datatype it will identify dependent bean.
+2) byType  : Based on variable datatype it will identify dependent bean.
 
 Note : we explicitly 
 “If you don’t specify a name in @Component, Spring generates a default bean name from the class name (first letter lowercase).

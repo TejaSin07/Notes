@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DOM Example</title>
+</head>
+<body>
+
+  <h1 id="title">Original Text</h1>
+  <button onclick="changeText()">Click Me</button>
+  <button onclick="changeText2()">Click Me to reverse</button>
+
+  <script>
+    function changeText() {
+      const element = document.getElementById("title");
+      element.innerText = "Text Changed!";
+      element.style.color = "blue";
+    }
+  </script>
+
+    <script>
+    function changeText2() {
+      const element = document.getElementById("title");
+      element.innerText = "Text Changed!";
+      element.style.color = "red";
+    }
+  </script>
+
+</body>
+</html>

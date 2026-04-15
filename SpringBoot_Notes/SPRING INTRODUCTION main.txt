@@ -451,16 +451,14 @@ Spring Cloud
 
 
 => Controller class methods should call service class methods
-
 		(controllers are dependent on services)	
 
 => service class methods should call DAO class methods
-
 		(services are dependent on DAOs)
 
-================================================================
+===============================================================
 How one java class method can access another java class method	
-================================================================
+===============================================================
 
 1) By Inheritance (IS-A)
 
@@ -1336,7 +1334,6 @@ How IOC will be starting in spring boot ?
 
 Class Name : AnnotationConfigApplicationContext
 
-
 => If we add spring-boot-starter-web then it will use below class to start IOC
 
 Class Name : AnnotationConfigServletWebServerApplicationContext
@@ -1356,16 +1353,14 @@ What is @SpringBootApplication ?
 
 
 
-==============================================
+============================================
 How to represent java class as Spring Bean ?
-==============================================
+============================================
 
 <bean id="udao" class="in.ashokit.UserDao" scope="prototype"/>
 
-
 @Component
 class UserDao{
-	
 
 }
 

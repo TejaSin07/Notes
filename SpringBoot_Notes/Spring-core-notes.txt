@@ -100,12 +100,12 @@ What is IOC ?
 
 9) what is  pom.xml?
 
-Project object model, inside that dependencies are available.and using that maven will download required jar files.
+Project object model, inside that dependencies are available. and using that maven will download required jar files.
 
 
 10) why we are using private variable for object storing variable?
 
-11) UserService service = ctx.getBean(UserService.class); this is line from 04_IOC_APP : 
+11) UserService service = ctx.getBean(UserService.class); this is line from 04_IOC_APP :
 we have not created object of interface in ioc,then how we are able to get bean for that?
 
 12) note: in xml configuration i.e spring we have only two DI ,field injection not directly possible .

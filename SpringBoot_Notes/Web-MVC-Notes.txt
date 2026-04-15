@@ -462,9 +462,9 @@ An exception only terminates that request, not the JVM, so other APIs continue t
 
 Each request create a separate thread
 
-============================================
+===========================================
 Exception Handling in Boot web application	
-============================================
+===========================================
 
 => Exception : Unexpected and unwanted situation.
 => When exception occurs program will be terminated abnormally.
