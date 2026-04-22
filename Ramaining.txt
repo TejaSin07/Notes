@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 1) kafka		done
 2) redis		done
 3) retries		done but what the dif between kafka and normal retry
@@ -356,3 +357,344 @@ Q. mostly asked in interview
 22) 12 factors 
 23) can we write static in child if main id available in parent
 
+=======
+Part 1::
+=======
+
+1) unit testing and project introduction in detail and flow manner and AWS and git git hub and cicd 9 April 10 pm
+2) frontend 
+3) debugging
+4) spring batch   - No need 
+5) project introduction in detail manner and AWS 
+6) string methods 				- Done
+7) map methods used 				- Done 
+8) async method config and use
+9) how company do real internal auditing
+10) this  used in lambda
+11) best practise while working with team for example naming convention and other
+12) advantage and disadvantage of springboot ,microservices,java
+13) hackathon
+14) aws and db connection
+15) docker and    Kubernetes
+16) best practices to use dto , dao, entity ,component
+17) scenario
+18) go throught quick notes and java interview notes
+19) go througgh crud of spring boot 
+20) dependencies and there use 
+21) design patterns -> strategy ,factory ,obeserver
+22) advantage of maven 
+23) graphql
+21) AOP
+22) bean lifecycle 
+23) kafka
+24) rest principle
+25) monitoring tools
+26) git and sql and streams
+27) blcking queue
+28) rest principle 
+29) microservices config in our project
+30) feign kafka redis setup
+31) react lifeclye
+32) spring security
+33) interceptor
+34) retries, retryable 
+35) 
+
+
+react theory 
+
+==================== CORE JAVA ====================
+
+- Wildcards (Generics)   			done partially 
+- volatile keyword      			done
+- varargs 					done	
+- Throwable & Exception hierarchy 		done
+- Try-with-resources     			done
+- Fail-fast vs Fail-safe iterator 		done
+- Process vs Thread (memory management)  	done        
+- Producer-Consumer problem			done
+- ConcurrentHashMap (real use case)		done
+- Memory leaks & memory management		done
+- Integer immutability				done		
+- Debugging techniques				done	
+- serilization 					done				
+- diamond problem				done
+- hashcode equals own implementation		done
+- object class methods:equals hascode toString	done		
+- parsing					done
+- comparator vs comparable in streams
+- file handling	
+- Reflection 
+		
+==================== SPRING / SPRING BOOT ====================
+
+- Dependency Injection (Which injection is better + use cases)   done
+- Bean lifecycle						 
+- AOP (Aspect-Oriented Programming)
+- Custom annotations
+- DAO vs DTO vs POJO						done
+- Association mapping						done
+- Cascading
+- Entity lifecycle
+- JPA concepts
+    - N+1 query problem						done
+    - Why transaction needed in lazy loading (even with HikariCP)
+
+- Spring Boot error handling
+    - White label error handling
+
+- REST API design
+    - PathVariable vs RequestParam vs RequestBody (real usage)
+    - Ways to send response (ResponseEntity)
+    - HTTP status codes
+
+- Bean life cycle
+- Debugging
+- serilization
+- file handling
+
+
+==================== MICROSERVICES & ARCHITECTURE ====================
+
+- Microservices advantages & disadvantages
+- Inter-service communication
+    - Service Mesh
+    - Kubernetes communication
+
+- Idempotency
+- Distributed tracing
+- Scenario-based questions
+- Microservices challenges faced in real projects
+- Design patterns used in project
+
+==================== DATABASE & DATA ====================
+
+- SQL concepts
+    - Nth salary query
+    - GroupBy, Max, Min
+
+- JPA vs SQL vs HQL
+- findBy methods in Spring Data JPA
+- NoSQL (MongoDB)
+- Multiple DB configuration in single application
+- How to check tables in UAT
+- Local DB setup & manual data reset
+
+==================== DEVOPS / CI-CD ====================
+
+- Deployment (how application deployed)
+- Deployment process (step-by-step)
+- CI/CD pipeline (detailed)
+- Jenkins & Jenkins pipeline
+- SonarQube
+- Prometheus & Grafana (monitoring)
+
+==================== CONFIGURATION & SECURITY ====================
+
+- Properties file management
+- Environment variables
+- Secret management
+    - AWS Secrets / Kubernetes Secrets / ConfigMaps
+
+- HTTP vs HTTPS
+
+==================== MESSAGING & CACHING ====================
+
+- Kafka configuration & usage in project
+- Redis configuration & usage
+- Debugging Kafka applications
+- CI/CD failure monitoring
+
+==================== TESTING ====================
+
+- Unit testing -> its best practise -> flow when exactly method get called
+- Code coverage improvement
+
+Answer:
+"I increase code coverage by adding meaningful unit tests for business logic,
+covering positive, negative, and edge cases, including exception scenarios.
+I focus on test quality rather than just percentage."
+
+==================== FILE HANDLING ====================
+
+- File uploading
+
+==================== BATCH & JOBS ====================
+
+- Spring Batch
+- Jobs / Schedulers
+
+==================== LOGGING & MONITORING ====================
+
+- Logging (best practices)
+- Logs in Aptakube
+- Logs in SecureCRT
+
+==================== GIT & VERSION CONTROL ====================
+
+- Git basics
+- GitHub workflows
+- Branching, merge, rebase, stash
+
+==================== LINUX & RUNTIME ====================
+
+- Linux commands
+- Shell script execution & debugging
+- Running application in debug mode
+
+==================== FRONTEND (BASIC) ====================
+
+- HTML, CSS, JavaScript basics
+- How frontend runs
+
+==================== REACTIVE ====================
+
+- Mono & Flux
+
+==================== PROJECT / REAL-TIME QUESTIONS ====================
+
+- What you worked on in microservices
+- Environment setup in project
+- Where you used PathVariable & QueryParam
+- How application is run locally
+- How errors/exceptions are handled in real systems
+- Naming conventions
+- Advantages & disadvantages (architecture decisions)
+
+======================================================
+
+
+JRTP
+====
+
+Part 4:
+=======
+1) Singleton Design Pattern
+2) how HashMap works internally 
+3) fail safe  and fail fast collections
+4) what is constructor chaining
+5) how many ways we can create object for a class in java
+6) what is cloning and why we need
+7) what are the methods available in object class
+8) String vs String Buffer vs StringBuilder
+9) what is exception hierarchy in java
+10) what is serialization and de serialization 
+11) what is transient keyword in java
+12) Diff between comparable and comparator
+13) how many ways we can create thread in java
+14) runnable vs callable in java
+15) what is executer framework in java
+16) what is  the  contract between hashCode() and equals() methods
+17) Checked vs unchecked exception
+18) what is try-with-resources in java
+19) what are concurrent collection in java
+20) difference between interfaces and abstract classes
+21) what is shallow cloning and deep cloning 
+22) what is the difference between filter() and map() method in Stream api?
+23) what is the purpose of User Defined Exception ?
+24) What is diff between concurrent HashMap and HashMap?
+25) what is Weak hash Map in java?
+26) what is factory design pattern
+27) how to read file data using java 8
+28) program to generate random text using java
+29) program to generate OTP using java
+30) program to check String contains only alphabets
+31) what are the rules for method overloading
+32) what are variable arguments in java
+33) how to increase heap size while running java program
+34) what are generics in java
+35) what is auto boxing auto unboxing 
+36) how to catch multiple exceptions using single catch block
+37) what is StringJoiner class
+38) what is  SplIterator
+39) can we declare method as abstract and final 
+40) how to  create user defined immutable class in java
+41) what are the class loaders available in java?
+42) what is thread local class?
+43) can we overload main() method in java class?
+44) can we run java program without main method?
+45) what is polymorphism with example
+46) what are SOLID oops principles?
+47) what is encapsulation with example?
+48) how to filter employees based on given salary using stream api
+49 ) diff lambda expression and method references
+50) what is the use of default and static methods in interface
+51) what is optional class in java 8?
+52) what is completable feature in java?
+
+
+
+Interview que:
+==============
+
+
+1) Diff betwn constructor and method
+2) What is serialization 
+3) How to handle exceptions in java
+4) List vs set 
+5) What is synchronization
+6) try-catch with throws keyword in single method 
+7)  difference between throw and throws
+8) Serializable interface is part of which package 
+9) oops
+10) what is IOC container in spring 
+11) what is loosely coupling and tightly coupling
+12) what are access modifiers in java
+13) what is the use of postman 
+14) program to write toggle a string (uppercase to lowercase and vice  versa)_
+15) what is dependency Injection and how many ways  we can do that?
+16)  write a java program to find smallest elements which right side for each element 
+		
+	 String arr[] = {"11","2","5","10","4"} 
+
+17) write a java program to find third highest value in the given array 
+	int [] arr = {1,6,1,7,6,9,8}
+
+18) freq of digits in given number 
+
+	ip: 65734252
+
+
+19) which annotations you are using in spring boot ?
+
+20) how to implement serialization with code?
+21) REST api annotations
+22) Array vs ArrayList 
+23) what is multi threading 
+24) how to achieve Syncronization
+25) List out some unchecked exception 
+26) How Lombok will generate setters and getters 
+27) collections freameworks vs collection (I) vs collections(C)
+28) what is rest api?
+29) diff between access specifiers and access modifiers 
+
+
+
+Q. mostly asked in interview 
+
+
+1) singleton design pattern with functional interface
+2) sort arraylist
+3) employee class -> salary per department
+4) first non repeating char
+5) freq of each char
+6) duplicate in string in string by 
+7) completable future callable 
+8) functional interface
+9) singleton, abstract factory ? which design pattern you used in project
+10) palindrome string
+11) transactional in project where you used ,automicity 
+12) solid
+13) saga
+14) circuit breaker 
+15) component vs enableautomaticcomponent
+16) qualifier primary 
+17) bean scope ,type of them
+18) lifecycle
+19) annotation
+20) hibernate 
+21) project structure 
+22) 12 factors 
+23) can we write static in child if main id available in parent
+
+>>>>>>> e744322819cf5dafe97c745800f8454abb1fe5f4
