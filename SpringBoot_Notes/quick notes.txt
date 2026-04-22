@@ -19,7 +19,7 @@ List<Worker> getWorkersSQL(
 5) Sort sort = Sort.by("salary").descending();  //and sort by accept arguments in varArgs format 
 List<Worker> list = repo.findAll(sort);
 
-6) Pageable pageable = PageRequest.of(0, 5, Sort.by("salary").descending()); 
+6) Pageable pageable = PageRequest.of(0{pageNumber}, 5{pagesize}, Sort.by("salary").descending()); 
 Page<Worker> page = repo.findAll(pageable);
 
 7) If no @Table or @Column is specified, JPA uses the class name as table name and field names as column names (Spring Boot usually converts them to lowercase/snake_case).
@@ -43,6 +43,13 @@ public void generateUUID() {
 
 9) Validation should be applied on DTO  -> DTO ensures the client remains stable and independent from backend and database changes.
 
+@PostMapping("/users")
+public ResponseEntity<?> createUser(@Valid @RequestBody UserRequestDTO dto) {
+    return ResponseEntity.ok("User created");
+}
+DTO Validation → @NotBlank, @NotNull, @Size, @Email, @Pattern, @Min/@Max → applied on fields → triggered using @Valid in controller → handled by Hibernate Validator
+
+  
 10) JSON → snake_case :: Java → camelCase
 
 11) @JsonProperty is used to explicitly map JSON fields to Java fields, especially when names differ or when we want control over serialization/deserialization.
@@ -65,7 +72,8 @@ For critical flows, I rely on integration testing to validate the complete flow.
 
 16) You get conflict only when your commit areas are updated by someone after your last pull;
 
-17) Encryption: Converting data into a secure form using a key so only authorized parties can decrypt it.
+17) 
+Encryption: Converting data into a secure form using a key so only authorized parties can decrypt it.
 Encoding: Transforming data into a different format for compatibility or transmission, which can be easily reversed without a key.
 Hashing: Converting data into a fixed-length value using a one-way function that cannot be reversed to the original data.
 
@@ -129,17 +137,26 @@ Static methods are resolved at compile time (early binding)  -> Instance methods
 
 35) super() present implicitly -> this() not present implicitly 
 -> both should be first statement -> only one can be available at once
+-> If parent has no default constructor, implicit super() fails → you must explicitly call super(params) or compilation breaks.
 
 36) super -> require when current class and parent class variable has same name 
 
 37) static block does not use this and super
 
-38) method call statement bind at runtime dynamic method dispatch{Runtime polymorphism} :: A a = new B(); even if type is parent still use
-method body/method from child
+38) method call statement bind at runtime dynamic method dispatch{Runtime polymorphism} :: A a = new B(); even if type is parent still use method body/method from child
 
 39) while overriding return type should be same or covariant allowed only
 
 40) access modifier should be wider in child not narrower
+
+class Parent {
+    Animal getAnimal() { return new Animal(); }
+}
+
+class Child extends Parent {
+    @Override
+    Dog getAnimal() { return new Dog(); } // allowed
+}
 
 41) exception should can be narrower not wider 
 
@@ -157,10 +174,10 @@ Runnable task = () -> {
 };
 
 executor.submit(task);   // pass Runnable/callable object
-
 executor.shutdown();
 
 45) to use completable future 
+
 @Async
 public CompletableFuture<String> getData() {
     return CompletableFuture.completedFuture("Hello");
@@ -206,7 +223,7 @@ List<? super Integer> list;
 
 55) Producer and Consumer are created as separate threads using lambda expressions, both sharing a synchronized buffer where Producer adds data and Consumer removes it using wait() and notify() for coordination.  {we are using queue here to save data-> consumer : add :: producer : pop  }
 
-56) HashMap ->  key → hashCode() →  hashing -> hash value → bit manipulation → bucket index
+56) HashMap ->  key → hashCode() →  hashing -> hash value(565136 ~ 14) → bit manipulation → bucket index
 
 57) concurrent hashmap -> bucket level locking and used by spring internally to store singleton bean and bean defination catche
 
@@ -238,7 +255,7 @@ interface name in method call → resolve ambiguity
 no InterfaceName.m1() → not static
 super → call parent implementation
 
-64) hashcode and equals :: to insert object of employee which has unique name only we ovveridde hashcode and equals method in employee class :: HashSet uses hashCode to find bucket and equals to detect duplicates — so fields used must be immutable to avoid data corruption.
+64) hashcode and equals :: to insert object of employee which has unique name only we overidde hashcode and equals method in employee class :: HashSet uses hashCode to find bucket and equals to detect duplicates — so fields used must be immutable to avoid data corruption.
 ->If you override equals() → you MUST override hashCode()
 
 65) t1.join() pauses the calling thread (here, the main thread) at that line until t1 finishes.it will not pasuse other thread execution which already called previously.
@@ -252,7 +269,7 @@ super → call parent implementation
 
 69) @Component → Redis helpers, JWT utils, Kafka producers ,AuditLogger,classes related to external client
 
-70) 1. Constructor called -> Dependency Injection ->  Aware Interfaces -> BeanPostProcessor (before init) -> @PostConstruct / init methods -> BeanPostProcessor (after init) -> Bean ready to use ->@PreDestroy / destroy methods
+70) Constructor called -> Dependency Injection ->  Aware Interfaces -> BeanPostProcessor (before init) -> @PostConstruct / init methods -> BeanPostProcessor (after init) -> Bean ready to use ->@PreDestroy / destroy methods
 
 71)  If Y requires X to be injected, then X is the dependency and Y is the dependent (target) bean.
 
@@ -327,11 +344,11 @@ produces :: response
 ex : application/json , text/plain , 
 
 100) xml :  before  java 9 automatically handle by jax b 
-	    after java 9 we need jakson dependency to add in pom 
+	    after java 9 we need jakson dependency to add in pom
 
 101) @JsonProperty is used to map JSON fields to DTO fields during request handling and also to control how DTO fields are sent in the response JSON.
 
-102) kubernetes acts as service registry ,no need to register servvices -> with dns it will work automatically
+102) kubernetes acts as service registry ,no need to register services -> with dns it will work automatically
 
 103)  Admin Server is used to manage all backend apis actuator endpoints at one place ,we use admin starter server dependency in pom file -> and use @EnableAdminServer at start class
 for clien we add admin-starter-client dependeny and add url config in prop file 
@@ -348,7 +365,7 @@ for clien we add admin-starter-client dependeny and add url config in prop file
 
 108)product owner tell ->  if requirenment change midway first i will do estimate and check if it is possible to complete in this period  -> if there is blocking story or if it require more time then i raised a risk in standup that it might take more time 
 
-109) i am manage junior members and wsr and msr this how I take initiative apart from my role. and I dont help him directly while solving bugs I help him debuging without telling direct he used to connect with me 
+109) i  manage junior members and wsr and msr this how I take initiative apart from my role. and I dont help him directly while solving bugs I help him debuging without telling direct he used to connect with me 
 
 110) one sprint -> two weeks -> 1 dev -> 8 to 10 story points
 
@@ -356,7 +373,7 @@ for clien we add admin-starter-client dependeny and add url config in prop file
 
 112) service boundry -> scop of responsibility and business capability -> own its data -> high cohesive (inside fuctionnality should be same)-> avoid exccesive syncronous calls -> independant deployment 
 
-113) sonarqube -> bugs -> null pointer risk ,optional mussuse
+113) sonarqube -> bugs -> null pointer risk ,optional missuse
 code smells ->  duplicate code,long method
 vulnerabily -> security issue , loging sensetive data,missing authorization and authentication 
 
@@ -367,7 +384,7 @@ vulnerabily -> security issue , loging sensetive data,missing authorization and 
 
 116) npn run scriptname/dev
 
-117) kub config maps :: service urls ,kafak topicd ,timeout/retry config
+117) kub config maps :: service urls ,kafaka topicd ,timeout/retry config
 kub secret :  jwt secret ,db user/password,api keys
 aws secret manager :: highly sensetive ,prod db credentials ,third party api  credential
 
@@ -384,14 +401,96 @@ ALTER TABLE survey_response -> ADD CONSTRAINT uk_user_survey_question -> UNIQUE 
 => One consumer can read multiple partitions  :: One partition is consumed by ONLY ONE consumer (per group)
 
 
+122) 1. Producer → audit-event-topic -> Consumer fails → retries → goes to audit-event-topic.DLT ->  DLQ Listener stores message (DB/map)->  Dev/Ops hits: POST /dlq/retry/{id} ->  Retry API fixes + republishes to audit-event-topic ->  Consumer processes successfully ->Reply event sent to audit-response-topic
+{Message fails → goes to DLQ (topic.name.DLT) → stored → retry API (via UI/Postman) republishes → processed → optional reply event sent.}
+@RetryableTopic(attempts = "3", dltTopicSuffix = "-dlt")
+
+123) a) scenario where we are using kafka :In our audit system, we use Kafka to publish audit events like finding creation. Multiple services like notification, dashboard, and rule engine consume these events asynchronously. We implemented retry with backoff and DLQ handling to ensure fault tolerance and allow manual replay of failed events.
 
 
+     b) when event or msg got failed :Email failure → SMTP/server issue
+DB failure → Connection/timeout problem
+Invalid data → Null/missing fields
+Code error → Bug in consumer logic
+API failure → Downstream service not available
+Schema mismatch → Event structure changed
+Timeout → Long processing / rebalance 
+
+124) where we write retries :: on consumer service :: use fixedbackoff obj we pass waiting time and retries count
+
+125) reply : “Reply in Kafka is implemented by consuming a message and producing a response to another topic, often using @SendTo in Spring Kafka, enabling asynchronous request-response communication between services.”
+
+126) DLQ is a design pattern -> Originated from queue-based systems -> thatw why we use queue to refer it 
+
+127) retry  {}
+ ->  @Retry(name = "xyService", fallbackMethod = "FallbackService")
+
+->    // Fallback method (must have same params + Exception) IN BOTH CB and Retry
+        public String sendFallback(String auditId, Exception ex) {
+
+-> we do config like time To wait for next call,for which we do retry for which not in yml
+
+128) CB AND RETRY 
+  @Retry(name = "notificationService", fallbackMethod = "fallback")
+    @CircuitBreaker(name = "notificationService", fallbackMethod = "fallback")
+
+129)  Request comes → retry executes → if all attempts fail, circuit breaker records failure → once threshold is reached, circuit breaker opens → in OPEN state, the main method is not invoked and retry does not execute → retry works only in CLOSED and HALF-OPEN states.
+
+130) retry -> audit service  using save call to save audit object at that time we may receive java.sql.SQLTransientConnectionException due to HikariCP  pool gets exhausted,so  we can use retry ove that save
+a)
+@Retry(name = "dbService", fallbackMethod = "saveAuditFallback") //here fallback woll throw excdption
+    public Audit saveAudit(Audit audit) {
+
+        System.out.println("Trying to save audit...");
+
+        return auditRepository.save(audit); // DB call
+    }
+
+b) Audit Service → External Compliance API  if that service is down then we try first then we will throw error
+
+131) where we apply both circuit breaker and retry
+
+132) previously we are using memcatch
+
+133) “In ConcurrentHashMap, writes are synchronized at bucket level, so only one thread can modify a bucket at a time. However, reads are mostly non-blocking and can happen concurrently even during writes.”
+
+134) “Here, the pointcut is defined using an annotation-based expression @annotation(requirePermission). It captures all join points where methods are annotated with @RequirePermission. The @Before advice executes authorization logic before method execution.”
+
+135)redisTemplate.opsForValue().get(key); // Fetch user role from Redis (O(1) lookup, avoids DB call)
+
+redisTemplate.opsForValue().set(key, value, TTL); // Store user role with TTL to prevent stale cache (String key-value)
+
+redisTemplate.opsForSet().members(key); // Get all permissions for a role (used for authorization check)
+
+redisTemplate.opsForSet().add(key, values); // Store role permissions in Redis Set (ensures uniqueness + fast lookup)
+
+136) Deadlock is a circular wait between concurrent transactions competing for locks, not just multiple transactions on the same database.If two methods having transaction annotation over them and they are creating circular dependency. 
+
+137) Timeouts are applied wherever your system waits on external resources—HTTP calls, DB, threads, messaging—to prevent resource blocking and cascading failures.
 
 
+138) -> Domain Decomposition (DDD) -> Single Responsibility per Service -> Loose Coupling & High Cohesion -> Database per Service -> Inter-Service Communication -> API Gateway -> Service Discovery -> Fault Tolerance & Resilience -> Observability (Monitoring, Logging, Tracing) -> CI/CD Pipeline -> Containerization & Orchestration -> Security
+
+139) ec2 -> kafka,redis:: EKS -> pods ::  rds -> mySQL :: s3 -> reports attachments :: ElasticCatche :: redis :: Lamda :: background jobs,sceduled  , 
+
+140) Feature → Dev → QA → UAT → Staging → Prod   {env}
+         (auto)   (manual/trigger) (approval-based)
+
+141) feature → develop → release → main    {branch} 
+            		  ↓             ↓         	   ↓
+           		 DEV          QA/UAT   STAGE/PROD
+
+142) Helm is used to package and manage Kubernetes applications using charts.
 
 
+143) // Service Test:
+// - @ExtendWith(MockitoExtension.class)
+// - Use @Mock and @InjectMocks
+// - Use when().thenReturn()
+// - Use assertEquals()
 
-
-
-
-
+// Controller Test:
+// - @WebMvcTest
+// - Use MockMvc
+// - Use @MockBean for service
+// - Use mockMvc.perform().andExpect()

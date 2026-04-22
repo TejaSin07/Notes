@@ -1,3 +1,22 @@
+1) kafka		done
+2) redis		done
+3) retries		done but what the dif between kafka and normal retry
+4) security   
+5) circuit breaker 	done
+6) timeout		done 
+7) Transactional annotation scenario
+
+1) running app
+2) basic codes controller writing , streams , unit tests , query and path
+3) read imp points
+4) unit testing
+5) git
+6) Ai 
+7) scenario
+8) kafka
+
+
+
 Part 1::
 =======
 

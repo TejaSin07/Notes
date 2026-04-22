@@ -1,0 +1,220 @@
+// ==============================
+// SPRING SECURITY + JWT NOTES
+// ==============================
+
+
+// =========================================
+// 1. OVERALL FLOW (VERY IMPORTANT)
+// =========================================
+
+// LOGIN FLOW:
+// Controller (loginCheck)
+//  → AuthenticationManager
+//      → AuthenticationProvider (DaoAuthenticationProvider)
+//          → UserDetailsService (DB call)
+//          → PasswordEncoder.matches()
+//  → JWT generated → returned to client
+
+
+// REQUEST FLOW (AFTER LOGIN):
+// Client sends JWT in header
+//  → Filter (AppFilter)
+//      → Extract token
+//      → Extract username
+//      → Load user from DB
+//      → Validate token
+//      → Set SecurityContext
+//  → Controller (API accessed)
+
+
+// =========================================
+// 2. IMPORTANT CLASSES
+// =========================================
+
+// 1. AppSecurityConfig
+// - Security configuration
+// - Defines endpoints access
+// - Registers JWT filter
+
+// 2. CustomerRestController
+// - Handles login & register APIs
+
+// 3. AuthenticationManager
+// - Entry point for authentication
+
+// 4. DaoAuthenticationProvider
+// - Performs actual authentication
+// - Calls UserDetailsService
+// - Uses PasswordEncoder
+
+// 5. MyUserDetailsService
+// - Loads user from DB
+
+// 6. PasswordEncoder (BCrypt)
+// - Encodes & verifies passwords
+
+// 7. JwtService
+// - Generates & validates JWT
+
+// 8. AppFilter (OncePerRequestFilter)
+// - Runs for every request
+// - Handles JWT validation
+
+// 9. SecurityContextHolder
+// - Stores authenticated user
+
+
+// =========================================
+// 3. IMPORTANT METHODS
+// =========================================
+
+// AppSecurityConfig
+securityFilterChain(HttpSecurity http)
+authenticationProvider()
+authenticationManager()
+pwdEncoder()
+
+
+// Controller
+loginCheck()
+
+
+// UserDetailsService
+loadUserByUsername(String username)
+
+
+// JWT Service
+generateToken(String username)
+validateToken(String token, UserDetails userDetails)
+extractUsername(String token)
+
+
+// Filter
+doFilterInternal(HttpServletRequest request, ...)
+
+
+// =========================================
+// 4. LOGIN FLOW (STEP-BY-STEP)
+// =========================================
+
+// 1. User sends username + password
+// 2. Controller creates:
+new UsernamePasswordAuthenticationToken(username, password)
+
+// 3. AuthenticationManager.authenticate()
+
+// 4. Internally:
+//    → loadUserByUsername()
+//    → fetch user from DB
+//    → compare password:
+//       passwordEncoder.matches(raw, encoded)
+
+// 5. If success:
+//    → generate JWT
+//    → return token
+
+
+// =========================================
+// 5. JWT STRUCTURE
+// =========================================
+
+// JWT contains:
+// - Subject (username)
+// - Issued time
+// - Expiry time
+// - Signature
+
+// Example:
+.setSubject(username)
+.setIssuedAt(new Date())
+.setExpiration(...)
+.signWith(key, HS256)
+
+
+// =========================================
+// 6. REQUEST FLOW (JWT VALIDATION)
+// =========================================
+
+// 1. Client sends request with header:
+//    Authorization: Bearer <token>
+
+// 2. Filter runs:
+
+String authHeader = request.getHeader("Authorization");
+
+// 3. Extract token
+token = authHeader.substring(7);
+
+// 4. Extract username
+jwtService.extractUsername(token);
+
+// 5. Load user from DB
+userDetailsService.loadUserByUsername(username);
+
+// 6. Validate token
+jwtService.validateToken(token, userDetails);
+
+// 7. Set authentication
+SecurityContextHolder.getContext().setAuthentication(authToken);
+
+
+// =========================================
+// 7. SECURITY CONFIG
+// =========================================
+
+// Disable CSRF (for APIs)
+http.csrf().disable()
+
+// Public APIs
+.requestMatchers("/api/login", "/api/register").permitAll()
+
+// Secured APIs
+.requestMatchers("/api/**").authenticated()
+
+// Stateless session
+.sessionManagement()
+.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
+// Add JWT filter
+.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+
+
+// =========================================
+// 8. PASSWORD HANDLING
+// =========================================
+
+// Register:
+encodedPwd = passwordEncoder.encode(rawPwd)
+
+// Login (internal):
+passwordEncoder.matches(rawPwd, encodedPwd)
+
+
+// =========================================
+// 9. COMMON ISSUES
+// =========================================
+
+// 1. User not found → UsernameNotFoundException
+// 2. Password mismatch → Invalid Credentials
+// 3. Token expired → Unauthorized
+// 4. Bearer missing space → parsing issue
+//    should be: "Bearer "
+// 5. No roles → authorization not possible
+// 6. SecurityContext not set → request blocked
+
+
+// =========================================
+// 10. KEY INTERVIEW POINTS
+// =========================================
+
+// - Difference between Authentication & Authorization
+// - Stateless vs Stateful authentication
+// - Role of JWT
+// - How filter chain works
+// - Why PasswordEncoder is needed
+// - How SecurityContextHolder works
+
+
+// =========================================
+// END OF NOTES
+// =========================================
