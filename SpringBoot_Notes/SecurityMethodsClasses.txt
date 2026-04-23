@@ -8,89 +8,117 @@
 // =========================================
 
 // LOGIN FLOW:
-// Controller (loginCheck)
-//  → AuthenticationManager
-//      → AuthenticationProvider (DaoAuthenticationProvider)
-//          → UserDetailsService (DB call)
-//          → PasswordEncoder.matches()
-//  → JWT generated → returned to client
+// CustomerRestController.loginCheck() 
+//  → AuthenticationManager.authenticate()   // entry point for authentication
+//      → DaoAuthenticationProvider          // performs actual auth logic
+//          → MyUserDetailsService.loadUserByUsername() // fetch user from DB
+//          → PasswordEncoder.matches()      // compares raw vs encoded password
+//  → JwtService.generateToken()             // create JWT
+//  → return token to client
 
 
 // REQUEST FLOW (AFTER LOGIN):
 // Client sends JWT in header
-//  → Filter (AppFilter)
-//      → Extract token
-//      → Extract username
-//      → Load user from DB
-//      → Validate token
-//      → Set SecurityContext
+//  → AppFilter.doFilterInternal()           // runs for every request
+//      → extract token from header
+//      → JwtService.extractUsername()       // get username from token
+//      → MyUserDetailsService.loadUserByUsername() // load user
+//      → JwtService.validateToken()         // validate token
+//      → SecurityContextHolder.setAuthentication() // mark request authenticated
 //  → Controller (API accessed)
 
 
 // =========================================
-// 2. IMPORTANT CLASSES
-// =========================================
-
-// 1. AppSecurityConfig
-// - Security configuration
-// - Defines endpoints access
-// - Registers JWT filter
-
-// 2. CustomerRestController
-// - Handles login & register APIs
-
-// 3. AuthenticationManager
-// - Entry point for authentication
-
-// 4. DaoAuthenticationProvider
-// - Performs actual authentication
-// - Calls UserDetailsService
-// - Uses PasswordEncoder
-
-// 5. MyUserDetailsService
-// - Loads user from DB
-
-// 6. PasswordEncoder (BCrypt)
-// - Encodes & verifies passwords
-
-// 7. JwtService
-// - Generates & validates JWT
-
-// 8. AppFilter (OncePerRequestFilter)
-// - Runs for every request
-// - Handles JWT validation
-
-// 9. SecurityContextHolder
-// - Stores authenticated user
-
-
-// =========================================
-// 3. IMPORTANT METHODS
+// 2. IMPORTANT CLASSES (WITH PURPOSE)
 // =========================================
 
 // AppSecurityConfig
+// → Central configuration class for Spring Security
+// → Defines authentication rules, filter chain, and providers
+
+// CustomerRestController
+// → Entry point for login & register APIs
+// → Starts authentication process
+
+// AuthenticationManager
+// → Main interface used to authenticate user
+// → Delegates to AuthenticationProvider
+
+// DaoAuthenticationProvider
+// → Default provider that validates user using DB
+// → Calls UserDetailsService + PasswordEncoder
+
+// MyUserDetailsService
+// → Custom service to fetch user from DB
+// → Converts DB entity → Spring Security User
+
+// PasswordEncoder (BCrypt)
+// → Encodes password during registration
+// → Matches password during login
+
+// JwtService
+// → Handles JWT creation, parsing, validation
+
+// AppFilter (OncePerRequestFilter)
+// → Runs on every request
+// → Extracts and validates JWT
+
+// SecurityContextHolder
+// → Stores authentication for current request
+// → If set → user is authenticated
+
+
+// =========================================
+// 3. IMPORTANT METHODS (WITH PURPOSE)
+// =========================================
+
+// AppSecurityConfig methods
+
 securityFilterChain(HttpSecurity http)
+// → Configures security rules (who can access what)
+
 authenticationProvider()
+// → Defines how authentication is performed
+
 authenticationManager()
+// → Provides AuthenticationManager bean
+
 pwdEncoder()
+// → Provides BCryptPasswordEncoder bean
 
 
-// Controller
+// Controller method
+
 loginCheck()
+// → Accepts username/password
+// → Calls AuthenticationManager
+// → Generates JWT on success
 
 
-// UserDetailsService
+// UserDetailsService method
+
 loadUserByUsername(String username)
+// → Fetch user from DB
+// → Called automatically during authentication
 
 
-// JWT Service
+// JWT Service methods
+
 generateToken(String username)
+// → Creates JWT with username + expiry
+
 validateToken(String token, UserDetails userDetails)
+// → Checks username + expiration
+
 extractUsername(String token)
+// → Extracts subject (username) from token
 
 
-// Filter
+// Filter method
+
 doFilterInternal(HttpServletRequest request, ...)
+// → Intercepts every request
+// → Validates JWT and sets authentication
 
 
 // =========================================
@@ -98,19 +126,20 @@ doFilterInternal(HttpServletRequest request, ...)
 // =========================================
 
 // 1. User sends username + password
-// 2. Controller creates:
+
+// 2. Controller creates authentication object
 new UsernamePasswordAuthenticationToken(username, password)
+// → Represents login request
 
 // 3. AuthenticationManager.authenticate()
+// → Triggers authentication process
 
 // 4. Internally:
-//    → loadUserByUsername()
-//    → fetch user from DB
-//    → compare password:
-//       passwordEncoder.matches(raw, encoded)
+//    → loadUserByUsername()  // fetch user from DB
+//    → passwordEncoder.matches(raw, encoded) // compare password
 
 // 5. If success:
-//    → generate JWT
+//    → JwtService.generateToken()
 //    → return token
 
 
@@ -125,10 +154,10 @@ new UsernamePasswordAuthenticationToken(username, password)
 // - Signature
 
 // Example:
-.setSubject(username)
-.setIssuedAt(new Date())
-.setExpiration(...)
-.signWith(key, HS256)
+.setSubject(username)        // stores username
+.setIssuedAt(new Date())     // token creation time
+.setExpiration(...)          // expiry time
+.signWith(key, HS256)        // digital signature
 
 
 // =========================================
@@ -141,9 +170,11 @@ new UsernamePasswordAuthenticationToken(username, password)
 // 2. Filter runs:
 
 String authHeader = request.getHeader("Authorization");
+// → fetch Authorization header
 
 // 3. Extract token
 token = authHeader.substring(7);
+// → remove "Bearer "
 
 // 4. Extract username
 jwtService.extractUsername(token);
@@ -156,13 +187,14 @@ jwtService.validateToken(token, userDetails);
 
 // 7. Set authentication
 SecurityContextHolder.getContext().setAuthentication(authToken);
+// → marks request as authenticated
 
 
 // =========================================
 // 7. SECURITY CONFIG
 // =========================================
 
-// Disable CSRF (for APIs)
+// Disable CSRF (not needed for REST APIs)
 http.csrf().disable()
 
 // Public APIs
@@ -171,11 +203,11 @@ http.csrf().disable()
 // Secured APIs
 .requestMatchers("/api/**").authenticated()
 
-// Stateless session
+// Stateless session (no session, only JWT)
 .sessionManagement()
 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
-// Add JWT filter
+// Add JWT filter before default auth filter
 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
 
 
@@ -185,20 +217,21 @@ http.csrf().disable()
 
 // Register:
 encodedPwd = passwordEncoder.encode(rawPwd)
+// → store hashed password
 
 // Login (internal):
 passwordEncoder.matches(rawPwd, encodedPwd)
+// → verify password
 
 
 // =========================================
 // 9. COMMON ISSUES
 // =========================================
 
-// 1. User not found → UsernameNotFoundException
-// 2. Password mismatch → Invalid Credentials
-// 3. Token expired → Unauthorized
-// 4. Bearer missing space → parsing issue
-//    should be: "Bearer "
+// 1. User not found → loadUserByUsername() fails
+// 2. Password mismatch → matches() returns false
+// 3. Token expired → validateToken() fails
+// 4. Missing "Bearer " → token extraction fails
 // 5. No roles → authorization not possible
 // 6. SecurityContext not set → request blocked
 
@@ -207,12 +240,12 @@ passwordEncoder.matches(rawPwd, encodedPwd)
 // 10. KEY INTERVIEW POINTS
 // =========================================
 
-// - Difference between Authentication & Authorization
-// - Stateless vs Stateful authentication
-// - Role of JWT
-// - How filter chain works
-// - Why PasswordEncoder is needed
-// - How SecurityContextHolder works
+// - Authentication vs Authorization
+// - Stateless authentication using JWT
+// - Role of AuthenticationManager & Provider
+// - Filter chain execution
+// - Importance of PasswordEncoder
+// - Role of SecurityContextHolder
 
 
 // =========================================
