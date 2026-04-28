@@ -1,0 +1,262 @@
+// ==========================================
+// ⚛️ REACT + TYPESCRIPT SHORT NOTES
+// ==========================================
+
+
+// ------------------------------------------
+// 1. WHAT IS REACT
+// ------------------------------------------
+
+/*
+- JavaScript library for building UI
+- Component-based architecture
+- Declarative (UI updates automatically when state changes)
+
+Java Mapping:
+- Like dynamic UI layer over backend
+*/
+
+
+// ------------------------------------------
+// 2. COMPONENT
+// ------------------------------------------
+
+function App() {
+  return <h1>Hello</h1>;
+}
+
+/*
+- Reusable UI block
+- Must start with CAPITAL letter
+- Returns JSX
+
+Java Mapping:
+class App { render() { return "<h1>Hello</h1>"; } }
+*/
+
+
+// ------------------------------------------
+// 3. JSX
+// ------------------------------------------
+
+return <h1>Hello</h1>;
+
+/*
+- Looks like HTML but it's JavaScript
+- Use {} to write JS inside JSX
+
+Example:
+<h1>{name}</h1>
+*/
+
+
+// ------------------------------------------
+// 4. PROPS (INPUT)
+// ------------------------------------------
+
+type Props = {
+  name: string;
+};
+
+function Greeting({ name }: Props) {
+  return <h1>Hello {name}</h1>;
+}
+
+// Usage
+<Greeting name="Tejas" />
+
+/*
+- Read-only
+- Passed from parent → child
+- Used to send data
+
+Java Mapping:
+String greet(String name)
+*/
+
+
+// ------------------------------------------
+// 5. STATE (INTERNAL DATA)
+// ------------------------------------------
+
+import { useState } from "react";
+
+const [count, setCount] = useState(0);
+
+/*
+- Local to component
+- Mutable via setter
+- Triggers re-render
+
+Key Rule:
+- Never update directly → use setter
+
+Wrong:
+count++
+
+Correct:
+setCount(count + 1)
+*/
+
+
+// ------------------------------------------
+// 6. EVENT HANDLING
+// ------------------------------------------
+
+<button onClick={() => setCount(count + 1)}>
+  Increase
+</button>
+
+/*
+- Uses arrow functions
+- onClick, onChange, etc.
+*/
+
+
+// ------------------------------------------
+// 7. LIST RENDERING (MAP)
+// ------------------------------------------
+
+const numbers = [1, 2, 3];
+
+return (
+  <ul>
+    {numbers.map(n => (
+      <li key={n}>{n}</li>
+    ))}
+  </ul>
+);
+
+/*
+- map() used to render lists
+- key is mandatory (unique)
+*/
+
+
+// ------------------------------------------
+// 8. COMPONENT STRUCTURE
+// ------------------------------------------
+
+/*
+App
+ ├── Header
+ ├── Counter
+ └── UserCard
+
+- Break UI into smaller components
+- Improves reusability
+*/
+
+
+// ------------------------------------------
+// 9. PROPS FLOW (IMPORTANT)
+// ------------------------------------------
+
+/*
+- Data flows TOP → DOWN
+- Parent → Child only
+
+Child cannot directly modify parent data
+*/
+
+
+// ------------------------------------------
+// 10. PASS FUNCTION AS PROP
+// ------------------------------------------
+
+function Parent() {
+  const [count, setCount] = useState(0);
+
+  return <Child increment={() => setCount(count + 1)} />;
+}
+
+function Child({ increment }: { increment: () => void }) {
+  return <button onClick={increment}>Increase</button>;
+}
+
+/*
+- Used for child → parent communication
+- Called "lifting state up"
+*/
+
+
+// ------------------------------------------
+// 11. useEffect (SIDE EFFECTS)
+// ------------------------------------------
+
+import { useEffect } from "react";
+
+useEffect(() => {
+  console.log("Runs once");
+}, []);
+
+/*
+Cases:
+[]        → run once (on mount)
+[count]   → run when count changes
+no array  → run on every render
+
+Used for:
+- API calls
+- timers
+- subscriptions
+*/
+
+
+// ------------------------------------------
+// 12. API CALL (ASYNC/AWAIT)
+// ------------------------------------------
+
+import { useState, useEffect } from "react";
+
+function Users() {
+  const [users, setUsers] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const res = await fetch("https://jsonplaceholder.typicode.com/users");
+      const data = await res.json();
+      setUsers(data);
+    };
+
+    fetchUsers();
+  }, []);
+
+  return (
+    <div>
+      {users.map(user => (
+        <p key={user.id}>{user.name}</p>
+      ))}
+    </div>
+  );
+}
+
+/*
+Flow:
+1. Component loads
+2. useEffect runs
+3. API call happens
+4. State updated
+5. UI re-renders
+
+Rules:
+- useEffect cannot be async
+- define async function inside it
+*/
+
+
+// ------------------------------------------
+// ⚠️ IMPORTANT SUMMARY
+// ------------------------------------------
+
+/*
+1. Component → UI block
+2. Props → input (read-only)
+3. State → internal data (causes re-render)
+4. useEffect → side effects (API calls)
+5. map → list rendering
+6. Data flow → parent → child only
+7. Async/Await → API handling
+
+If you understand these → you can build real apps
+*/

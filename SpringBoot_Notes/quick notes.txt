@@ -11,10 +11,7 @@ List<Worker> getWorkersHQL(
 );
 
 4) @Query(value = "SELECT * FROM worker WHERE ename = :name AND esalary = :salary", nativeQuery = true)
-List<Worker> getWorkersSQL(
-    @Param("name") String name,
-    @Param("salary") Double salary
-);
+List<Worker> getWorkersSQL( @Param("name") String name, @Param("salary") Double salary);
 
 5) Sort sort = Sort.by("salary").descending();  //and sort by accept arguments in varArgs format 
 List<Worker> list = repo.findAll(sort);
@@ -121,7 +118,7 @@ Repository Pattern
 DTO Pattern
 circuit breaker
 
-30) Shallow copy copies reference, deep copy copies object
+30) Shallow copy copies reference, deep copy copies object,
 
 31) Business Use Case Identification -> Resource-Based URL Design (REST) ->Proper HTTP Methods
 Request & Response Design -> API Versioning
@@ -174,6 +171,15 @@ Runnable task = () -> {
 };
 
 executor.submit(task);   // pass Runnable/callable object
+
+or 
+
+        Callable<String> task = () -> {
+            String threadName = Thread.currentThread().getName();
+            return "Executed by: " + threadName;
+        };
+
+        Future<String> future = executor.submit(task); // submit Callable
 executor.shutdown();
 
 45) to use completable future 
@@ -182,6 +188,7 @@ executor.shutdown();
 public CompletableFuture<String> getData() {
     return CompletableFuture.completedFuture("Hello");
 }
+
 46) ReentrantLock creation
 ReentrantLock lock = new ReentrantLock(); // this is how we create ReentrantLock
 
@@ -218,7 +225,7 @@ List<? super Integer> list;
 
 53) Varargs :: void printNumbers(int... nums) => internally int... nums  ≈  int[] nums
 
-54) Fail Fast behavior: => System throws exception immediately when modification or error occurs.   => ArrayList,HashMap
+54) Fail Fast behavior: => System throws ConcurrentModificationException exception immediately when modification or error occurs.   => ArrayList,HashMap
     Fail Safe behavior: => System avoids failure by operating on a copy or safe structure and continues execution. => ConcurrentHashMap
 
 55) Producer and Consumer are created as separate threads using lambda expressions, both sharing a synchronized buffer where Producer adds data and Consumer removes it using wait() and notify() for coordination.  {we are using queue here to save data-> consumer : add :: producer : pop  }
@@ -305,7 +312,7 @@ usually we add starter but we can seperate dependencies also like jakson
 
 82) Run method -> bootstrap context -> start listeners -> prepare env -> create Ioc -> call runners -> start embded server->return Ioc
 
-83) ApplicationRunner adn CommandLineRunner : Both are Spring Boot interfaces used to execute code after the application starts and the ApplicationContext is fully initialized.
+83) ApplicationRunner and CommandLineRunner : Both are Spring Boot interfaces used to execute code after the application starts and the ApplicationContext is fully initialized.
 You implement their run() method to add startup logic.
 
 84) If you don’t specify a name in @Component, Spring generates a default (lowercase)
@@ -316,12 +323,13 @@ You implement their run() method to add startup logic.
 86) @Query ->  when method names cannot express complex queries
 
 87) JpaRepo = CrudRepo + Pagination + Sorting + QBE
+Specification = Separate interface (must be added explicitly)
 
 88) QBE ignore null feilds only care about which feild are not null : we use Example.of(entity) 
 
 89) JPA requires equals and hashCode for composite primary keys because it uses them to uniquely identify entities in the persistence context, cache, and collections.
 
-90) hibernate need session to execute lazy loading hickariConnection only provide connection ,hickari : car ,hibernate : driver 
+90) hibernate need session to execute lazy loading hickariConnection only provide connection ,hickari : car ,hibernate : driver  QUE : why hibernate closes its session in lazy loading?
 
 91) emails  -> mail starter -> configure application properties -> add our outlook mail -> create utils class -> use JavaMailSender 
 
@@ -350,9 +358,8 @@ ex : application/json , text/plain ,
 
 102) kubernetes acts as service registry ,no need to register services -> with dns it will work automatically
 
-103)  Admin Server is used to manage all backend apis actuator endpoints at one place ,we use admin starter server dependency in pom file -> and use @EnableAdminServer at start class
+103) Admin Server is used to manage all backend apis actuator endpoints at one place ,we use admin starter server dependency in pom file -> and use @EnableAdminServer at start class
 for clien we add admin-starter-client dependeny and add url config in prop file 
-
 
 104) zipkin -> distributed tracing -> which api is taking more time -> micrometer  to generate span and trace id -> reporter brave -> for client just add url in prop file
 
@@ -375,7 +382,7 @@ for clien we add admin-starter-client dependeny and add url config in prop file
 
 113) sonarqube -> bugs -> null pointer risk ,optional missuse
 code smells ->  duplicate code,long method
-vulnerabily -> security issue , loging sensetive data,missing authorization and authentication 
+vulnerabily -> security issue ,hardcoded values, loging sensetive data,missing authorization and authentication 
 
 
 114) inside sorted(Comparator.comparing(Employee::getSalary).reversed() .thenComparing(Employee::getName)) this how we compare multiple feilds and get output
@@ -396,6 +403,9 @@ aws secret manager :: highly sensetive ,prod db credentials ,third party api  cr
 
 120) Survey -> Questions -> Survey Assignment -> Survey Response :: Each (user_id, survey_id, question_id) combination must be unique -> APPLICATION-LEVEL SOLUTIONS WERE NOT USED -> as synchronization will reduce performance  ->Frontend Debouncing: -> Not reliable ->Cannot control retries or race conditions -> Added composite UNIQUE constraint:
 ALTER TABLE survey_response -> ADD CONSTRAINT uk_user_survey_question -> UNIQUE (user_id, survey_id, question_id);
+
+DBA team executed a controlled cleanup script to remove duplicates
+After data was clean, you added a composite UNIQUE constraint via Flyway
 
 121) topics divided into partition -> ordering guranded only inside one partitions -> Offset: Sequential number inside partition  
 => One consumer can read multiple partitions  :: One partition is consumed by ONLY ONE consumer (per group)
@@ -420,7 +430,7 @@ Timeout → Long processing / rebalance
 
 125) reply : “Reply in Kafka is implemented by consuming a message and producing a response to another topic, often using @SendTo in Spring Kafka, enabling asynchronous request-response communication between services.”
 
-126) DLQ is a design pattern -> Originated from queue-based systems -> thatw why we use queue to refer it 
+126) DLQ is a design pattern -> Originated from queue-based systems -> thats why we use queue to refer it 
 
 127) retry  {}
  ->  @Retry(name = "xyService", fallbackMethod = "FallbackService")
@@ -428,7 +438,7 @@ Timeout → Long processing / rebalance
 ->    // Fallback method (must have same params + Exception) IN BOTH CB and Retry
         public String sendFallback(String auditId, Exception ex) {
 
--> we do config like time To wait for next call,for which we do retry for which not in yml
+-> We configure retry in YAML by defining max attempts, wait duration between retries, and specifying which exceptions should trigger retries and which should be ignored.
 
 128) CB AND RETRY 
   @Retry(name = "notificationService", fallbackMethod = "fallback")
@@ -477,7 +487,7 @@ redisTemplate.opsForSet().add(key, values); // Store role permissions in Redis S
          (auto)   (manual/trigger) (approval-based)
 
 141) feature → develop → release → main    {branch} 
-            		  ↓             ↓         	   ↓
+            		  ↓             ↓        ↓
            		 DEV          QA/UAT   STAGE/PROD
 
 142) Helm is used to package and manage Kubernetes applications using charts.
@@ -494,3 +504,41 @@ redisTemplate.opsForSet().add(key, values); // Store role permissions in Redis S
 // - Use MockMvc
 // - Use @MockBean for service
 // - Use mockMvc.perform().andExpect()
+
+
+144) “A lambda expression provides the implementation of the abstract method of a functional interface. Unlike an anonymous class, it does not create a separate class or its own this context (it is implemented internally using invokedynamic, not a .class file). Because of this, this inside a lambda refers to the enclosing class instance.”
+
+145)Shallow  -> same inner references
+ Deep     -> completely independent objects
+ Defensive-> copy to protect internal data
+
+146) Write operations → @transaction is mandatory we can write on service or repo method
+
+147) @Modifying is required only for custom update/delete queries in Spring Data JPA, not for standard repository methods like save or delete.
+
+148) In production, we keep logs at INFO and ERROR levels. For debugging, we temporarily enable DEBUG for specific packages instead of globally, to avoid performance issues and excessive logging.
+
+149) TRACE → DEBUG → INFO → WARN → ERROR
+
+150) The actual resource is the underlying file (file descriptor). BufferedReader is just a wrapper over FileReader. Closing BufferedReader ensures the underlying file resource is also released.
+
+151) Idempotency = deduplication + safe replay + atomic control
+
+152) use csrf when -> Using session-based authentication -> Using cookies for login -> use csrf token
+as we are not storing jwt in cookies as we are using stateless comm -> so 
+
+153) A – Atomicity
+C – Consistency
+I – Isolation
+D – Durability
+
+
+154) transaction on method outside which is calling method inside.
+
+
+
+
+
+
+
+

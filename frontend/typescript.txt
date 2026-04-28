@@ -1,0 +1,316 @@
+EX 1:: 
+interface Employee {
+  id: number;
+  name: string;
+  salary: number;
+}
+
+function getEmployee(emp: Employee): string {
+  return emp.name + " earns " + emp.salary;
+}
+
+let emp1: Employee = {
+  id: 1,
+  name: "Tejas",
+  salary: 50000
+};
+
+console.log(getEmployee(emp1));
+
+
+NOTES :: 
+// Structural Typing (TypeScript)
+
+// TypeScript uses structural typing (duck typing)
+// → Type compatibility is based on object SHAPE, not type/interface name
+
+// Key Rules:
+
+// 1. Object must have all required properties
+//    → Missing property → compile-time error
+
+// 2. Property types must match
+//    → Wrong type → compile-time error
+
+// 3. Extra properties
+//    → Allowed when using variables
+//    → May error in direct object literals (excess property check)
+
+// Important:
+// TypeScript checks:
+// ✔ property names
+// ✔ property types
+// ❌ NOT interface/type name
+
+// One-line summary:
+// If structure matches, types are compatible (name doesn’t matter)
+
+
+
+
+===================================================
+### TypeScript Core Syntax — Quick Reference Note
+===================================================
+**1. Interface (structure/contract)**
+
+```ts
+interface InterfaceName {
+  property: Type;
+  optionalProp?: Type;
+  methodName?(param: Type): ReturnType;   //just a signature
+}
+```
+
+**2. Object Creation**
+
+```ts
+const obj: InterfaceName = {
+  property: value,
+  methodName(param) {
+    return value;
+  }
+};
+```
+
+**3. Function**
+
+```ts
+function functionName(param: Type): ReturnType {
+  return value;
+}
+```
+
+**4. Arrow Function**
+
+
+const fn = (param: Type): ReturnType => {
+  return value;
+};
+
+
+**5. Short Arrow Function**
+
+```ts
+const fn = (param: Type): ReturnType => expression;
+```
+
+**6. Function in Interface**
+
+
+interface I {
+  method(param: Type): ReturnType;
+}
+
+
+**7. Function Type**
+
+
+interface FnType {
+  (a: Type, b: Type): ReturnType;
+}
+
+
+**8. Generics (Reusable Types)**
+
+
+interface Box<T> {
+  value: T;
+}
+
+function identity<T>(param: T): T {
+  return param;
+}
+```
+
+**Key Points**
+
+* `: Type` → type annotation
+* `?` → optional field
+* `<T>` → generic (dynamic type)
+* Interfaces define shape, not implementation
+* TypeScript checks structure, not class
+
+
+
+
+
+// ===============================================
+// ⚡ MODERN JAVASCRIPT NOTES (TS + REACT BASE)
+// ===============================================
+
+
+// ----------------------------------
+// 1. ARROW FUNCTIONS
+// ----------------------------------
+
+// Normal function
+function add(a: number, b: number): number {
+  return a + b;
+}
+
+// Arrow function
+const addArrow = (a: number, b: number): number => {
+  return a + b;
+};
+
+// Short form
+const addShort = (a: number, b: number) => a + b;
+
+/*
+Java Mapping:
+BiFunction<Integer, Integer, Integer> add = (a, b) -> a + b;
+
+Key Points:
+- '=>' used instead of function keyword
+- No own 'this' (uses outer context)
+- Widely used in React
+*/
+
+
+// ----------------------------------
+// 2. DESTRUCTURING
+// ----------------------------------
+
+const user = { name: "Tejas", age: 25 };
+
+// Without destructuring
+const name1 = user.name;
+const age1 = user.age;
+
+// With destructuring
+const { name, age } = user;
+
+/*
+Java Mapping:
+String name = user.getName();
+
+Key Points:
+- Extract values from objects easily
+- Reduces boilerplate
+*/
+
+
+// ----------------------------------
+// 3. SPREAD OPERATOR (...)
+// ----------------------------------
+
+// Copy object
+const user1 = { name: "Tejas" };
+const user2 = { ...user1, age: 25 };
+
+// Merge objects
+const a = { x: 1 };
+const b = { y: 2 };
+const merged = { ...a, ...b };
+
+// Arrays
+const arr1 = [1, 2];
+const arr2 = [...arr1, 3, 4];
+
+/*
+Java Mapping:
+- new ArrayList<>(oldList)
+- builder / copy constructor
+
+Key Points:
+- Used for copying & merging
+- Immutable style updates (important in React)
+*/
+
+
+// ----------------------------------
+// 4. MAP FUNCTION
+// ----------------------------------
+
+const numbers = [1, 2, 3];
+const doubled = numbers.map(n => n * 2);
+
+/*
+Output: [2, 4, 6]
+
+Java Mapping:
+numbers.stream().map(n -> n * 2)
+
+Key Points:
+- Transforms array
+- VERY IMPORTANT in React (for rendering lists)
+*/
+
+
+// ----------------------------------
+// 5. FILTER FUNCTION
+// ----------------------------------
+
+const nums = [1, 2, 3, 4];
+const even = nums.filter(n => n % 2 === 0);
+
+/*
+Output: [2, 4]
+
+Java Mapping:
+stream().filter(n -> n % 2 == 0)
+
+Key Points:
+- Filters elements based on condition
+*/
+
+
+// ----------------------------------
+// 6. ASYNC / AWAIT
+// ----------------------------------
+
+// async function
+const fetchData = async () => {
+  return "Data";
+};
+
+// using await
+const main = async () => {
+  const data = await fetchData();
+  console.log(data);
+};
+
+main();
+
+/*
+Java Mapping:
+CompletableFuture<String> future = supplyAsync(...)
+future.get()
+
+Key Points:
+- async → marks function as asynchronous
+- await → waits for result
+- Works only inside async function
+- Cleaner than .then()
+*/
+
+
+// ----------------------------------
+// ⚠️ IMPORTANT SUMMARY
+// ----------------------------------
+
+/*
+1. Arrow functions → React standard
+2. Destructuring → clean code
+3. Spread → immutable updates
+4. map/filter → UI rendering logic
+5. async/await → API calls
+
+If you understand these → React becomes easy
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

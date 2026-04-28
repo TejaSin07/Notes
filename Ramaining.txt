@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 1) kafka		done
 2) redis		done
 3) retries		done but what the dif between kafka and normal retry
