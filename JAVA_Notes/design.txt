@@ -1,0 +1,98 @@
+NOTE :: loosely coupling means we are creating multiple classes having parent interface ,and at runtime we are assigning object to that interface variable
+
+with if else we can violate open close principle as they need modification in same code everytime there is new option we need to add.
+
+Behavioral design pattern::
+===========================
+
+1) Strategy Design Pattern:: {real code for rule engine}
+============================
+
+-> Strategy Pattern is a behavioral design pattern that defines a family of algorithms, 
+encapsulates each one in separate classes, and makes them interchangeable at runtime.
+
+prob :: large if else or switch , tight coupling 
+solution :: store obj in parent interface variable so we achieve loose coupling by selecting them dynamically
+
+project use::
+==============
+
+“When a user performs an action, we load applicable rules from the database.
+Each rule has a type, and based on that type, we dynamically select the corresponding evaluator implementation using a factory.
+Each evaluator encapsulates a specific validation logic, and we execute them without using if-else conditions.”
+
+Punch :: “Strategy pattern helped us convert hardcoded business rules into pluggable, runtime-driven logic.”
+
+
+also :: we can use strategy to implement  payment ,authentication processes.
+
+2) Observer Pattern is a behavioral design pattern where an object (publisher) maintains a list of dependents (subscribers) and notifies them automatically when its state changes.
+
+Creational design pattern :: (write code example)
+
+
+=================================================
+1) Factory design pattern
+
+-> Factory Pattern is a creational design pattern used to create objects without exposing the instantiation logic to the client. The client requests an object, and the factory decides which implementation to return.
+
+-> In our project, we used it in the execution pipeline where the ExecutionService delegates the responsibility of selecting the correct business service to a factory.
+Based on the operation type, the factory returns the appropriate service implementation, such as CreateAssignmentService or UpdateAssignmentService.
+This helped us avoid if-else conditions in the execution layer and made the system more scalable and maintainable.”
+
+
+2) Builder Pattern
+3) Singleton pattern
+4) Prototype pattern
+
+structural design pattern ::
+============================
+
+“Adapter pattern is used to allow incompatible interfaces to work together by converting one interface into another.
+In our project, we implemented an Adapter layer between the Controller and ExecutionService.
+The controller handles HTTP requests, while the business layer works with internal context objects.
+The Adapter converts HTTP requests into business context objects, invokes the execution pipeline, and converts the response back to HTTP format.
+This helped us keep controllers thin and maintain a clean separation between presentation and business logic.”
+
+
+3) Proxy Pattern
+👉 Intent
+
+Provide a placeholder to control access to another object.
+
+👉 Types
+Virtual Proxy (lazy loading)
+Security Proxy (authorization)
+Remote Proxy (microservices calls)
+👉 Real-world example
+Spring AOP proxies
+Hibernate lazy loading
+Feign Client acting as proxy to another service
+👉 Key use in your system
+RBAC check before accessing service
+API Gateway as proxy
+
+
+
+
+
+
+12 Factors::
+==============
+
+1) codebase
+2) dependencies
+3) port 
+4) config 
+5) backing service 
+6) stages -> build release run
+7) processes
+8) concurrency {instances}
+9) disposability  
+10) dev/prod parity 
+11) logs
+12) admin process
+
+
+
+

@@ -429,7 +429,7 @@ Timeout → Long processing / rebalance
 124) where we write retries :: on consumer service :: use fixedbackoff obj we pass waiting time and retries count
 
 125) reply : “Reply in Kafka is implemented by consuming a message and producing a response to another topic, often using @SendTo in Spring Kafka, enabling asynchronous request-response communication between services.”
-
+D
 126) DLQ is a design pattern -> Originated from queue-based systems -> thats why we use queue to refer it 
 
 127) retry  {}
@@ -535,10 +535,13 @@ D – Durability
 
 154) transaction on method outside which is calling method inside.
 
+155) strategy -> at runtime pick the correct class -> rule engine -> payment , authentication
 
+156) factory -> Object creation is centralized
 
-
-
+157) Behavioral Design Patterns -> Strategy, Observer
+Creational Design Patterns -> Factory, Builder, Singleton, Prototype
+Structural Design Patterns -> Adapter, Proxy
 
 
 

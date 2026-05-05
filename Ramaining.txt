@@ -1,4 +1,123 @@
 
+
+priority::
+==========
+
+# java
+1) practice more for proper answers
+2) design patterns				done
+3) symbols
+
+
+# SpringBoot
+
+1) configuration of component
+  
+a) database MySQL			done
+b) hickaripool				done
+c) admin 				done
+d) service registry			done
+e) config servers			done
+d) feign client 			done
+f) api gateway 
+
+2) scenario based
+3) api flow structure
+4) tradeoffs
+5) scenario based question              done
+6) timeout                              done
+7) kafka
+8) bulkhead				done
+9) retry				done
+10) circuit breaker  			done
+11) reverse proxy
+12) soap
+13) graphql
+14) bean lifecycle  			done
+15) ssl                                 
+16) batch processing
+17) Auto config (run and @springbootApplication use)
+18) security
+19) lazy and eager (n+1)
+20) transactions and deadlocks and dirty checking     done
+21) diff ways of save method, and flush               done
+22) reflection
+23) certification, tls, ssl, tls termination
+24) profile annotation			done
+25) error and exception
+26) Actuator				done
+27) Api key				done
+28) regress pattern
+29) datadog integreation and used
+30) splunk used and integration
+31) load balancing
+32) ips
+33) redis config
+
+# microservices
+
+1) 12 factors in details 			done
+2) configurations
+3) scenario based questions
+4) tradeoffs
+5) git lab and stages of cicd where we can see failure
+
+
+# dsa
+
+1) practice mostly asked dsa
+
+
+# sql
+
+1) practice mostly asked que
+
+
+# Docker
+
+
+# Kubernetes
+
+
+# AWS
+
+
+# React + typescript + java script
+
+
+# Scenario
+
+1) how you handle duplicate request, like two request are coming for same payment
+2) how you tackle if 100000 request need to handle by your api
+3) where you store your urls, passwords
+4) how you collaborate with frontend and performance testing team
+5) how you debug if your application not running locally and you need to check your code is working fine
+6) aws services used
+7) whats the use of s3 bucket, in which format data is stored in that
+8) ai used in your project, which version of ai are you currently using
+9) why we need rag, why we are not directly using gpt, what enhancement is it doing
+10) how you debug your application
+11) why we get white page lable error, how you handle it
+12) which api you created, how, why
+13) explain db schema you worked on
+14) which bean creation is best, why testing construction injection is cleaner and easy
+15) what are the field in real audit app ? 
+16) what cause transactional deadlock and db lock
+
+# cover
+
+1) application start locally
+2) how we debug application -> with postman -> payload ->
+3) how we start kafka, redis locally
+4) what if pr fails where we check
+
+
+# Task
+
+1) git hub profile update
+2) add projects in that
+
+
 1) kafka		done
 2) redis		done
 3) retries		done but what the dif between kafka and normal retry
@@ -82,7 +201,7 @@ react theory
 - hashcode equals own implementation		done
 - object class methods:equals hascode toString	done		
 - parsing					done
-- comparator vs comparable in streams
+- comparator vs comparable in streams          
 - file handling	
 - Reflection 
 		
