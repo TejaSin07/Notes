@@ -543,5 +543,22 @@ D – Durability
 Creational Design Patterns -> Factory, Builder, Singleton, Prototype
 Structural Design Patterns -> Adapter, Proxy
 
+158) private SetOperations<String, String> setOps =rt.opsForSet();    
+methods -> setOps.add("user:101:roles", "ADMIN")  => add role 
+setOps.members("user:101:roles")  => fetch all the roles
+Boolean exists = rt.hasKey("user:101:roles"); => how to check key exists
+ 
+setOps.add(
+    "user:101:roles",
+    "ADMIN",
+    "AUDITOR",
+    "MANAGER"
+);   => to add all values for set
+
+
+159) we use @Aspect + @Component annotaion which is using for aop,"pointcut" is the rule to match methods,"advice" is code needs to be executed. 
+
+160) classpath -> target/classes  AND  maven/gradele  ANDapp.properties
+
 
 

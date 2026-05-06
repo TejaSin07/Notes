@@ -1,0 +1,2334 @@
+
+1) why spring boot ::
+
+a) Jpa :
+=> no need to write queries which directly provided by JPA
+=> Ready made methods support is available0-
+  
+b) autoconfigure
+c) no xml 
+d) annotation
+
+2) what dependencies we need to implement jpa functionality ?
+
+step 1: add below dependencies
+
+ a) data-jpa-starter  - Provides ORM, JPA support, repositories, Hibernate integration
+ b) mysql-driver      - Provides JDBC driver to connect Spring Boot to MySQL database
+
+step 2: 
+create database
+
+step 3: configure properties 
+spring.datasource.username=root
+spring.datasource.password=Ned$tark07
+spring.datasource.url=jdbc:mysql://localhost/sbms39
+spring.jpa.hibernate.ddl-auto=update     :: check if table modified then modifies the table 
+spring.jpa.show-sql=true   ::Tells Hibernate to print SQL statements in the console.
+
+
+3) What is the use of @Repository annotation? : convert db exception to java exception
+
+Scenario:
+- We have an Entity class User with an email field.
+- Email column is marked as UNIQUE.
+- JPA creates a database table with a UNIQUE constraint on email.
+
+Flow when duplicate email is saved:
+
+1. Client sends a request with an email that already exists in the database.
+
+2. Service layer calls the repository method:
+   userRepository.save(user);
+
+3. The repository is actually a Spring-generated PROXY,
+   not the real implementation.
+
+4. The proxy delegates the call to:
+   Proxy → EntityManager → Hibernate → JDBC → Database
+
+5. Database detects UNIQUE constraint violation and throws
+   a checked JDBC exception:
+   - SQLException / SQLIntegrityConstraintViolationException
+
+6. Hibernate catches this checked exception and WRAPS it into
+   an unchecked runtime exception:
+   - ConstraintViolationException
+   - PersistenceException
+
+7. Because the class is annotated with @Repository,
+   Spring applies PersistenceExceptionTranslationInterceptor.
+
+8. Spring intercepts the runtime persistence exception and
+   TRANSLATES it into a database-independent unchecked exception:
+   - DataIntegrityViolationException
+
+9. This unchecked exception is thrown to the service layer.
+   - No throws declaration required
+   - No database-specific exception leakage
+
+10. Spring marks the transaction for rollback and the normal
+    execution flow stops.
+
+Conclusion:
+- @Repository enables automatic exception translation.
+- It converts low-level, vendor-specific persistence exceptions
+  into Spring’s unified DataAccessException hierarchy.
+- This keeps service layer clean and database-independent.
+
+JDBC (checked)
+   ↓
+Hibernate/JPA (unchecked, ORM-specific)
+   ↓
+Spring (@Repository) (unchecked, generic)
+
+Exception translation means JDBC throws checked exceptions, JPA/Hibernate converts them into unchecked persistence exceptions, and Spring further translates them into generic, database-independent unchecked DataAccessExceptions
+
+4) How pagination works internally?
+
+What Spring creates internally
+
+Spring builds a PageRequest object containing:
+
+pageNumber = 1
+pageSize = 10
+// offset = pageNumber * pageSize = 10    	//this many is going to skip
+// limit = pageSize = 10  		      // after offset we want this amny data
+
+
+5) if we can write findBy then why specification??
+
+findBy methods create static queries with mandatory parameters, whereas Specifications allow building dynamic queries that handle optional values and complex business logic in a single reusable method.
+
+When we want a single logical method that can handle all filtering logic based on business rules, we use Specification.
+
+Why?
+Using findBy :: 
+Each findBy method has fixed conditions
+All parameters are mandatory
+Cannot skip a condition
+For different combinations, we must:
+Write multiple findBy methods, or
+Write one very long findBy with all conditions
+Becomes hard to maintain
+
+Using Specification ::
+We can write one method
+Filters are added dynamically
+
+Conditions can be:
+Added only when value is present
+Skipped when value is null
+
+Handles:
+AND / OR
+, <, BETWEEN
+Complex business rules
+Perfect for UI-driven search and business logic
+
+ex specification ::
+
+Specification<Employee> spec = (root, query, cb) -> {
+
+    List<Predicate> predicates = new ArrayList<>();
+
+    if (name != null) {
+        predicates.add(cb.equal(root.get("name"), name));
+    }
+
+    if (minSalary != null) {
+        predicates.add(cb.greaterThanOrEqualTo(
+                root.get("salary"), minSalary));
+    }
+
+    if (maxSalary != null) {
+        predicates.add(cb.lessThanOrEqualTo(
+                root.get("salary"), maxSalary));
+    }
+
+    if (department != null) {
+        predicates.add(cb.equal(root.get("department"), department));
+    }
+
+    if (status != null) {
+        predicates.add(cb.equal(root.get("status"), status));
+    }
+
+    return cb.and(predicates.toArray(new Predicate[0]));
+};
+
+6) Why uuid if we have primary key?
+- When we share UUID instead of the primary key, the user cannot guess or predict the next identifier.
+- Numeric primary keys (IDENTITY) are sequential, so a user can easily assume the next or previous ID.
+- Predictable IDs can allow users to access or perform actions on data that should not be exposed (ID enumeration).
+- UUIDs are random and non-sequential, so the next UUID cannot be predicted.
+
+7) what's the diff in Identity and sequence
+SEQUENCE:
+- Sequence generates the next ID value BEFORE inserting the record.
+- Hibernate fetches the next ID(s) using SELECT NEXTVAL.
+- IDs are assigned in memory first.
+- Data is then inserted along with the IDs.
+- Because IDs are already known, multiple records can be inserted in a batch.
+
+Example:
+SELECT emp_seq.NEXTVAL;   --> returns 100
+INSERT INTO emp(id, name) VALUES (100, 'A');
+INSERT INTO emp(id, name) VALUES (101, 'B');
+
+IDENTITY:
+- ID is generated by the database DURING the insert.
+- Data is inserted first without an ID.
+- Database generates the ID and places it in the primary key column.
+- Hibernate must wait for the ID after each insert.
+- Because IDs are generated one by one, batch insert is NOT possible.
+
+Example:
+INSERT INTO emp(name) VALUES ('A');  --> DB generates id = 1
+INSERT INTO emp(name) VALUES ('B');  --> DB generates id = 2
+
+Conclusion:
+SEQUENCE knows IDs before insert → batch insert possible.
+IDENTITY gets IDs after insert → batch insert not possible.
+
+
+With IDENTITY, the database generates the primary key only after each row is inserted, and JDBC can return generated keys only one row at a time.
+Because Hibernate must map each Java entity to its generated ID, it is forced to insert rows one by one.
+
+
+8) => Composite primary key: and the fields which are in embeddable class are also seen in main db table;for below ex name,email,role will be present in db table
+=> id is just a Java object reference, not a DB column.
+=> JPA takes the fields inside UserId and maps them directly as columns.
+
+
+1️⃣ Composite key class (@Embeddable)
+@Embeddable
+public class UserId {
+    private String name;
+    private String email;
+    // equals() and hashCode() are MANDATORY
+}
+
+
+This class:
+
+Represents the logical primary key
+Contains multiple fields
+
+2️⃣ Entity using composite key
+@Entity
+@Table(name = "users")
+public class User {
+
+    @EmbeddedId
+    private UserId id;
+    private String role;
+}
+
+3️⃣ What the DB table looks like
+CREATE TABLE users (
+    name  VARCHAR(50),
+    email VARCHAR(100),
+    role  VARCHAR(20),
+    PRIMARY KEY (name, email)
+);
+
+8) @Transactional(rollbackOn = Exception.class)
+
+Spring transactions delegate commit and rollback to the database; 
+Spring only manages transaction boundaries and exception handling.
+
+9) 
+
+| Case | Start Entity | Side    | Fetch  | Queries              | Reason                 |
+| ----  | ------------ | -------  | -----   | ------------------  | ---------------------- |
+| 1     | Person       | Inverse  | LAZY   | 2                         | No FK, lazy            |
+| 2     | Person       | Inverse  | EAGER | 1 JOIN                | Must fetch immediately |
+| 3     | Passport     | Owning  | LAZY  | 1 (+1 if accessed) | FK known               |
+| 4 | Passport |Owning | EAGER | 1 JOIN            | FK known + eager       |
+
+=> eager present => 1 query [left join]
+
+one to many 
+
+| Fetch   | Transaction      | Queries                     | Result |
+| ----- | -----------  | -------------------       | ------ |
+| LAZY  | ✅ Yes       | 2 SELECT            | Works  |
+| EAGER | ❌ No        | 1 LEFT JOIN         | Works  |
+| LAZY  | ❌ No        | ❌ Error on addrList| Fails  |
+| EAGER | ✅ Yes       | 1 LEFT JOIN         | Works  |
+
+Conclusion::In JPA, the owning side defined by @JoinColumn controls the foreign key, while the mappedBy side is inverse and used only for navigation.
+EAGER fetching loads related data immediately using joins or additional selects, while LAZY fetching defers loading and requires an active transaction.
+Hibernate commonly uses LEFT JOINs to safely handle optional relationships.
+
+n+1::below this logic typically lives in your service layer, and this exact access pattern is what causes     ====	N+1 with ##LAZY loading##.
+
+
+List<User> users = userRepository.findAll();   // repository call
+
+for (User u : users) {
+    u.getOrders().size();                      // accessing lazy collection
+}
+
+
+
+==============================MVC=========================
+
+1) which dependency we require to setup mvc
+
+spring-boot-starter-web is mandatory
+
+If you want:
+REST APIs
+@Controller / @RestController
+@GetMapping, @PostMapping
+JSON request/response
+Embedded server
+
+
+2) when to use which server ?
+=> Use Tomcat or Jetty for Spring MVC apps; use Netty only for reactive, high-concurrency systems like Spring WebFlux.
+
+
+3) what's the diff between application and command line runner? Use in application?
+✔️ Both are used to execute logic at application startup
+✔️ ApplicationRunner provides structured and better control over command-line arguments
+✔️ CommandLineRunner receives raw string arguments and is suited for simple startup tasks
+
+4) when we use h2 dB? How?
+Step-1 : Add h2 dependency in pom.xml file
+Step-2 : Configure H2 data source properties in application.Properties file
+Step-3 : Run the application and access h2-console in browser
+
+=> We use H2 in unit tests to get fast startup and quick feedback, while heavier integration tests validate behavior against the real database engine.
+
+Test execution starts (JUnit)
+ ↓
+@SpringBootTest detects test class
+ ↓
+@ActiveProfiles("test") is read
+ ↓
+Spring activates "test" profile
+ ↓
+application-test.yml is loaded
+ ↓
+H2 in-memory DataSource is configured
+ ↓
+H2 database starts (in memory)
+ ↓
+Hibernate reads entities
+ ↓
+Hibernate creates tables (ddl-auto=create-drop)
+ ↓
+Spring context is fully initialized
+ ↓
+@BeforeEach inserts test data
+ ↓
+@Test methods execute assertions
+ ↓
+Test finishes
+ ↓
+Spring test context is closed
+ ↓
+Hibernate drops tables
+ ↓
+H2 in-memory DB is destroyed
+How to change default container to  jetty ?
+
+
+5) How to setup mail functionality in app
+-> To configure mail sending in Spring Boot, we add spring-boot-starter-mail, which provides JavaMailSender and SMTP support.
+
+6) Query Parameters (key-value)	:-> "@RequestParam"
+ → order does not matter	
+
+7) Path Parameters (write after / )" :-> @PathVariable "
+→ order matter
+
+9) dependency required to add validation => spring-boot-starter-validation
+
+10) actuators -> spring-boot-starter-actuator
+
+11) spring.profiles.active=mm -> to active profile
+
+12) PUT vs PATCH – Conclusion
+
+=> There is NO inbuilt PUT or PATCH method in CrudRepository/JpaRepository.
+   Repositories only provide save(), findById(), delete().
+
+=> PUT is used for FULL replacement of a resource.
+   → Client sends complete JSON.
+   → Service layer overwrites all fields (no null checks).
+
+=> PATCH is used for PARTIAL update of a resource.
+   → Client sends only changed fields.
+   → Service layer updates only non-null fields.
+
+=> save() [insert + update] does not know PUT or PATCH semantics.
+   → It simply persists the current entity state.
+
+=> PUT/PATCH behavior is implemented in the SERVICE layer,
+   not in the repos
+
+
+13) swagger -> springdoc-openapi-starter-webmvc-ui
+
+----------------------------REST---------------------------
+
+14) xml -> Marshalling : Converting java object to xml data  :: unmarshelling is reverse
+To deal with xml data in spring boot rest api we need to add "jackson-dataformat-xml" dependency in pom.xml file  (we can get json AUTOMATICALY . And get xml by adding dependency)
+
+15) @RepositoryRestResource(path = "books") // repository + restController  : repository act as rest controller
+public interface BookRepository extends JpaRepository<Book, Integer>{
+
+}
+
+16) HATEOAS ->  spring-boot-starter-hateoas dependency
+
+17) eureka -> spring-cloud-starter-netflix-eureka-server
+
+18) admin sever -> spring-cloud-starter-netflix-eureka-server
+
+19) Zipkin -> micrometer-tracing-bridge-brave
+
+
+-----------------unit testing ---------------------------
+C:\Users\tejas\Desktop\springboot repo\workspace-spring-tool-suite-4-4.27.0.RELEASE\51_UnitTestingApp
+
+1) unit testing -> no db involment directly
+2) integration testing -> we use h2 or local db
+3) 
+When you use: @WebMvcTest(EmployeeController.class)
+Spring loads: Controller : @RestControllerAdvice : Jackson (JSON) : MVC config 
+
+=================================================AOP================================
+
+C:\Users\tejas\Desktop\springboot repo\workspace-spring-tool-suite-4-4.27.0.RELEASE\Spring_Aop_learnings
+
+
+Q. Why private method cannot intercepts by aop?
+=> AOP works by creating a proxy (often by subclassing the target class).
+Private methods cannot be inherited or overridden, so the proxy cannot intercept them.
+
+-> 
+| AOP Advice        | Java Equivalent   | Runs on Exception?   |
+| ----------------- | ----------------- | ------------------   |
+| `@Before`         | code before `try` | ✅ Yes              |
+| `@AfterReturning` | after success     | ❌ No               |
+| `@AfterThrowing`  | `catch` block     | ✅ Yes              |
+| `@After`          | `finally` block   | ✅ Yes              |
+| `@Around`         | wraps everything  | ✅ Yes              |
+
+1️⃣ What does execution(...) mean in AOP?
+
+- execution is a pointcut designator.
+- It tells Spring WHERE your aspect should run.
+- It intercepts METHOD EXECUTION that matches a given pattern.
+
+General syntax:
+
+execution(
+    return-type
+    package.class.method(arguments)
+)
+
+Example used:
+
+execution(* in.tejas.service.*.*(..))
+
+✔  Classes directly inside in.tejas.service
+✔  Any method in those classes
+❌ Does NOT match sub-packages inside service
+
+
+Breakdown:
+
+*                    		-> any return type
+in.tejas.service     		-> package name
+*                    		-> any class
+*                    		-> any method
+(..)                		-> any number of arguments
+
+Result:
+- Aspect runs for every method in every class inside in.tejas.service package
+
+2️⃣ Why execution is MOST USED in Spring AOP
+
+Spring AOP is:
+- method-level
+- proxy-based
+
+So Spring AOP can intercept:
+✔️ method execution
+
+But it CANNOT intercept:
+❌ field access
+❌ constructor calls (in Spring AOP)
+
+That’s why execution() is the most commonly used pointcut.
+
+3️⃣ Other important execution patterns (REAL USE CASES)
+
+// Specific method
+execution(* in.tejas.service.UserService.createUser(..))
+
+// Specific return type
+execution(String in.tejas.service.*.*(..))
+
+// Specific argument
+execution(* in.tejas.service.*.*(String))
+
+// Multiple arguments
+execution(* in.tejas.service.*.*(String, Integer))
+
+// Methods starting with "get"
+execution(* in.tejas.service.*.get*(..))
+
+
+4️⃣ Other pointcut designators (VERY IMPORTANT)
+Spring AOP supports more than just execution().
+
+// 1️⃣ within
+// Match by class or package
+within(in.tejas.service..*)
+// Matches all classes under service package (including sub-packages)
+
+
+// 2️⃣ @annotation
+// Match methods having a specific annotation (MOST POWERFUL)
+@annotation(in.tejas.annotation.LogExecutionTime)
+
+// Used heavily in real projects
+// Clean, readable, and precise
+
+
+// 3️⃣ @within
+// Match classes annotated with a specific annotation here it is @Service
+@within(org.springframework.stereotype.Service)
+
+
+// 4️⃣ args
+//Match any method execution where the runtime argument list contains exactly 
+one argument of type String.
+args(String)
+
+
+// 5️⃣ bean
+// Match by Spring bean name
+bean(userService)
+@Service
+public class UserService {
+    public void create() {}
+}
+
+
+5️⃣ What Spring AOP CANNOT do (VERY IMPORTANT)
+
+Because Spring AOP is proxy-based:
+❌ Constructor interception (coz call happen only after obj creation)
+❌ Field access
+❌ Private methods
+❌ Internal method calls (this.method())
+
+For these use cases, we need:
+- AspectJ (compile-time or load-time weaving)
+*/
+
+
+/*
+6️⃣ Best practice used in real projects
+
+Instead of repeating pointcut expressions everywhere like:
+
+execution(* in.tejas.service.*.*(..))   ->(1)
+
+Define a reusable pointcut : we are just replacing (1) line with "serviceMethod()" name by using pointCut
+
+@Pointcut("execution(* in.tejas.service.*.*(..))")
+public void serviceMethods() {}
+
+// Then reuse it
+@Before("serviceMethods()")
+@Around("serviceMethods()")
+
+/*
+Cleaner.
+Maintainable.
+Professional.
+*/
+
+
+----------------------Self Created annotation------------------
+
+*****************************************************************
+  STEP 1: CREATE A CUSTOM ANNOTATION
+ *****************************************************************
+
+/*
+ * @interface tells Java: this is an annotation type (not a class, not an interface)
+ */
+@Retention(RetentionPolicy.RUNTIME) 
+// RUNTIME => annotation will be available at JVM runtime
+// REQUIRED for Spring, AOP, Reflection
+
+@Target(ElementType.METHOD) 
+// METHOD => annotation can be applied only on methods
+
+public @interface LogExecution {
+
+    /*
+     * Annotation attributes look like methods
+     * They do NOT have method bodies
+     */
+
+    String value() default "";
+    // Optional description
+
+    boolean enabled() default true;
+    // Flag to enable / disable logic
+}
+
+
+/*****************************************************************
+ * STEP 2: USE THE ANNOTATION
+ *****************************************************************/
+
+@Service
+public class UserService {
+
+    @LogExecution(value = "Create User Logic", enabled = true)
+    public void createUser() {
+        System.out.println("Creating user...");
+    }
+
+    /*
+     * IMPORTANT:
+     * - Annotation alone does NOTHING
+     * - No logic runs here automatically
+     */
+}
+
+
+
+/*****************************************************************
+ * STEP 3: CREATE ASPECT (THIS IS WHERE LOGIC LIVES)
+ *****************************************************************/
+
+@Aspect
+@Component
+public class LogExecutionAspect {
+
+    /*
+     * @Around => execute logic before + after method
+     *
+     * @annotation(logExecution)
+     * - Match methods annotated with @LogExecution
+     * - Spring injects annotation instance into advice
+     */
+    @Around("@annotation(logExecution)")
+    public Object execute(
+            ProceedingJoinPoint joinPoint,
+            LogExecution logExecution
+    ) throws Throwable {
+
+        // Check annotation flag
+        if (!logExecution.enabled()) {
+            return joinPoint.proceed();
+        }
+
+        long startTime = System.currentTimeMillis();
+
+        // Call actual method
+        Object result = joinPoint.proceed();
+
+        long endTime = System.currentTimeMillis();
+
+        System.out.println(
+            logExecution.value() +
+            " executed in " +
+            (endTime - startTime) + " ms"
+        );
+
+        return result;
+    }
+}
+
+
+/*****************************************************************
+ * STEP 4: WHAT HAPPENS INTERNALLY (RUNTIME FLOW)
+ *****************************************************************/
+
+/*
+1. Spring starts application
+2. Spring scans beans
+3. Finds @Aspect class
+4. Creates PROXY for UserService
+5. Client calls createUser()
+6. Call goes to PROXY (not real object)
+7. Proxy checks pointcut
+8. @LogExecution found
+9. Aspect logic executes
+10. Real method is invoked
+11. Aspect runs after logic
+12. Result returned
+*/
+
+
+/*****************************************************************
+ * STEP 5: WHY @Retention(RUNTIME) IS MANDATORY
+ *****************************************************************/
+
+/*
+“Retention specifies how long an annotation is available (source, class, or runtime), while Target specifies where the annotation can be applied, such as method, class, or field.”
+
+
+If you use:
+@Retention(RetentionPolicy.SOURCE)
+-> Annotation exists only in source code
+-> JVM cannot see it
+-> Spring cannot read it
+
+If you use:
+@Retention(RetentionPolicy.CLASS)
+-> Annotation in .class file
+-> JVM does NOT expose it via reflection
+
+ONLY THIS WORKS FOR SPRING:
+@Retention(RetentionPolicy.RUNTIME)
+*/
+
+
+/*******************************************
+ * STEP 6: IMPORTANT LIMITATIONS (MUST KNOW)
+ *******************************************/
+
+/*
+❌ Annotation on private methods -> AOP WILL NOT WORK
+❌ Self-invocation -> AOP WILL NOT WORK
+❌ Annotation without Aspect -> DOES NOTHING
+
+Reason:
+Spring AOP works via PROXY
+Proxy intercepts only external public method calls
+*/
+
+
+/*****************************************************************
+ * STEP 7: INTERVIEW-READY SUMMARY (IN COMMENTS)
+ *****************************************************************/
+
+/*
+Custom annotations are metadata created using @interface.
+They are controlled by @Retention and @Target.
+Annotations do not execute logic by themselves.
+Frameworks like Spring read annotations using reflection or AOP.
+In Spring AOP, proxies intercept method calls and apply logic
+defined in aspects based on annotation presence.
+*/
+
+----------------------------------Spring Batch-------------------------------------
+
+
+
+
+---------------------------------packaging type-------------------------
+16) Final mental picture
+
+JAR → App wakes the server , self-contained app
+
+WAR → Server wakes the app , app + external container
+
+--------------------------------------maven-----------------------------
+
+18)lifecycle
+
+compile
+→ test (unit tests)
+→ package
+→ integration-test
+→ verify
+
+17) 
+
+| Test Type        | Failure Effect      |
+| ---------------- | ------------------- |
+| Unit test        | Build stops early   |
+| Integration test | Build rejected      |
+| Runtime failure  | Production incident |
+
+
+
+18) maven repo flow::
+
+MAVEN DEPENDENCY RESOLUTION FLOW
+--------------------------------
+
+1) When we add a dependency in pom.xml:
+
+   <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-web</artifactId>
+       <version>3.2.0</version>
+   </dependency>
+
+   Maven starts the dependency resolution process during build.
+
+------------------------------------------------------------
+
+2) Step 1 – Check Local Repository
+
+   Location:
+   ~/.m2/repository
+
+   - Maven first checks whether the required artifact (JAR + POM) 
+     already exists in the local repository.
+   - If found → it uses the local copy.
+   - No remote call is made.
+
+------------------------------------------------------------
+
+3) Step 2 – If NOT found locally
+
+   Maven connects to a Remote Repository.
+
+   The remote repository can be:
+
+   a) Maven Central (default)
+   b) Company Repository Manager (if configured)
+      - Nexus
+      - Artifactory
+
+   Remote repository used depends on configuration.
+
+------------------------------------------------------------
+
+4) If NO company repository is configured:
+
+   Flow:
+   Local → Maven Central → Download → Store in Local
+
+------------------------------------------------------------
+
+5) If company repository (Nexus/Artifactory) is configured:
+
+   Usually configured in:
+   - settings.xml (recommended approach)
+   - or pom.xml (less common in enterprise)
+
+   Flow:
+   Local → Nexus → (if not cached) → Maven Central
+          → Nexus Cache → Local
+
+   Nexus acts as:
+   - Proxy for external dependencies
+   - Host for internal company artifacts
+   - Caching layer
+   - Access control layer
+
+------------------------------------------------------------
+
+6) First-Time Download Behavior
+
+   - Artifact is downloaded from remote repository.
+   - Stored inside local repository (~/.m2).
+   - Also cached in Nexus (if used).
+
+------------------------------------------------------------
+
+7) Subsequent Builds
+
+   - Maven finds artifact in local repository.
+   - No need to contact remote repository again.
+   - Build becomes faster.
+
+------------------------------------------------------------
+
+8) Important Technical Clarifications
+
+   - Maven always checks Local Repository first.
+   - Maven Central is used by default if no mirror/repository is configured.
+   - Nexus/Artifactory is NOT mandatory.
+   - Nexus comes into the picture only if:
+       * Configured via settings.xml (mirror)
+       * Defined in pom.xml
+       * Enforced by corporate build system
+
+------------------------------------------------------------
+
+9) Complete Resolution Order (Simplified)
+
+   1. Local Repository
+   2. Remote Repository (Nexus if configured)
+   3. Maven Central (if allowed)
+
+------------------------------------------------------------
+
+10) Key Enterprise Understanding
+
+   - Small projects → Directly use Maven Central.
+   - Large enterprises → Use Nexus/Artifactory to:
+       * Block direct internet access
+       * Manage internal libraries
+       * Cache external artifacts
+       * Control dependency versions
+       * Improve build stability
+
+------------------------------------------------------------
+
+Conclusion:
+
+Maven dependency resolution is hierarchical:
+Local first → then Remote (Nexus or Central).
+
+Nexus is optional and only participates when explicitly configured.
+
+
+19)
+================ MAVEN: PLUGIN vs DEPENDENCY =================
+
+-----------------------------------------
+PLUGIN  (Example: maven-surefire-plugin)
+-----------------------------------------
+
+Purpose:
+- Used by Maven during build lifecycle.
+- Controls execution of build phases.
+
+Example:
+- maven-surefire-plugin → Runs unit tests in "test" phase.
+
+What Plugin Does:
+- Does NOT add libraries to your application.
+- Does NOT affect application runtime logic.
+- Controls build execution (compile, test, package, deploy).
+- Executes specific goals during lifecycle phases.
+
+If Plugin Is Missing:
+- Basic Maven build may still work (default lifecycle bindings).
+- Unit tests may not run properly or advanced configuration won't work.
+- Customization (parallel tests, includes/excludes) will fail.
+- Enterprise build features may break.
+
+---------------------------------------------------------------
+DEPENDENCY  (Example: spring-boot-starter-web)
+---------------------------------------------------------------
+
+Purpose:
+- Provides external libraries required by the application.
+
+How Dependencies Work:
+- Maven downloads required JAR files from repository.
+- JARs are stored in local repository (~/.m2).
+- Added to project class path.
+- Available during compile and/or runtime (based on scope).
+
+What Dependency Does:
+- Adds external library code to your project.
+- Allows your application to use classes and APIs.
+- Affects application compile-time and runtime behavior.
+
+If Dependency Is Missing:
+- Compilation errors (class not found).
+- Runtime failures (ClassNotFoundException).
+- Application functionality breaks.
+
+---------------------------------------------------------------
+Core Difference:
+Plugin  → Used by Maven to build the project.
+Dependency → Used by Application to run the project.
+---------------------------------------------------------------
+
+
+20) ================ BENEFITS OF USING MAVEN =================
+
+1) Dependency Management
+------------------------
+With Maven:
+- Add dependency in pom.xml
+- Maven downloads JAR automatically
+- Handles transitive dependencies
+- Ensures same version for all developers
+
+Example:
+<dependency>
+   <groupId>org.springframework.boot</groupId>
+   <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+Without Maven:
+- Manually download JAR
+- Add to classpath manually
+- Risk of wrong/multiple versions
+- Team members may use different libraries
+
+classpath -> target/classes,maven/gradele,app.properties
+------------------------------------------------------------
+
+2) Build Automation
+-------------------
+With Maven:
+- Run: mvn clean install
+- Automatically compiles, tests, packages
+
+Without Maven:
+- Compile manually using javac
+- Run tests manually
+- Create JAR manually
+- More chances of human error
+
+------------------------------------------------------------
+
+3) Standard Project Structure
+-----------------------------
+With Maven:
+src/main/java
+src/test/java
+src/main/resources
+
+Every Maven project follows same structure.
+
+Without Maven:
+- No fixed structure
+- Harder for new developers to understand project
+
+------------------------------------------------------------
+
+4) Version Control & Reproducible Builds
+----------------------------------------
+With Maven:
+- All dependency versions defined in pom.xml
+- Same build works on every machine
+
+Without Maven:
+- JAR files must be shared manually
+- Different machines may have different versions
+- Build may fail in production
+
+------------------------------------------------------------
+
+5) CI/CD Friendly
+-----------------
+With Maven:
+- Jenkins or pipeline can run: mvn clean install
+- Automatic build and deployment
+
+Without Maven:
+- Manual build steps
+- Hard to automate
+
+------------------------------------------------------------
+
+FINAL SUMMARY
+-------------
+Maven provides:
+✔ Automatic dependency management
+✔ Build lifecycle automation
+✔ Standard structure
+✔ Version consistency
+✔ Easy CI/CD integration
+
+Without Maven:
+❌ Manual JAR handling
+❌ Manual compilation
+❌ Version conflicts
+❌ Non-reproducible builds
+❌ Not suitable for large/enterprise projects
+
+
+
+=======================
+  DATA MIGRATION NOTES
+==========================
+
+1) What is Data Migration?
+--------------------------
+Data migration = Moving or transforming existing data 
+when schema changes OR system changes.
+
+Examples:
+- Adding NOT NULL column with default value
+- Splitting one column into two
+- Moving data from old table to new table
+- Changing datatype (INT → BIGINT)
+- Renaming table with data preservation
+
+
+2) Types of Migrations
+----------------------
+
+A) Schema Migration
+   - Structure change
+   - CREATE / ALTER / DROP
+   - Handled via Flyway versioned SQL
+
+B) Data Migration
+   - Modifies existing data
+   - UPDATE / INSERT INTO ... SELECT
+   - Backfilling new columns
+   - Data transformation
+
+3) Example Scenario  {IMP :: Flyway stores migration history inside the database itself.}
+-------------------
+
+Step 1: Add new column
+
+V2__add_department_column.sql
+
+ALTER TABLE employee
+ADD COLUMN department VARCHAR(255);
+
+
+Step 2: Backfill existing data (Data Migration)
+
+V3__populate_department.sql
+
+UPDATE employee
+SET department = 'General'
+WHERE department IS NULL;
+
+
+4) Important Rule
+-----------------
+
+✔ Schema change first
+✔ Data migration next
+✔ Keep them in separate migration files
+✔ Never modify old migration files
+
+
+5) When Data Migration is Required
+-----------------------------------
+
+- Adding NOT NULL column
+- Changing column type
+- Normalization (splitting tables)
+- Merging tables
+- System migration (legacy → new DB)
+
+
+6) Production Best Practices
+-----------------------------
+
+- Use forward-only migrations
+- Make scripts idempotent when possible
+- Test on staging before prod
+- Always take DB backup before major migration
+- Avoid heavy UPDATE on huge tables during peak hours
+
+
+7) Large Data Migration Strategy
+----------------------------------
+
+- Batch updates
+- Use indexing before update
+- Use background jobs if needed
+- Monitor locks and performance
+
+
+8) Flyway Strategy
+-------------------
+
+V1__schema.sql
+V2__add_column.sql
+V3__data_backfill.sql
+V4__index.sql
+
+ddl-auto = validate
+
+
+===================================
+Data migration is NOT just SQL.
+It is production planning + safety.
+====================================
+
+
+1. Add dependency: org.flywaydb:flyway-core
+
+2. Place SQL files in: src/main/resources/db/migration
+
+3. Entity must match DB changes defined in migration scripts (use ddl-auto=validate)
+
+4. Naming convention: V1__desc.sql (versioned), R__desc.sql (repeatable)
+
+5. Use R__ scripts when you want execution on change (repeatable migrations) like Views Stored procedures
+Functions Triggers
+
+NOTE : “Flyway runs only pending migrations; previously executed scripts are skipped based on schema history whi stored in db.”
+
+====================
+CIRCULAR DEPENDENCY
+===================
+
+CIRCULAR DEPENDENCY (SPRING / JAVA)
+
+Definition
+Circular dependency occurs when two or more beans depend on each other directly or indirectly, 
+creating a loop during bean creation.
+
+Example:
+A → B
+B → A
+
+
+1) WHY WE GET THIS PROBLEM
+
+This problem occurs when two services/classes require each other during object creation.
+
+Spring cannot decide which bean to create first.
+
+Common causes:
+- Poor service design
+- Business logic spread across multiple services
+- Tight coupling between components
+
+Example:
+
+@Service
+class A {
+    private B b;
+
+    public A(B b){
+        this.b = b;
+    }
+}
+
+@Service
+class B {
+    private A a;
+
+    public B(A a){
+        this.a = a;
+    }
+}
+
+Flow:
+
+Spring tries to create A
+A requires B
+Spring tries to create B
+B requires A
+
+Result:
+BeanCurrentlyInCreationException
+
+
+2) HOW WE AVOID USING @Lazy
+
+@Lazy delays bean creation until it is actually used.
+
+Spring injects a proxy object instead of the real bean.
+
+Example:
+
+@Service
+class A {
+
+    private B b;
+
+    public A(@Lazy B b){
+        this.b = b;
+    }
+}
+
+@Service
+class B {
+
+    private A a;
+
+    public B(A a){
+        this.a = a;
+    }
+}
+
+Flow:
+
+Create A
+Inject proxy of B
+Create B
+Inject A
+
+When A calls B method → real B is created.
+
+
+3) HOW WE AVOID THIS USING SETTER INJECTION
+
+Setter injection allows Spring to create objects first and inject dependencies later.
+
+Example:
+
+@Service
+class A {
+
+    private B b;
+
+    @Autowired
+    public void setB(B b){
+        this.b = b;
+    }
+}
+
+@Service
+class B {
+
+    private A a;
+
+    @Autowired
+    public void setA(A a){
+        this.a = a;
+    }
+}
+
+Flow:
+
+Step 1: Create A object
+Step 2: Create B object
+Step 3: Inject B into A
+Step 4: Inject A into B
+
+Both beans are created successfully.
+
+4) MORE REAL PROJECT EXAMPLES
+
+Example 1
+
+OrderService   → PaymentService
+PaymentService → OrderService
+
+Problem:
+Order needs payment status
+Payment needs order details
+
+
+Example 2
+
+UserService → RoleService
+RoleService → UserService
+
+Problem:
+User needs role
+Role service checks user
+
+
+Example 3
+
+AuditService → FindingService
+FindingService → AuditService
+
+Problem:
+Audit creates findings
+Finding validates audit
+
+
+Best Solution (Recommended)
+
+Introduce third service:
+
+A → C
+B → C
+
+Example:
+
+OrderService
+PaymentService
+OrderPaymentHelper
+
+
+INTERVIEW ONE LINE ANSWER
+
+Circular dependency occurs when two or more beans depend on each other, creating a loop during bean creation. It can be resolved using @Lazy, setter injection, or by redesigning services to remove tight coupling.
+
+“IMP: we can introduce a third service to break circular dependency by extracting shared logic, but the real goal is to redesign dependencies to be unidirectional rather than just adding another class.”
+
+
+MYSQL INDEXING NOTES
+====================
+
+1. CLUSTERED INDEX (InnoDB)
+
+Definition
+----------
+Clustered index determines how the table data is physically stored.
+
+In MySQL InnoDB:
+PRIMARY KEY itself becomes the CLUSTERED INDEX.
+
+Important Points
+----------------
+- Only ONE clustered index per table
+- Data rows are physically stored in primary key order
+- Clustered index contains the FULL ROW DATA
+- Implemented using B+ Tree structure
+
+Example
+-------
+
+CREATE TABLE employee (
+    id INT PRIMARY KEY,
+    name VARCHAR(50),
+    salary INT
+);
+
+Inserted Data
+-------------
+id | name  | salary
+3  | Rahul | 50000
+1  | Amit  | 70000
+5  | Neha  | 60000
+
+Internally Stored (Clustered Order)
+-----------------------------------
+id | name  | salary
+1  | Amit  | 70000
+3  | Rahul | 50000
+5  | Neha  | 60000
+
+Explanation
+-----------
+The data is physically stored sorted by the PRIMARY KEY.
+
+
+------------------------------------------------------------
+
+
+2. NON-CLUSTERED INDEX (SECONDARY INDEX)
+
+Definition
+----------
+Any index other than the primary key in MySQL is called a
+SECONDARY INDEX (non-clustered index).
+
+It does NOT store full rows.
+
+Instead it stores:
+    Indexed column value
+    +
+    Primary key value
+
+MySQL then uses the primary key to fetch the actual row.
+
+
+Example
+-------
+
+CREATE INDEX idx_salary
+ON employee(salary);
+
+
+Secondary Index Structure
+-------------------------
+
+salary | primary_key
+40000  | 2
+50000  | 3
+60000  | 5
+70000  | 1
+
+
+Query
+-----
+
+SELECT * FROM employee WHERE salary = 60000;
+
+Execution Steps
+---------------
+
+Step 1
+MySQL searches salary index
+
+Step 2
+Finds primary key = 5
+
+Step 3
+Uses primary key to fetch row from clustered index
+
+
+------------------------------------------------------------
+
+
+3. KEY DIFFERENCE
+
+Feature              | Clustered Index | Non-Clustered Index
+--------------------------------------------------------------
+Storage              | Stores full row | Stores column + PK
+Physical ordering    | Yes             | No
+Number allowed       | Only one        | Multiple
+MySQL name           | Primary Index   | Secondary Index
+
+
+------------------------------------------------------------
+
+
+4. IMPORTANT MYSQL BEHAVIOR
+
+If a table has NO PRIMARY KEY:
+
+MySQL will:
+
+1) Use first UNIQUE NOT NULL index as clustered index
+
+If that also does not exist
+
+2) MySQL creates a hidden 6-byte row ID
+   and uses it as clustered index.
+
+
+------------------------------------------------------------
+
+
+5. INTERVIEW ONE-LINE ANSWER
+
+In MySQL InnoDB, the PRIMARY KEY acts as the clustered index
+that stores actual table rows, while other indexes are
+secondary indexes that store indexed columns along with
+the primary key reference.
+
+=============================================================
+
+Fail Fast:
+System throws exception immediately when modification or error occurs.
+
+Fail Safe:
+System avoids failure by operating on a copy or safe structure and continues execution.
+
+
+K8s
+---
+
+docker image (single) -> container(multiple possible) -> pods (unique ip)-> nodes -> cluster 
+
+suppose we are pulling branch which already had some previous commit
+=====================================================================
+
+# Initial state
+
+# Remote (origin/main)
+A --- B
+
+# Local (main)
+X
+
+
+# Command (IMP)
+git pull origin main --rebase
+
+
+# What Git does internally
+
+# 1. Fetch remote commits
+A --- B
+
+# 2. Remove your commit temporarily
+A --- B
+
+# 3. Move your branch to remote
+A --- B   (main)
+
+# 4. Reapply your commit on top
+A --- B --- X'
+
+
+# Final result
+# Clean linear history, push works
+
+git push origin main
+
+//stash we used for uncommitted changes
+
+## Wildcard
+============
+
+List<String> list = new ArrayList<>();
+List<Object> objList = list; // ❌ compile error
+
+Even though String is a subtype of Object,
+List<String> is NOT a subtype of List<Object>.
+
+
+1) Unbounded Wildcard → <?> :: List<?> list
+
+public static void printList(List<?> list) {
+    for (Object obj : list) {
+        System.out.println(obj);
+    }
+}
+
+
+List<String> names = List.of("A", "B");
+List<Integer> nums = List.of(1, 2);
+
+printList(names);
+printList(nums);
+
+--> list.add("Hello"); // ❌ compile error
+--> you can only read 
+
+
+
+2) Upper Bounded Wildcard → <? extends T>   :: List<? extends Number>  :: List of Number or its subclasses
+
+public static void printNumbers(List<? extends Number> list) {
+    for (Number n : list) {
+        System.out.println(n);
+    }
+}
+
+List<Integer> list1 = List.of(1, 2);
+List<Double> list2 = List.of(1.5, 2.5);
+
+printNumbers(list1);
+printNumbers(list2);
+
+
+list.add(10); // ❌ compile error
+list.add(null); // only null allowed
+
+
+3) Lower Bounded Wildcard → <? super T>  :: List<? super Integer>
+
+public static void addNumbers(List<? super Integer> list) {
+    list.add(10);
+    list.add(20);
+}
+
+List<Number> list1 = new ArrayList<>();
+List<Object> list2 = new ArrayList<>();
+
+addNumbers(list1);
+addNumbers(list2);
+
+list.add(10); // ✅ 
+
+Object obj = list.get(0); // only Object Why?
+
+Because actual type could be:
+
+List<Object> OR List<Number>
+
+
+
+## volatile 
+
+boolean volatile flag = true;
+
+Thread t1 = new Thread(() -> {
+    while (flag) {
+        // do nothing
+    }
+    System.out.println("Stopped");
+});
+
+Thread t2 = new Thread(() -> {
+    flag = false;
+});
+
+
+::Without volatile, thread t1 may keep reading a cached value of flag and never stop (visibility issue).
+::With volatile, updates from t2 are immediately visible to t1, so the loop exits correctly.
+
+## Atomic 
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+class WithAtomicExample {
+    static AtomicInteger count = new AtomicInteger(0);
+
+    public static void main(String[] args) throws Exception {
+
+        Thread t1 = new Thread(() -> {
+            for (int i = 0; i < 1000; i++) {
+                count.incrementAndGet(); // thread-safe
+            }
+        });
+
+        Thread t2 = new Thread(() -> {
+            for (int i = 0; i < 1000; i++) {
+                count.incrementAndGet(); // thread-safe
+            }
+        });
+
+        t1.start();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        System.out.println("Final Count: " + count.get());
+    }
+}
+
+
+Without automic:
+/*
+What happens:
+- Expected output: 2000
+- Actual output: less than 2000 (random)
+
+Reason:
+count++ = read → increment → write (3 steps)
+Both threads interfere → updates lost → race condition
+*/
+
+
+/*
+What happens:
+- Output is always 2000
+
+Reason:
+incrementAndGet() is atomic (single operation)
+No interference between threads
+*/
+
+volatile read from main memory not from cached value that's the benefit of volatile over instance other variable, but it will not give thread safety but it will guaranty latest read for all thread but atomic guaranty read and write both.
+
+## VarArgs
+
+class VarArgsExample {
+    static void printNumbers(int... nums) {
+        for (int n : nums) {
+            System.out.println(n);
+        }
+    }
+
+    public static void main(String[] args) {
+        printNumbers(1);
+        printNumbers(1, 2, 3);
+        printNumbers(); // also valid
+    }
+}
+
+
+:: internally int... nums  ≈  int[] nums we can override
+
+
+
+-------------------------------
+Produces and consumer problem
+-------------------------------
+
+import java.util.LinkedList;
+import java.util.Queue;
+
+class SharedBuffer {
+    private Queue<Integer> queue = new LinkedList<>();
+    private int capacity = 5;
+
+    public synchronized void produce(int value) throws InterruptedException {
+        while (queue.size() == capacity) {
+            wait(); // wait if full
+        }
+
+        queue.add(value);
+        System.out.println("Produced: " + value);
+
+        notify(); // notify consumer
+    }
+
+    public synchronized void consume() throws InterruptedException {
+        while (queue.isEmpty()) {
+            wait(); // wait if empty
+        }
+
+        int val = queue.poll();
+        System.out.println("Consumed: " + val);
+
+        notify(); // notify producer
+    }
+}
+
+
+public class Main {
+    public static void main(String[] args) {
+        SharedBuffer buffer = new SharedBuffer();
+
+        Thread producer = new Thread(() -> {
+            int i = 0;
+            while (true) {
+                try {
+                    buffer.produce(i++);
+                } catch (InterruptedException e) {}
+            }
+        });
+
+        Thread consumer = new Thread(() -> {
+            while (true) {
+                try {
+                    buffer.consume();
+                } catch (InterruptedException e) {}
+            }
+        });
+
+        producer.start();
+        consumer.start();
+    }
+}
+
+
+# HashCode equals implementation when required
+ 
+Suppose we create our own Employee class and want to insert objects into a Set based only on unique name (not reference):
+-> We override hashCode() and equals()
+-> In hashCode():   we generate hash based only on 'name'
+-> In HashSet:   internally HashMap is used, and during add():
+   existingKey.equals(newKey) is called
+-> In equals():   
+   1. Check reference (this == obj)
+   2. Check type (instanceof)
+   3. Compare name
+-> If equals() returns true:  object is NOT inserted (duplicate)
+-> Issue:   If 'name' is mutable and changed after insertion:
+   hashCode changes → object may go to different bucket
+-> This can lead to:   duplicate entry OR inability to find/remove object
+-> Therefore:  fields used in hashCode/equals should be immutable (preferably final)
+
+Starters and dependencies
+--------------------------
+spring-boot-starter -> spring-boot, spring-context, spring-aop, logging (logback, slf4j), snakeyaml
+
+spring-boot-starter-web -> spring-web, spring-webmvc, jackson (JSON), validation, embedded tomcat
+
+spring-boot-starter-data-jpa  -> spring-data-jpa, hibernate, jakarta persistence, jdbc
+
+
+
+#story 
+=====
+
+| Aspect        | Prod Bug              | Feature               |
+| ------------- | --------------------- | --------------------- |
+| Goal          | Fix issue             | Build new capability  |
+| Nature        | Reactive              | Proactive             |
+| Content focus | Reproduction + impact | Requirements + design |
+| Priority      | High/urgent           | Planned               |
+| RCA           | Mandatory             | Not applicable        |
+
+
+
+// ======================
+// UNIT TESTING SUMMARY
+// ======================
+
+// ---------- SERVICE LAYER TEST ----------
+
+// Use Mockito with JUnit 5
+@ExtendWith(MockitoExtension.class)
+class EmpServiceImplTest {
+
+    @Mock
+    private EmpRepo empRepo;
+
+    @InjectMocks
+    private EmpServiceImpl empService;
+
+    @Test
+    void testFindName_success() {
+        // stub behavior
+        when(empRepo.findById(1)).thenReturn(Optional.of(new Employee("Tejas")));
+
+        // call method
+        String result = empService.findName(1);
+
+        // assertion
+        assertEquals("Tejas", result);
+    }
+}
+
+
+// ---------- CONTROLLER LAYER TEST ----------
+
+// Load only web layer
+@WebMvcTest(EmployeeController.class)
+class EmployeeControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private EmpService empService;
+
+    @Test
+    void testFindName_success() throws Exception {
+
+        // mock service response
+        Mockito.when(empService.findName(1)).thenReturn("Tejas");
+
+        // perform API call + verify response
+        mockMvc.perform(get("/emp/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Tejas"));
+    }
+}
+
+
+// ======================
+// KEY POINTS (REVISION)
+// ======================
+
+// Service Test:
+// - @ExtendWith(MockitoExtension.class)
+// - Use @Mock and @InjectMocks
+// - Use when().thenReturn()
+// - Use assertEquals()
+
+// Controller Test:
+// - @WebMvcTest
+// - Use MockMvc
+// - Use @MockBean for service
+// - Use mockMvc.perform(get("/emp/1") ).andExpect()
+
+
+
+
+// =======================
+// SHALLOW COPY
+// =======================
+// New object, but internal references are shared
+
+class Address {
+    String city;
+}
+
+class User {
+    String name;
+    Address address;
+}
+
+User u1 = new User();
+u1.name = "Tejas";
+u1.address = new Address();
+u1.address.city = "Pune";
+
+// Shallow copy
+User u2 = new User();
+u2.name = u1.name;
+u2.address = u1.address; // same reference
+
+u2.address.city = "Mumbai";
+
+// Effect:
+// u1.address.city → "Mumbai" (changed)
+// u2.address.city → "Mumbai"
+
+
+
+// =======================
+// DEEP COPY
+// =======================
+// New object + new nested objects (no shared reference)
+
+User u3 = new User();
+u3.name = u1.name;
+u3.address = new Address();
+u3.address.city = u1.address.city; // new object
+
+u3.address.city = "Delhi";
+
+// Effect:
+// u1.address.city → "Mumbai" (unchanged)
+// u3.address.city → "Delhi"
+
+
+
+// =======================
+// DEFENSIVE COPY
+// =======================
+// Copy used to protect internal state (encapsulation)
+
+import java.util.*;
+
+class Order {
+    private List<String> items;
+
+    // Constructor defensive copy
+    public Order(List<String> items) {
+        this.items = new ArrayList<>(items);
+    }
+
+    // Getter defensive copy
+    public List<String> getItems() {
+        return new ArrayList<>(items);
+    }
+}
+
+List<String> list = new ArrayList<>();
+list.add("Item1");
+
+Order order = new Order(list);
+
+// External modification
+list.add("Hacked");
+
+// Effect:
+// order.items → ["Item1"] (safe, not affected)
+
+
+
+// =======================
+// SUMMARY
+// =======================
+// Shallow  -> same inner references
+// Deep     -> completely independent objects
+// Defensive-> copy to protect internal data
+
+
+
+# spring.jpa.hibernate.ddl-auto options 
+=====================================
+
+none
+# → No schema change
+# → Used in production (manual DB management)
+
+validate
+# → Checks entity vs DB schema
+# → Throws error if mismatch
+# → Used in production (safe)
+
+update
+# → Updates schema (add tables/columns)
+# → Used in development
+# → Not safe (no proper control, no delete handling)
+
+create
+# → Drops and recreates schema on startup
+# → Used in testing / initial dev
+# → Data loss risk
+
+create-drop
+# → Create on start, drop on shutdown
+# → Used in unit tests (temporary DB)
+
+# Best Practice
+# Dev        → update
+# Test       → create-drop
+# Production → validate + Flyway/Liquibase
+
+# Key Point
+# Avoid 'update' in production → use migration tools
+
+
+
+
+// 🔹 Spring Data JPA – Quick Notes
+
+// 1️⃣ Keywords for auto query generation (used in method names)
+GreaterThan, LessThan, Between
+Is, Equals
+IsNull, IsNotNull
+Containing, Like, StartsWith, EndsWith
+True, False
+And, Or
+OrderBy (Asc, Desc)
+In, NotIn
+Distinct, Top, First, IgnoreCase
+
+
+// 2️⃣ Methods you DON’T need to write (already in JpaRepository)
+findById()
+findAll()
+save()
+deleteById()
+existsById()
+count()
+
+
+// 3️⃣ Methods you MUST write (custom queries)
+findByName(String name);
+findByAgeGreaterThan(int age);
+findByEmailContaining(String email);
+findByNameAndAge(String name, int age);
+
+// 👉 JPA generates implementation ONLY for declared methods
+// 👉 It does NOT create methods automatically
+
+
+
+hackathon::
+
+* Validate input:
+  Use @RestController, @RequestBody, and Bean Validation (@Valid, @NotBlank) with @ControllerAdvice for centralized exception handling.
+
+* Call embedding API:
+  Use WebClient to call OpenAI embeddings API with DTO mapping, API key configuration, and Resilience4j for retries and timeouts.
+
+* Query Pinecone:
+  Use WebClient to call Pinecone query API with embedding vector, topK results, and optional metadata filters.
+
+* Build prompt:
+  Use a dedicated service (PromptBuilder) to construct structured prompts combining current risk and retrieved similar risks.
+
+* Call GPT:
+  Use WebClient to invoke OpenAI GPT-3.5 Turbo chat completion API with prompt, temperature control, and max token limits.
+
+* Return response:
+  Map output to response DTO using Jackson (ObjectMapper) and return via ResponseEntity from the controller.
+
+
+
+Leader is responsible for:
+
+handling all producer writes
+assigning offsets
+replicating data to followers
+serving consumer reads
+maintaining ISR-> in sync replica
+It acts as the central coordinator and source of truth for a partition
+
+
+Leader fails = broker unreachable → controller triggers re-election from ISR
+
+
+
+
+
+// =====================
+// GROUPING + VALUE OPERATIONS (CHEAT SHEET)
+// =====================
+
+// 1. ALL STATS (min, max, sum, avg, count)
+Collectors.summarizingInt(Employee::getSalary);
+// Use: when you need everything in one pass
+
+
+// 2. MAX VALUE (primitive)
+Collectors.collectingAndThen(
+    Collectors.maxBy(Comparator.comparing(Employee::getSalary)),
+    opt -> opt.get().getSalary()
+);
+// Use: highest salary only
+
+
+// 3. MIN VALUE (primitive)
+Collectors.collectingAndThen(
+    Collectors.minBy(Comparator.comparing(Employee::getSalary)),
+    opt -> opt.get().getSalary()
+);
+// Use: lowest salary only
+
+
+// 4. SUM
+Collectors.summingInt(Employee::getSalary);
+// Use: total salary
+
+
+// 5. AVERAGE
+Collectors.averagingInt(Employee::getSalary);
+// Use: average salary
+
+
+// 6. COUNT
+Collectors.counting();
+// Use: number of employees
+
+
+// 7. MAP VALUES (extract field)
+Collectors.mapping(Employee::getName, Collectors.toList());
+// Use: convert Employee → Name list
+
+
+// 8. UNIQUE VALUES
+Collectors.mapping(Employee::getName, Collectors.toSet());
+// Use: remove duplicates
+
+
+// 9. JOIN VALUES (String)
+Collectors.mapping(Employee::getName, Collectors.joining(", "));
+// Use: "Alice, Bob, John"
+
+
+// 10. POST-PROCESS RESULT
+Collectors.collectingAndThen(downstream, result -> transform(result));
+// Use: Optional → value, List → immutable, etc.
+
+
+// =====================
+// REAL USAGE WITH GROUPING
+// =====================
+
+// A. Department → Salary stats
+Map<String, IntSummaryStatistics> stats =
+    employees.stream()
+        .collect(Collectors.groupingBy(
+            Employee::getDepartment,
+            Collectors.summarizingInt(Employee::getSalary)
+        ));
+
+
+// B. Department → Max salary
+Map<String, Integer> maxSalary =
+    employees.stream()
+        .collect(Collectors.groupingBy(
+            Employee::getDepartment,
+            Collectors.collectingAndThen(
+                Collectors.maxBy(Comparator.comparing(Employee::getSalary)),
+                opt -> opt.get().getSalary()
+            )
+        ));
+
+
+// C. Department → Total salary
+Map<String, Integer> totalSalary =
+    employees.stream()
+        .collect(Collectors.groupingBy(
+            Employee::getDepartment,
+            Collectors.summingInt(Employee::getSalary)
+        ));
+
+
+// D. Department → Employee names
+Map<String, List<String>> names =
+    employees.stream()
+        .collect(Collectors.groupingBy(
+            Employee::getDepartment,
+            Collectors.mapping(Employee::getName, Collectors.toList())
+        ));
+
+
+
+# redis method
+
+Set data (add to set):
+redisTemplate.opsForSet().add(key, values);
+Get data (all members):
+redisTemplate.opsForSet().members(key);
+
+
+
+
+Retry::
+=======
+
+===============================
+RETRY MECHANISMS 
+===============================
+
+
+===============================
+KEY NOTES
+===============================
+
+1) Retry DOES NOT create new thread by default
+   -> It re-executes in same thread
+
+2) Retry is SEQUENTIAL, not parallel
+
+3) Thread changes only when:
+   -> @Async is used
+   -> Kafka consumers (multi-threaded)
+   -> Reactive schedulers
+   -> Custom thread pools
+
+4) COMMON RETRY PARAMETERS
+   -> maxAttempts        : number of retries
+   -> delay / waitTime   : time between retries
+   -> backoff strategy   : fixed / exponential
+   -> retryOn exceptions : which errors to retry
+   -> fallback           : recovery method
+
+5) BLOCKING vs NON-BLOCKING
+
+   BLOCKING:
+   -> Spring Retry
+   -> RetryTemplate
+   -> RestTemplate
+   -> Feign
+
+   NON-BLOCKING:
+   -> WebClient (Reactor)
+   -> Reactive Retry
+
+===============================
+ONE LINE SUMMARY
+===============================
+
+Retry = Same operation + Same thread (mostly) + Multiple attempts with delay
+
+
+| Aspect            		| API Gateway + Service Registry            	 	| API Gateway + Kubernetes DNS                      |
+| -----------------		 | ------------------------------------------			 	| ------------------------------------------------- |
+| Service Discovery | External registry (Netflix Eureka)         	| Built-in DNS (Kubernetes)                         |
+| Load Balancing   	 | Client-side (Gateway / Ribbon / Spring LB) | Infrastructure-level (K8s Service via kube-proxy) |
+| Ownership         		| Application layer                          				| Infrastructure layer                              |
+
+
+
+
+redis Controller::
+==================
+
+@RestController
+public class DemoRestController {
+
+    private HashOperations<String, String, String> hashOps;
+    private ListOperations<String, String> listOps;
+    private SetOperations<String, String> setOps;
+
+    public DemoRestController(RedisTemplate<String, String> rt) {
+        this.hashOps = rt.opsForHash();
+        this.listOps = rt.opsForList();
+        this.setOps = rt.opsForSet();
+    }
+
+    // ---------- HASH ----------
+
+    @PostMapping("/user")
+    public String saveUser() {
+        hashOps.put("USERS", "101", "Manish");
+        return "User saved in HASH";
+    }
+
+    @GetMapping("/user")
+    public String getUser() {
+        return hashOps.get("USERS", "101");
+    }
+
+    // ---------- LIST ----------
+
+    @PostMapping("/list")
+    public String addToList() {
+        listOps.rightPush("USER_LIST", "Manish");
+        listOps.rightPush("USER_LIST", "Raj");
+        return "Added to LIST";
+    }
+
+    @GetMapping("/list")
+    public List<String> getList() {
+        return listOps.range("USER_LIST", 0, -1);
+    }
+
+    // ---------- SET ----------
+
+    @PostMapping("/set")
+    public String addToSet() {
+        setOps.add("USER_SET", "Manish");
+        setOps.add("USER_SET", "Raj");
+        setOps.add("USER_SET", "Manish"); // duplicate ignored
+        return "Added to SET";
+    }
+
+    @GetMapping("/set")
+    public Set<String> getSet() {
+        return setOps.members("USER_SET");
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

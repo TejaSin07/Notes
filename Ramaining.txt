@@ -1,5 +1,14 @@
 
-
+1) remaining
+2) sql and notes
+3) streams
+3) security
+4) kafka
+5) react
+6) book notes
+7) git github
+ 
+ 
 priority::
 ==========
 
