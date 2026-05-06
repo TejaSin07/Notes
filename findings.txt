@@ -1872,7 +1872,7 @@ class EmployeeControllerTest {
 
 // Controller Test:
 // - @WebMvcTest
-// - Use MockMvc
+// - Use MockMvc  with @Autowired
 // - Use @MockBean for service
 // - Use mockMvc.perform(get("/emp/1") ).andExpect()
 
@@ -2313,7 +2313,132 @@ public class DemoRestController {
 }
 
 
+// =======================================================
+// 1) CSRF
+// =======================================================
 
+// Full Form:
+// Cross-Site Request Forgery
+
+// Use:
+// Protects application from fake requests sent using
+// user’s logged-in session/cookies.
+
+// Mostly Used In:
+// Session-based authentication
+
+// Usually Disabled In:
+// JWT token-based APIs / Microservices
+
+http.csrf(csrf -> csrf.disable());
+
+
+
+// =======================================================
+// 2) CORS
+// =======================================================
+
+// Full Form:
+// Cross-Origin Resource Sharing
+
+// Use:
+// Allows frontend from different origin/domain/port
+// to access backend APIs.
+
+// Example:
+// Frontend  -> localhost:3000
+// Backend   -> localhost:8080
+
+// Without CORS:
+// Browser blocks request
+
+http.cors(cors -> {});
+
+
+
+// =======================================================
+// 3) requestMatchers() / authenticated() / permitAll()
+// =======================================================
+
+// requestMatchers()
+// Used to match specific API URLs
+
+.requestMatchers("/auth/login")
+
+
+// permitAll()
+// Public API
+// No authentication needed
+
+.requestMatchers("/auth/login").permitAll()
+
+
+// authenticated()
+// API requires login/JWT token
+
+.anyRequest().authenticated()
+
+
+
+// =======================================================
+// 4) SecurityFilterChain
+// =======================================================
+
+// Use:
+// Main Spring Security configuration chain.
+
+// Intercepts request before controller execution.
+
+// Handles:
+// - Authentication
+// - Authorization
+// - JWT validation
+// - CSRF
+// - CORS
+
+@Bean
+SecurityFilterChain securityFilterChain(HttpSecurity http)
+
+
+// Flow:
+//
+// Request
+//    ↓
+// SecurityFilterChain
+//    ↓
+// Controller
+
+
+
+
+// =======================================================
+// 5) GlobalFilterChain
+// =======================================================
+
+// Use:
+// Gateway-level filter executed for every request.
+
+// Mostly Used In:
+// Spring Cloud Gateway
+
+// Handles:
+// - JWT validation
+// - Logging
+// - Request modification
+// - Rate limiting
+// - Header manipulation
+
+@Component
+public class JwtGlobalFilter implements GlobalFilter
+
+
+// Flow:
+//
+// Client Request
+//       ↓
+// Global Filter (Gateway)
+//       ↓
+// Microservice
 
 
 

@@ -561,4 +561,7 @@ setOps.add(
 160) classpath -> target/classes  AND  maven/gradele  ANDapp.properties
 
 
+161) User user = repo.findById(5)
+                .orElse(new User(0, "Default User"));
 
+System.out.println(user.getName());
