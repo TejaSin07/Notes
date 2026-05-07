@@ -1,0 +1,61 @@
+Deployment::
+============
+
+private -> feature ->  master -> release   
+
+
+1) developer changes code in there private branch
+2) they will commit their changes in private branch
+3) raise the pr to merge there changes to feature
+4) feature branch will trigger the cicd through the web hook that we need to configure {one time}
+5) we have to monitor we need to monitor Jenkins pipeline ,after successful building the code and packaging the deployment will trigger automatically based on Jenkins script.
+6) lets suppose we want to deploy my private branch to any of the environment then I need to Jenkins script of my private branch 
+7) so for every repos we have WinSCP configuration from where we can see the deployment logs
+8) also we can see  ansible logs of the deployment repos. 
+
+
+Docker ::
+
+1) we have create the docker file for each repo/service ,and do the configuration too create docker image
+2) we have to  provide configuration in Jenkins file to execute the docker file to create the docker image after saucerful build and then we have to do the configuration to push the docker image on aws image registry.
+3) now after pushing the image to the aws elastic container  registry we have to do the config in elastic bean stalk.so that it can pull the latest image from aws elastic container  registry{may be docker}.And do the deployment.
+
+
+
+Kafka ::
+=========
+
+cloudwatch /splunk 
+
+1) types of kafka ->  point to point , pub and sub
+2) each partition has its own leader and replicas
+3) offset count maintain service ?
+4) consumer group and how they are consuming 
+5) consumer consumes msg and fails, what if offset is not committed
+6) dlq
+7) broker -> on which partition run 
+8) cluster -> group of broker
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
