@@ -2533,9 +2533,25 @@ Never rebase shared/public branches.
 ```
 
 
+1) Why we need Refresh Token if we already have JWT Access Token
+Access token is short-lived for security.
+If stolen, attacker gets access only for limited time.
+Refresh token helps generate new access token without forcing user to login again repeatedly.
+2) Why not use only long-lived Refresh Token directly
+Refresh token is not meant for API authorization.
+Long-lived access token is dangerous if stolen.
+Access token contains roles/permissions and is sent on every API request.
+So access token is kept short-lived, while refresh token is used only occasionally to get new access token.
+3) How Refresh Token verification works
 
+Backend performs:
 
-
+Verify token signature
+Check token expiry
+Extract userId/tokenId
+Check Redis/DB to ensure token is active and not revoked
+Load latest user roles/permissions
+Generate new JWT access token
 
 
 
