@@ -1,0 +1,572 @@
+```text id="k7r9x2"
+=========================================================
+DOCKER NOTES - TEAMMATE+ APPLICATION
+=========================================================
+
+1) DOCKER
+---------------------------------------------------------
+Purpose:
+Containerization platform used to package and run
+applications consistently across environments.
+
+How We Use It:
+- Package Spring Boot microservices
+- Create portable runtime environments
+- Deploy applications in Kubernetes
+
+Why Needed:
+- "Works on my machine" problem solved
+- Consistent deployments
+- Dependency isolation
+- Easy scaling and portability
+
+Example:
+audit-service container
+reporting-service container
+
+
+=========================================================
+
+2) CONTAINER
+---------------------------------------------------------
+Purpose:
+Running instance of a Docker image.
+
+How We Use It:
+- Spring Boot application runs inside container
+- Containers run inside Kubernetes pods
+
+Why Needed:
+- Isolated runtime
+- Lightweight compared to VMs
+- Easy deployment and restart
+
+Example:
+java -jar app.jar running inside container
+
+
+=========================================================
+
+3) DOCKER IMAGE
+---------------------------------------------------------
+Purpose:
+Read-only packaged snapshot of application +
+dependencies.
+
+Contains:
+- Java runtime
+- Application JAR
+- Libraries
+- OS dependencies
+
+How We Use It:
+- Jenkins builds Docker image
+- Stored in AWS ECR
+- Kubernetes pulls image during deployment
+
+Why Needed:
+- Reusable deployments
+- Versioned application package
+
+Example:
+teammate-audit-service:v47
+
+
+=========================================================
+
+4) DOCKERFILE
+---------------------------------------------------------
+Purpose:
+Instruction file used to build Docker image.
+
+How We Use It:
+Defines:
+- Base image
+- Working directory
+- JAR copy
+- Startup command
+
+Example:
+FROM openjdk:17-jdk-slim
+COPY target/app.jar app.jar
+ENTRYPOINT ["java","-jar","app.jar"]
+
+Why Needed:
+- Standardized image creation
+- Automated CI/CD builds
+
+
+=========================================================
+
+5) BASE IMAGE
+---------------------------------------------------------
+Purpose:
+Starting OS/runtime layer for Docker image.
+
+How We Use It:
+Uses official Java image.
+
+Example:
+openjdk:17-jdk-slim
+
+Why Needed:
+- Provides Java runtime
+- Lightweight Linux environment
+
+
+=========================================================
+
+6) IMAGE LAYERS
+---------------------------------------------------------
+Purpose:
+Docker images are built in layers.
+
+Example Layers:
+- Linux OS layer
+- Java layer
+- Application layer
+
+Why Needed:
+- Faster builds
+- Layer caching
+- Smaller updates
+
+Benefit:
+Only changed layers rebuild.
+
+
+=========================================================
+
+7) CONTAINER PORT
+---------------------------------------------------------
+Purpose:
+Port application listens on inside container.
+
+How We Use It:
+Spring Boot runs on:
+8080
+
+Example:
+EXPOSE 8080
+
+Why Needed:
+- Container communication
+- Kubernetes service routing
+
+
+=========================================================
+
+8) PORT MAPPING
+---------------------------------------------------------
+Purpose:
+Maps host machine port to container port.
+
+Syntax:
+HOST_PORT:CONTAINER_PORT
+
+Example:
+-p 9090:8080
+
+Meaning:
+Access app on 9090 externally
+Application runs on 8080 internally
+
+Why Needed:
+- External access to container
+
+
+=========================================================
+
+9) DOCKER REGISTRY
+---------------------------------------------------------
+Purpose:
+Central repository to store Docker images.
+
+How We Use It:
+AWS ECR acts as Docker registry.
+
+Flow:
+Jenkins
+ ↓
+Push image to ECR
+ ↓
+Kubernetes pulls image
+
+Why Needed:
+- Centralized image storage
+- Deployment consistency
+
+
+=========================================================
+
+10) AWS ECR (Elastic Container Registry)
+---------------------------------------------------------
+Purpose:
+Private Docker image repository.
+
+How We Use It:
+- Stores microservice Docker images
+- Kubernetes pulls deployment images
+
+Example:
+123456.dkr.ecr.ap-south-1.amazonaws.com/
+audit-service:v47
+
+Why Needed:
+- Secure storage
+- Version management
+
+
+=========================================================
+
+11) DOCKER BUILD
+---------------------------------------------------------
+Purpose:
+Creates Docker image from Dockerfile.
+
+Command:
+docker build -t audit-service:v1 .
+
+How We Use It:
+Jenkins automatically performs build.
+
+Why Needed:
+- Package application into image
+
+
+=========================================================
+
+12) DOCKER RUN
+---------------------------------------------------------
+Purpose:
+Starts container from image.
+
+Example:
+docker run -p 8080:8080 audit-service:v1
+
+Why Needed:
+- Local testing
+- Container execution
+
+
+=========================================================
+
+13) DETACHED MODE
+---------------------------------------------------------
+Purpose:
+Runs container in background.
+
+Command:
+docker run -d audit-service:v1
+
+Why Needed:
+- Keep terminal free
+- Production-like execution
+
+
+=========================================================
+
+14) DOCKER LOGS
+---------------------------------------------------------
+Purpose:
+View container logs.
+
+Command:
+docker logs <container-id>
+
+How We Use It:
+- Debug startup issues
+- Check application errors
+
+Why Needed:
+- Troubleshooting
+
+
+=========================================================
+
+15) DOCKER EXEC
+---------------------------------------------------------
+Purpose:
+Access running container shell.
+
+Command:
+docker exec -it <container-id> bash
+
+Why Needed:
+- Debug inside container
+- Inspect files/configurations
+
+
+=========================================================
+
+16) ENVIRONMENT VARIABLES
+---------------------------------------------------------
+Purpose:
+Pass runtime configuration into container.
+
+How We Use It:
+Inject:
+- DB URL
+- Redis host
+- Kafka host
+- S3 bucket
+
+Example:
+SPRING_DATASOURCE_URL
+AWS_S3_BUCKET
+
+Why Needed:
+- Same image across environments
+- Runtime configuration
+
+Important:
+Config is NOT hardcoded in image.
+
+
+=========================================================
+
+17) DOCKER NETWORKING
+---------------------------------------------------------
+Purpose:
+Allows containers to communicate.
+
+How We Use It:
+Mostly managed by Kubernetes networking.
+
+Why Needed:
+- Service communication
+- Internal connectivity
+
+
+=========================================================
+
+18) DOCKER VOLUME
+---------------------------------------------------------
+Purpose:
+Persistent/shared storage for containers.
+
+How We Use It:
+Shared logs between:
+- Spring Boot container
+- Fluent Bit sidecar
+
+Example:
+App writes logs
+Fluent Bit reads same logs
+
+Why Needed:
+- Data sharing between containers
+
+
+=========================================================
+
+19) CONTAINER LIFECYCLE
+---------------------------------------------------------
+Flow:
+Image Created
+ ↓
+Container Started
+ ↓
+Application Running
+ ↓
+Container Stopped
+ ↓
+Container Removed
+
+Why Needed:
+- Standardized execution flow
+
+
+=========================================================
+
+20) DOCKER IN CI/CD PIPELINE
+---------------------------------------------------------
+Flow:
+Developer Pushes Code
+ ↓
+Jenkins Triggered
+ ↓
+Maven Build
+ ↓
+Docker Build
+ ↓
+Push to ECR
+ ↓
+Kubernetes Deployment
+
+Why Needed:
+- Automated deployment pipeline
+
+
+=========================================================
+
+21) DOCKER + KUBERNETES RELATIONSHIP
+---------------------------------------------------------
+Docker:
+Creates and runs containers
+
+Kubernetes:
+Manages containers at scale
+
+Simple Understanding:
+Docker = Packaging
+Kubernetes = Orchestration
+
+Flow:
+Docker Image
+ ↓
+Container
+ ↓
+Kubernetes Pod
+ ↓
+EKS Cluster
+
+
+=========================================================
+
+22) DOCKER IN OUR APPLICATION
+---------------------------------------------------------
+Each microservice has:
+- Dockerfile
+- Docker image
+- Kubernetes deployment
+
+Examples:
+- auth-service
+- audit-service
+- reporting-service
+- notification-service
+
+Each service deployed independently.
+
+
+=========================================================
+
+23) WHY WE USE DOCKER
+---------------------------------------------------------
+Benefits:
+- Consistent environment
+- Faster deployment
+- Easy rollback
+- Dependency isolation
+- Lightweight
+- Portable
+- CI/CD friendly
+
+Without Docker Problems:
+- Java version mismatch
+- Missing dependencies
+- Environment inconsistency
+- Difficult deployments
+
+
+=========================================================
+
+24) IMPORTANT DOCKER COMMANDS
+---------------------------------------------------------
+
+Build Image:
+docker build -t app:v1 .
+
+Run Container:
+docker run -p 8080:8080 app:v1
+
+List Running Containers:
+docker ps
+
+View Logs:
+docker logs <container-id>
+
+Stop Container:
+docker stop <container-id>
+
+Remove Container:
+docker rm <container-id>
+
+Remove Image:
+docker rmi <image-id>
+
+Access Container:
+docker exec -it <container-id> bash
+
+
+=========================================================
+
+25) ZERO DOWNTIME DEPLOYMENT FLOW
+---------------------------------------------------------
+Old Container Running
+ ↓
+New Container Created
+ ↓
+Health Check Success
+ ↓
+Traffic Shifted
+ ↓
+Old Container Removed
+
+Managed by:
+Kubernetes Deployments
+
+
+=========================================================
+
+26) INTERVIEW IMPORTANT POINTS
+---------------------------------------------------------
+
+- Docker packages application + dependencies
+- Dockerfile defines image creation steps
+- Jenkins builds Docker images automatically
+- Images stored in AWS ECR
+- Kubernetes pulls images from ECR
+- Same image promoted across environments
+- Configurations injected using ConfigMaps/Secrets
+- Spring Boot apps run inside Docker containers
+
+
+=========================================================
+
+COMPLETE FLOW
+=========================================================
+
+Developer Code
+ ↓
+Maven Build
+ ↓
+Docker Build
+ ↓
+Docker Image
+ ↓
+Push to AWS ECR
+ ↓
+Kubernetes Pulls Image
+ ↓
+Container Runs Inside Pod
+ ↓
+User Accesses Application
+
+
+=========================================================
+
+IMPORTANT INTERVIEW SUMMARY
+=========================================================
+
+We use Docker to containerize our Spring Boot
+microservices. Docker packages the application,
+Java runtime, and dependencies into portable
+Docker images.
+
+Jenkins builds Docker images and pushes them
+to AWS ECR. Kubernetes running on AWS EKS
+pulls these images and runs them as containers
+inside pods.
+
+This provides:
+- Consistent deployments
+- Portability
+- Faster releases
+- Easy scaling
+- Environment isolation
+- CI/CD automation support
+
+=========================================================
+```

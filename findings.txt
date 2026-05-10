@@ -2442,8 +2442,14 @@ public class JwtGlobalFilter implements GlobalFilter
 
 
 
+Saga design Pattern
+===================
+
+In a Choreography Saga, there is no central controller managing the transaction flow. Instead, each microservice reacts to events produced by other services. For example, when the Order Service creates an order, it publishes an OrderCreatedEvent to a message broker like Apache Kafka. The Payment Service listens to that event, processes the payment, and then publishes either a PaymentSuccessEvent or PaymentFailedEvent. Other services continue reacting to these events and performing their own local transactions. If a failure occurs, compensating events are published to undo previous actions, such as cancelling the order or releasing inventory. This approach creates very loose coupling because services only know about events, not about the entire workflow. It scales well and fits naturally into event-driven architectures. However, in large enterprise systems, choreography can become difficult to manage because event chains become complex, debugging is harder, and understanding the full transaction flow across services becomes challenging.
 
 
+
+In an Orchestration Saga, the entire workflow is controlled by a central component called the Saga Orchestrator. Instead of services reacting independently to events, the orchestrator explicitly tells each service what action to perform. For example, the orchestrator first calls the Order Service to create the order, then calls the Payment Service to process payment, and then calls the Inventory Service to reserve stock. If any step fails, the orchestrator triggers compensating actions such as refunding the payment or cancelling the order. This provides much better visibility into the transaction lifecycle because the orchestrator maintains the current saga state, retry logic, timeout handling, and compensation flow in one place. Enterprise systems often prefer orchestration because production debugging, auditing, monitoring, and operational control become easier. Technologies like Temporal, Camunda, and Netflix Conductor are commonly used for orchestration-based saga implementations.
 
 
 

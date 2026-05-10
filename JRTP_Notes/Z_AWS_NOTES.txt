@@ -1,0 +1,314 @@
+=========================================================
+AWS COMPONENTS USED IN TEAMMATE+ APPLICATION
+=========================================================
+
+1) AWS EC2 (Elastic Compute Cloud)
+---------------------------------------------------------
+Purpose:
+Virtual Linux servers used to run infrastructure and
+application workloads.
+
+How We Use It:
+- EKS worker nodes run on EC2 instances
+- Jenkins server runs on EC2
+- Earlier monolith/Tomcat deployments were on EC2
+
+Why Needed:
+- Provides compute power (CPU/RAM)
+- Hosts containers and services
+- Scalable infrastructure
+
+Example:
+- t2.medium instances used for Kubernetes worker nodes
+
+
+=========================================================
+
+2) AWS EKS (Elastic Kubernetes Service)
+---------------------------------------------------------
+Purpose:
+Managed Kubernetes service used to orchestrate and
+manage Docker containers.
+
+How We Use It:
+- Runs all Spring Boot microservices
+- Manages pods, deployments, scaling, and recovery
+- Handles rolling deployments and self-healing
+
+Why Needed:
+- Auto-scaling
+- Auto-healing
+- Zero downtime deployments
+- Container orchestration
+
+Example:
+- audit-service pod
+- auth-service pod
+- reporting-service pod
+
+
+=========================================================
+
+3) AWS ECR (Elastic Container Registry)
+---------------------------------------------------------
+Purpose:
+Private Docker image repository.
+
+How We Use It:
+- Jenkins pushes Docker images to ECR
+- Kubernetes pulls images from ECR during deployment
+
+Why Needed:
+- Secure image storage
+- Version management
+- Central image repository
+
+Example:
+teammate-reporting-service:v47
+
+
+=========================================================
+
+4) AWS RDS (Relational Database Service)
+---------------------------------------------------------
+Purpose:
+Managed relational database service.
+
+How We Use It:
+- MySQL database hosted on RDS
+- Spring Boot applications connect via HikariCP
+
+Why Needed:
+- Automatic backup
+- Failover support
+- Managed database maintenance
+- High availability
+
+Stores:
+- Audit data
+- User data
+- Roles and permissions
+- Workflow data
+
+
+=========================================================
+
+5) AWS S3 (Simple Storage Service)
+---------------------------------------------------------
+Purpose:
+Object/file storage service.
+
+How We Use It:
+- Store audit documents
+- Upload/download PDFs and evidence files
+- Generate pre-signed URLs
+
+Why Needed:
+- Large file storage
+- Highly durable
+- Cheap and scalable
+- Avoid storing binary files in DB
+
+Example:
+- Audit reports
+- Workpapers
+- Evidence documents
+
+
+=========================================================
+
+6) AWS ALB (Application Load Balancer)
+---------------------------------------------------------
+Purpose:
+Distributes incoming HTTP/HTTPS traffic.
+
+How We Use It:
+- Receives user requests
+- Routes traffic to Kubernetes ingress controller
+- TLS/SSL termination
+
+Why Needed:
+- Load balancing
+- HTTPS support
+- Path-based routing
+
+Example:
+/api/auth/*  -> auth-service
+/api/audit/* -> audit-service
+
+
+=========================================================
+
+7) AWS Route 53
+---------------------------------------------------------
+Purpose:
+DNS management service.
+
+How We Use It:
+- Resolves domain names to ALB endpoint
+
+Why Needed:
+- DNS resolution
+- Traffic routing
+- Failover routing
+
+Example:
+https://teammate.company.com
+
+
+=========================================================
+
+8) AWS IAM (Identity and Access Management)
+---------------------------------------------------------
+Purpose:
+Controls AWS permissions and security access.
+
+How We Use It:
+- IAM roles attached to EC2/EKS
+- Jenkins authentication
+- S3 access permissions
+- ECR push/pull permissions
+
+Why Needed:
+- Secure AWS access
+- Avoid hardcoded credentials
+- Role-based cloud security
+
+Example Permissions:
+- s3:GetObject
+- s3:PutObject
+- ecr:PushImage
+
+
+=========================================================
+
+9) AWS VPC (Virtual Private Cloud)
+---------------------------------------------------------
+Purpose:
+Private network inside AWS.
+
+How We Use It:
+- EKS cluster runs inside VPC
+- RDS and EC2 communicate privately
+
+Why Needed:
+- Network isolation
+- Security
+- Internal communication
+
+Example:
+- Private subnets for databases
+- Public subnets for ALB
+
+
+=========================================================
+
+10) AWS Security Groups
+---------------------------------------------------------
+Purpose:
+Acts as firewall rules for AWS resources.
+
+How We Use It:
+- Control inbound/outbound traffic
+- Restrict DB access
+- Allow only required ports
+
+Why Needed:
+- Security
+- Network protection
+- Controlled communication
+
+Example:
+- Allow 443 for HTTPS
+- Allow 3306 for MySQL internally
+
+
+=========================================================
+
+11) AWS Lambda
+---------------------------------------------------------
+Purpose:
+Serverless compute service.
+
+How We Use It:
+- Event-driven background tasks
+- Lightweight async processing
+
+Why Needed:
+- No server management
+- Cost efficient for small async jobs
+- Event-based execution
+
+Example:
+- File processing
+- Notification triggers
+- Scheduled cleanup tasks
+
+
+=========================================================
+
+12) AWS CloudWatch (Indirectly / Sometimes)
+---------------------------------------------------------
+Purpose:
+AWS monitoring and logging service.
+
+How We Use It:
+- Infrastructure-level monitoring
+- EC2/EKS metrics
+- Basic AWS alerts
+
+Why Needed:
+- Resource monitoring
+- Operational visibility
+
+Note:
+Main application monitoring is done using:
+- Datadog
+- Splunk
+
+
+=========================================================
+
+COMPLETE HIGH LEVEL FLOW
+=========================================================
+
+User
+ ↓
+Route53
+ ↓
+ALB
+ ↓
+EKS Ingress
+ ↓
+Kubernetes Service
+ ↓
+Pod (Spring Boot Container)
+ ↓
+Redis / Kafka / RDS / S3
+ ↓
+Response Back to User
+
+
+=========================================================
+
+IMPORTANT INTERVIEW SUMMARY
+=========================================================
+
+We use AWS to host and manage our enterprise audit
+application infrastructure.
+
+- EC2 provides compute infrastructure
+- EKS orchestrates containers
+- ECR stores Docker images
+- RDS hosts MySQL databases
+- S3 stores audit documents
+- ALB balances incoming traffic
+- Route53 manages DNS
+- IAM handles security permissions
+- VPC and Security Groups secure networking
+- Lambda handles event-driven processing
+
+All services together provide scalability, security,
+high availability, and zero-downtime deployments.
+
+=========================================================

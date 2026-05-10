@@ -8,8 +8,8 @@ private -> feature ->  master -> release
 2) they will commit their changes in private branch
 3) raise the pr to merge there changes to feature
 4) feature branch will trigger the cicd through the web hook that we need to configure {one time}
-5) we have to monitor we need to monitor Jenkins pipeline ,after successful building the code and packaging the deployment will trigger automatically based on Jenkins script.
-6) lets suppose we want to deploy my private branch to any of the environment then I need to Jenkins script of my private branch 
+5)  we need to monitor Jenkins pipeline ,after successful building the code and packaging the deployment will trigger automatically based on Jenkins script.
+6) lets suppose we want to deploy my private branch to any of the environment then I need write Jenkins script of my private branch 
 7) so for every repos we have WinSCP configuration from where we can see the deployment logs
 8) also we can see  ansible logs of the deployment repos. 
 

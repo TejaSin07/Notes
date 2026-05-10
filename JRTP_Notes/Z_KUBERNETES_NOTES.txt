@@ -1,0 +1,605 @@
+=========================================================
+KUBERNETES NOTES - TEAMMATE+ APPLICATION
+=========================================================
+
+1) KUBERNETES (K8s)
+---------------------------------------------------------
+Purpose:
+Container orchestration platform used to manage
+Docker containers in production.
+
+How We Use It:
+- Runs Spring Boot microservices
+- Manages deployments and scaling
+- Handles pod recovery and load balancing
+
+Why Needed:
+- Auto-healing
+- Auto-scaling
+- Zero downtime deployment
+- Service discovery
+- Centralized orchestration
+
+Example:
+- audit-service
+- auth-service
+- reporting-service
+
+
+=========================================================
+
+2) EKS CLUSTER
+---------------------------------------------------------
+Purpose:
+Main Kubernetes environment where all services run.
+
+How We Use It:
+- Entire application deployed inside EKS cluster
+- Contains worker nodes and Kubernetes components
+
+Why Needed:
+- Centralized infrastructure management
+- Runs all microservices together
+
+Simple Structure:
+EKS Cluster
+   ↓
+Worker Nodes (EC2)
+   ↓
+Pods
+   ↓
+Containers
+
+
+=========================================================
+
+3) CONTROL PLANE
+---------------------------------------------------------
+Purpose:
+Brain of Kubernetes cluster.
+
+Managed By:
+AWS EKS manages it automatically.
+
+Components:
+- API Server
+- Scheduler
+- etcd
+- Controller Manager
+
+Why Needed:
+- Maintains cluster state
+- Schedules pods
+- Monitors health
+- Handles deployments
+
+Developer Note:
+We usually do not manage control plane directly.
+
+
+=========================================================
+
+4) WORKER NODE
+---------------------------------------------------------
+Purpose:
+EC2 machine where pods actually run.
+
+How We Use It:
+- Application pods run on worker nodes
+- Each node contains kubelet + container runtime
+
+Why Needed:
+- Provides CPU/RAM for applications
+
+Example:
+Node-1:
+- auth-service
+- audit-service
+
+Node-2:
+- reporting-service
+- notification-service
+
+
+=========================================================
+
+5) POD
+---------------------------------------------------------
+Purpose:
+Smallest deployable unit in Kubernetes.
+
+Contains:
+One or more containers.
+
+How We Use It:
+Each microservice runs inside a pod.
+
+Example:
+audit-service-pod
+ ├── springboot-container
+ ├── datadog-sidecar
+ └── fluentbit-sidecar
+
+Why Needed:
+- Isolated runtime environment
+- Easy scaling and management
+
+
+=========================================================
+
+6) CONTAINER
+---------------------------------------------------------
+Purpose:
+Runs application process.
+
+How We Use It:
+- Spring Boot app runs inside container
+- Datadog agent runs as sidecar
+- Fluent Bit runs as sidecar
+
+Why Needed:
+- Portable runtime
+- Same behavior across environments
+
+Example:
+java -jar app.jar
+
+
+=========================================================
+
+7) DEPLOYMENT
+---------------------------------------------------------
+Purpose:
+Manages pod creation and lifecycle.
+
+How We Use It:
+- Maintains desired pod count
+- Handles rolling deployments
+- Recreates failed pods
+
+Why Needed:
+- High availability
+- Zero downtime deployments
+
+Example:
+replicas: 3
+means:
+Always maintain 3 running pods
+
+
+=========================================================
+
+8) REPLICA SET
+---------------------------------------------------------
+Purpose:
+Ensures required number of pods are running.
+
+How We Use It:
+Automatically managed by Deployment.
+
+Why Needed:
+- Auto-healing
+- High availability
+
+Example:
+If 1 pod crashes,
+ReplicaSet creates new pod automatically.
+
+
+=========================================================
+
+9) SERVICE
+---------------------------------------------------------
+Purpose:
+Provides stable internal networking for pods.
+
+How We Use It:
+- Exposes pods internally
+- Load balances traffic across pods
+
+Why Needed:
+- Pods are temporary
+- Pod IP changes frequently
+
+Example:
+audit-service
+   ↓
+routes traffic to
+audit-service pods
+
+Types Used:
+- ClusterIP (mostly internal)
+
+
+=========================================================
+
+10) CLUSTER IP SERVICE
+---------------------------------------------------------
+Purpose:
+Internal-only service communication.
+
+How We Use It:
+Microservices communicate internally.
+
+Example:
+http://audit-service:8080
+
+Why Needed:
+- Internal DNS
+- Secure communication inside cluster
+
+
+=========================================================
+
+11) INGRESS
+---------------------------------------------------------
+Purpose:
+Handles external HTTP/HTTPS routing.
+
+How We Use It:
+Routes traffic from ALB to services.
+
+Why Needed:
+- Central API routing
+- Path-based routing
+
+Example:
+/api/auth/* → auth-service
+/api/reporting/* → reporting-service
+
+
+=========================================================
+
+12) INGRESS CONTROLLER
+---------------------------------------------------------
+Purpose:
+Actual component implementing ingress rules.
+
+Examples:
+- NGINX Ingress
+- AWS ALB Ingress Controller
+
+How We Use It:
+Reads ingress YAML and routes traffic.
+
+Why Needed:
+- External traffic management
+- Reverse proxy behavior
+
+
+=========================================================
+
+13) NAMESPACE
+---------------------------------------------------------
+Purpose:
+Logical isolation inside cluster.
+
+How We Use It:
+Separate environments.
+
+Examples:
+- teammate-dev
+- teammate-qa
+- teammate-prod
+
+Why Needed:
+- Environment isolation
+- Prevent conflicts
+
+
+=========================================================
+
+14) CONFIGMAP
+---------------------------------------------------------
+Purpose:
+Stores non-sensitive configuration.
+
+How We Use It:
+Inject environment-specific configs.
+
+Stores:
+- DB URL
+- Redis host
+- Kafka host
+- S3 bucket name
+
+Why Needed:
+- Same Docker image for all environments
+- Runtime configuration injection
+
+Example:
+${DB_URL}
+
+
+=========================================================
+
+15) SECRET
+---------------------------------------------------------
+Purpose:
+Stores sensitive information securely.
+
+How We Use It:
+Stores:
+- DB passwords
+- JWT keys
+- API tokens
+
+Why Needed:
+- Secure credential management
+- Avoid hardcoding secrets
+
+
+=========================================================
+
+16) HORIZONTAL POD AUTOSCALER (HPA)
+---------------------------------------------------------
+Purpose:
+Automatically scales pods.
+
+How We Use It:
+Scales services during high traffic.
+
+Why Needed:
+- Handle load spikes
+- Better performance
+
+Example:
+CPU > 70%
+Pods increase from 2 → 10
+
+
+=========================================================
+
+17) KUBELET
+---------------------------------------------------------
+Purpose:
+Agent running on every worker node.
+
+Responsibilities:
+- Starts containers
+- Monitors pods
+- Reports node health
+
+Why Needed:
+- Communication between node and control plane
+
+
+=========================================================
+
+18) KUBE-PROXY
+---------------------------------------------------------
+Purpose:
+Handles internal pod networking and routing.
+
+How We Use It:
+Routes traffic between services and pods.
+
+Why Needed:
+- Internal load balancing
+- Service communication
+
+
+=========================================================
+
+19) ETCD
+---------------------------------------------------------
+Purpose:
+Kubernetes internal database.
+
+Stores:
+- Cluster state
+- Deployments
+- Pod info
+- Configurations
+
+Managed By:
+AWS EKS control plane.
+
+Why Needed:
+- Cluster consistency
+- State management
+
+
+=========================================================
+
+20) SCHEDULER
+---------------------------------------------------------
+Purpose:
+Decides where pods should run.
+
+How We Use It:
+Places pods on suitable worker nodes.
+
+Checks:
+- CPU
+- Memory
+- Node availability
+
+Why Needed:
+- Efficient resource usage
+
+
+=========================================================
+
+21) READINESS PROBE
+---------------------------------------------------------
+Purpose:
+Checks if pod is ready to receive traffic.
+
+How We Use It:
+Calls:
+/actuator/health
+
+Why Needed:
+- Prevent traffic to unhealthy pods
+- Safe deployments
+
+Behavior:
+If failed:
+Pod removed from load balancer.
+
+
+=========================================================
+
+22) LIVENESS PROBE
+---------------------------------------------------------
+Purpose:
+Checks whether pod is alive.
+
+How We Use It:
+Kubernetes continuously monitors pod health.
+
+Why Needed:
+- Detect deadlocks/hangs
+- Auto restart failed containers
+
+Behavior:
+If failed:
+Container restarted automatically.
+
+
+=========================================================
+
+23) ROLLING DEPLOYMENT
+---------------------------------------------------------
+Purpose:
+Deploy new version without downtime.
+
+How We Use It:
+- New pods created first
+- Old pods terminated gradually
+
+Why Needed:
+- Zero downtime deployment
+
+Flow:
+v1 pods running
+↓
+v2 pods created
+↓
+health check passes
+↓
+old v1 pods removed
+
+
+=========================================================
+
+24) SERVICE DISCOVERY
+---------------------------------------------------------
+Purpose:
+Allows services to locate each other.
+
+How We Use It:
+Using internal DNS names.
+
+Example:
+http://rule-engine-service:8080
+
+Why Needed:
+- Dynamic pod IP handling
+- Easy inter-service communication
+
+
+=========================================================
+
+25) kubectl
+---------------------------------------------------------
+Purpose:
+CLI tool to manage Kubernetes.
+
+Commands We Use:
+kubectl get pods
+kubectl logs <pod>
+kubectl describe pod <pod>
+kubectl rollout restart deployment
+
+Why Needed:
+- Debugging
+- Monitoring
+- Deployment management
+
+
+=========================================================
+
+26) LOGGING FLOW
+---------------------------------------------------------
+Application Logs
+ ↓
+Fluent Bit Sidecar
+ ↓
+Splunk
+
+Why Needed:
+- Centralized logging
+- Production debugging
+
+
+=========================================================
+
+27) MONITORING FLOW
+---------------------------------------------------------
+Application Metrics
+ ↓
+Datadog Agent
+ ↓
+Datadog Dashboard
+
+Tracks:
+- CPU
+- Memory
+- JVM metrics
+- API latency
+- Error rates
+
+
+=========================================================
+
+COMPLETE REQUEST FLOW
+=========================================================
+
+User
+ ↓
+Route53
+ ↓
+ALB
+ ↓
+Ingress
+ ↓
+Kubernetes Service
+ ↓
+Pod
+ ↓
+Spring Boot Container
+ ↓
+Redis / Kafka / MySQL / S3
+
+
+=========================================================
+
+IMPORTANT INTERVIEW SUMMARY
+=========================================================
+
+We use Kubernetes on AWS EKS to orchestrate our
+Dockerized Spring Boot microservices.
+
+Kubernetes handles:
+- Pod management
+- Scaling
+- Service discovery
+- Load balancing
+- Rolling deployments
+- Auto healing
+- Traffic routing
+
+We use:
+- Deployments for pod lifecycle
+- Services for networking
+- Ingress for external routing
+- ConfigMaps and Secrets for configs
+- HPA for scaling
+- Readiness/Liveness probes for health monitoring
+
+This architecture provides scalability, reliability,
+high availability, and zero downtime deployments.
+
+=========================================================
