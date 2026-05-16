@@ -1,0 +1,10 @@
+1) audit application real flow		done
+2) about empower and the project I am going to work on
+3) more about aws, about sdks
+4) project planning scrum agile
+5) scenario based questions
+6) jal garud vayu agni trishul ,I am working with garud 1
+7) spring ai
+8) idh application 
+
+“I worked on the Integrated Data Hub platform where upstream banking systems sent transaction and customer data files. For example, if the core banking system generated a daily transaction file containing account numbers, transaction amounts, and timestamps in a legacy format, our microservices validated the records, converted the data into a standardized format, enriched it with customer and branch information, and then forwarded it to downstream systems like reporting, fraud detection, analytics, and compliance applications. We used Kafka for real-time event processing, Redis for faster access to frequently used reference data, and Autosys for scheduling batch jobs that handled large-volume nightly file processing.”

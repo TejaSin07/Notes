@@ -1,14 +1,25 @@
 
-1)  findings   		done
+1) aws
 2) sql and notes	
-3) streams		
-3) security
+3) streams				
+3) security		done
 4) kafka
 5) book notes		done
-6) git GitHub
-7) Ai
+6) git GitHub		done
+7) Ai			done
 8) deployment
- 
+9)  scenario based
+10) soap
+11) graphql
+12) ssl
+13) batch processing
+14) $$ REACT $$
+15) reflection
+16) kafka configuration
+17) splunk and datadog integration
+18) project modules and services
+19) docker and kubernetes
+20) monolith vs micro  && spring vs spring boot && java 8 && java 17 deatures
  
 priority::
 ==========
@@ -29,11 +40,11 @@ c) admin 				done
 d) service registry			done
 e) config servers			done
 d) feign client 			done
-f) api gateway 
+f) api gateway 				done
 
-2) scenario based
+2)
 3) api flow structure
-4) tradeoffs
+4) tradeoffs				done
 5) scenario based question              done
 6) timeout                              done
 7) kafka
