@@ -1,9 +1,9 @@
 
-1) aws
+1) aws and configuration
 2) sql and notes	
 3) streams				
 3) security		done
-4) kafka
+4) kafka and its setup
 5) book notes		done
 6) git GitHub		done
 7) Ai			done
@@ -16,11 +16,13 @@
 14) $$ REACT $$
 15) reflection
 16) kafka configuration
-17) splunk and datadog integration
+17) splunk and datadog integration and logs collection in real system
 18) project modules and services
 19) docker and kubernetes
-20) monolith vs micro  && spring vs spring boot && java 8 && java 17 deatures
- 
+20) monolith vs micro  && spring vs spring boot && java 8 && java 17 features
+21) git lab
+22) which bean creation is best, why testing construction injection is cleaner and easy
+
 priority::
 ==========
 

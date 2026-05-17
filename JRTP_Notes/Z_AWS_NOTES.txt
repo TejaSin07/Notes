@@ -66,11 +66,10 @@ Why Needed:
 Example:
 teammate-reporting-service:v47
 
-
 =========================================================
 
 4) AWS RDS (Relational Database Service)
----------------------------------------------------------
+------------------------------------------
 Purpose:
 Managed relational database service.
 
@@ -267,6 +266,7 @@ Main application monitoring is done using:
 - Splunk
 
 
+13) MSk
 =========================================================
 
 COMPLETE HIGH LEVEL FLOW

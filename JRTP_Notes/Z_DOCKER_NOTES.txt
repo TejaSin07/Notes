@@ -50,8 +50,7 @@ java -jar app.jar running inside container
 3) DOCKER IMAGE
 ---------------------------------------------------------
 Purpose:
-Read-only packaged snapshot of application +
-dependencies.
+Read-only packaged snapshot of application + dependencies.
 
 Contains:
 - Java runtime
@@ -134,7 +133,6 @@ Why Needed:
 Benefit:
 Only changed layers rebuild.
 
-
 =========================================================
 
 7) CONTAINER PORT
@@ -173,7 +171,6 @@ Application runs on 8080 internally
 
 Why Needed:
 - External access to container
-
 
 =========================================================
 
@@ -300,7 +297,7 @@ Why Needed:
 =========================================================
 
 16) ENVIRONMENT VARIABLES
----------------------------------------------------------
+---------------------------
 Purpose:
 Pass runtime configuration into container.
 
@@ -322,8 +319,7 @@ Why Needed:
 Important:
 Config is NOT hardcoded in image.
 
-
-=========================================================
+=====================================
 
 17) DOCKER NETWORKING
 ---------------------------------------------------------
@@ -398,10 +394,9 @@ Why Needed:
 - Automated deployment pipeline
 
 
-=========================================================
-
+=======================================
 21) DOCKER + KUBERNETES RELATIONSHIP
----------------------------------------------------------
+---------------------------------------
 Docker:
 Creates and runs containers
 
@@ -422,10 +417,9 @@ Kubernetes Pod
 EKS Cluster
 
 
-=========================================================
-
+==================================
 22) DOCKER IN OUR APPLICATION
----------------------------------------------------------
+---------------------------------
 Each microservice has:
 - Dockerfile
 - Docker image
@@ -440,10 +434,9 @@ Examples:
 Each service deployed independently.
 
 
-=========================================================
-
+===============================
 23) WHY WE USE DOCKER
----------------------------------------------------------
+--------------------------------
 Benefits:
 - Consistent environment
 - Faster deployment
@@ -460,10 +453,10 @@ Without Docker Problems:
 - Difficult deployments
 
 
-=========================================================
+=====================================
 
 24) IMPORTANT DOCKER COMMANDS
----------------------------------------------------------
+-------------------------------------
 
 Build Image:
 docker build -t app:v1 .
@@ -545,10 +538,10 @@ Container Runs Inside Pod
 User Accesses Application
 
 
-=========================================================
+====================================================
 
 IMPORTANT INTERVIEW SUMMARY
-=========================================================
+====================================================
 
 We use Docker to containerize our Spring Boot
 microservices. Docker packages the application,
@@ -568,5 +561,4 @@ This provides:
 - Environment isolation
 - CI/CD automation support
 
-=========================================================
-```
+====================================================

@@ -37,6 +37,13 @@ cloudwatch /splunk
 8) cluster -> group of broker
 
 
+NOTE::
+======
+
+Feature branches are merged into develop (or QA/integration branch). 
+When code is release-ready, a release branch is created from develop for UAT/testing and stabilization fixes. 
+After UAT passes, the release branch is merged into main, and main becomes the single source of truth for production deployment. 
+Finally, release fixes are merged back into develop to keep branches synced.
 
 
 
@@ -44,7 +51,381 @@ cloudwatch /splunk
 
 
 
+===============================
+BACKEND + DEVOPS INTERVIEW TOPICS
+(Java/Spring Boot Developer)
+===============================
 
+---------------------------------
+1. DOCKER
+---------------------------------
+
+[Basics]
+- What is Docker
+- Why containers are used
+- Difference between VM vs Container
+- Docker architecture
+
+[Dockerfile]
+- FROM
+- COPY
+- ADD
+- RUN
+- CMD
+- ENTRYPOINT
+- EXPOSE
+- ENV
+
+[Docker Commands]
+- docker build
+- docker run
+- docker ps
+- docker logs
+- docker exec
+- docker images
+- docker stop
+
+[Concepts]
+- Docker image
+- Container lifecycle
+- Layers and caching
+- Port mapping
+- Volume mounting
+- Environment variables
+
+[Interview Internal Understanding]
+- How Spring Boot app runs inside container
+- Why containers are lightweight
+- Difference between image and container
+- Stateless container concept
+
+---------------------------------
+2. KUBERNETES
+---------------------------------
+
+[Core Concepts]
+- What is Kubernetes
+- Why Kubernetes is needed
+- Cluster architecture
+
+[Important Components]
+- Master node / Control plane
+- Worker node
+- kube-apiserver
+- etcd
+- kube-scheduler
+- kube-controller-manager
+- kubelet
+- kube-proxy
+
+[Main Objects]
+- Pod
+- Deployment
+- ReplicaSet
+- Service
+- ConfigMap
+- Secret
+- Namespace
+- Ingress
+- StatefulSet
+- DaemonSet
+
+[Scaling]
+- Replica scaling
+- Horizontal Pod Autoscaler (HPA)
+
+[Networking]
+- Cluster IP
+- NodePort
+- LoadBalancer
+- Ingress routing
+- Service discovery
+- Internal DNS
+
+[Configuration]
+- YAML basics
+- Deployment YAML
+- Service YAML
+
+[Health Checks]
+- Liveness probe
+- Readiness probe
+
+[Commands]
+- kubectl get pods
+- kubectl describe pod
+- kubectl logs
+- kubectl exec
+
+[Internal Flow Understanding]
+- How deployment creates pods
+- How service load balances pods
+- How pod-to-pod communication works
+- How rolling deployment happens
+- How failed pods restart
+- How Kubernetes maintains desired replicas
+
+---------------------------------
+3. AWS
+---------------------------------
+
+[Core Services]
+- EC2
+- EKS
+- ECS
+- S3
+- RDS
+- IAM
+- Lambda
+- CloudWatch
+- SQS
+- SNS
+
+[EC2]
+- What is EC2
+- Security groups
+- Ports
+- Auto scaling basics
+
+[S3]
+- Object storage
+- Upload/download flow
+- Presigned URL
+- Bucket policies
+
+[RDS]
+- Managed database
+- Read replicas
+- Connection pooling basics
+
+[IAM]
+- IAM users
+- IAM roles
+- IAM policies
+- Least privilege concept
+
+[EKS]
+- Kubernetes on AWS
+- Node groups
+- Pods inside EKS
+
+[CloudWatch]
+- Logs
+- Metrics
+- Monitoring basics
+
+[SQS/SNS]
+- Queue basics
+- Async communication
+
+[Lambda]
+- Event-driven execution
+- Serverless basics
+
+[Internal Flow Understanding]
+- How backend accesses S3
+- How IAM role is attached to service
+- How requests reach backend from internet
+- How logs move to CloudWatch
+- How autoscaling works
+
+---------------------------------
+4. CI/CD
+---------------------------------
+
+[Core Concepts]
+- Continuous Integration
+- Continuous Deployment
+- Continuous Delivery
+
+[Pipeline Flow]
+Code Push
+-> Build
+-> Unit Test
+-> Sonar Scan
+-> Docker Build
+-> Image Push
+-> Deployment
+
+[Tools]
+- Jenkins
+- GitHub Actions
+- GitLab CI/CD
+
+[Concepts]
+- Artifact
+- Build pipeline
+- Deployment pipeline
+- Rollback
+- Blue-Green deployment
+- Rolling deployment
+
+[Internal Flow Understanding]
+- How JAR becomes Docker image
+- How image deployed to Kubernetes
+- How rollback works
+- Why pipelines are important
+
+---------------------------------
+5. SPRING BOOT + MICROSERVICES
+---------------------------------
+
+[Core]
+- REST APIs
+- Layered architecture
+- DTO
+- Exception handling
+- Validation
+
+[Microservices]
+- Service discovery
+- API Gateway
+- Load balancing
+- Inter-service communication
+
+[Communication]
+- RestTemplate
+- WebClient
+- Feign Client
+
+[Resilience]
+- Retry
+- Circuit breaker
+- Timeout
+- Fallback
+
+[Security]
+- JWT
+- Spring Security
+- RBAC
+
+[Caching]
+- Redis basics
+- Cache-aside pattern
+- TTL
+- Eviction
+
+[Messaging]
+- Kafka basics
+- Producer
+- Consumer
+- Consumer groups
+
+[Database]
+- Connection pooling
+- Transactions
+- Lazy vs eager loading
+- Indexing basics
+
+[Internal Flow Understanding]
+- Complete request lifecycle
+- API Gateway routing
+- JWT validation flow
+- Service-to-service communication
+- Cache hit/miss flow
+- Kafka async flow
+
+---------------------------------
+6. PRODUCTION DEBUGGING
+---------------------------------
+
+[Must Know Issues]
+- Pod crash
+- OOMKilled
+- High CPU
+- Memory leak
+- Slow API
+- DB connection exhaustion
+- Kafka lag
+- Redis failure
+
+[Logs]
+- kubectl logs
+- CloudWatch logs
+- Splunk basics
+
+[Metrics]
+- CPU usage
+- Memory usage
+- Request latency
+
+[Debugging Flow]
+- Check logs
+- Check pod health
+- Check DB connectivity
+- Check external dependencies
+- Check resource usage
+
+---------------------------------
+7. IMPORTANT ARCHITECTURE TOPICS
+---------------------------------
+
+- Monolith vs Microservices
+- Stateless applications
+- Scalability
+- High availability
+- Fault tolerance
+- CAP theorem basics
+- Horizontal vs vertical scaling
+- Load balancing
+- API Gateway
+- Distributed systems basics
+
+---------------------------------
+8. MOST IMPORTANT INTERVIEW FLOWS
+---------------------------------
+
+1. Complete Request Flow
+Client
+-> Load Balancer
+-> API Gateway
+-> Service
+-> DB/Cache/Kafka
+-> Response
+
+2. Kubernetes Deployment Flow
+Code
+-> Docker Image
+-> Registry
+-> Kubernetes Deployment
+-> Pods Created
+-> Service Exposure
+
+3. Authentication Flow
+Login
+-> JWT Generation
+-> JWT Validation
+-> Role Validation
+-> API Access
+
+4. Scaling Flow
+High Traffic
+-> HPA detects CPU
+-> New Pods Created
+-> Service balances traffic
+
+5. CI/CD Flow
+Git Push
+-> Jenkins Pipeline
+-> Build/Test
+-> Docker Image
+-> Kubernetes Deployment
+
+---------------------------------
+9. OPTIONAL ADVANCED TOPICS
+---------------------------------
+
+- Helm
+- Terraform
+- Service Mesh
+- Istio
+- OpenTelemetry
+- Distributed tracing
+- Rate limiting
+- API throttling
+- Sidecar pattern
+- Saga pattern
+- Event-driven architecture
 
 
 

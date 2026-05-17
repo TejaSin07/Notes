@@ -1,6 +1,7 @@
 quick notes
+===========
 
-1) custome repo ->In a custom repository, we create a @Repository class, inject EntityManager provided by Spring, and use it to manually perform CRUD operations and queries.
+1) costume repo ->In a custom repository, we create a @Repository class, inject EntityManager provided by Spring, and use it to manually perform CRUD operations and queries.
 
 2) Most built-in CRUD methods in CrudRepository operate using the primary key, and for non-ID fields, we define custom methods using naming conventions or @Query.
 
@@ -565,3 +566,10 @@ setOps.add(
                 .orElse(new User(0, "Default User"));
 
 System.out.println(user.getName());
+
+162)  scenario based
+ =>  https://app.eraser.io/workspace/JcT5R9azAVgEAOeaasiF 
+ => https://app.eraser.io/workspace/8umYtHzsVgaUeVzQKMdR
+
+163) # Nexiora Solutions
+AuditSphere
